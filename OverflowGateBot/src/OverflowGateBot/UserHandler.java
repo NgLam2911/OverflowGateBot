@@ -13,6 +13,7 @@ import java.util.TreeMap;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.ParseException;
 
 import OverflowGateBot.JSONHandler.JSONData;
 import OverflowGateBot.JSONHandler.JSONWriter;
@@ -30,7 +31,6 @@ public class UserHandler {
 
     final String POINT = "p";
     final String LEVEL = "l";
-    final String ROLEID = "r";
     final String NAME = "n";
     final String NICKNAME = "nn";
     final String GUILDID = "g";
@@ -237,7 +237,7 @@ public class UserHandler {
     }
 
     public String getDate() {
-        return (new SimpleDateFormat("dd-MM-yyyy HH:mm:ss").format(Calendar.getInstance().getTime())).toString();
+        return (new SimpleDateFormat("dd-MM-yyyy").format(Calendar.getInstance().getTime())).toString();
     }
 
     public void load() throws IOException {
@@ -259,14 +259,16 @@ public class UserHandler {
             reader = (jsonHandler.new JSONReader("cache/data/" + dailyPath)).read();
             String date = reader.readString("date");
 
-            if (date.equals(getDate())) {
+            if (!date.equals("")) {
                 JSONArray dailyData = reader.readJSONArray(dailyPath);
-                for (Object d : dailyData) {
-                    String id = d.toString();
-                    if (!daily.contains(id))
-                        daily.add(id);
-                }
-            }
+                if (dailyData != null)
+                    for (Object d : dailyData) {
+                        String id = d.toString();
+                        if (!daily.contains(id))
+                            daily.add(id);
+                    }
+            } else
+                System.out.println("New date");
 
             // Load user data
             new File("cache/").mkdir();
@@ -307,6 +309,8 @@ public class UserHandler {
                             guildIds.add(gid);
 
                         DiscordUser user = addNewMember(gid, id, name, point, level, money, hideLv);
+                        if (level == 0)
+                            System.out.println("\tUser error " + user.name);
                         user.setNickname(nickname);
                         user.checkMemberRole();
                     }
@@ -326,9 +330,7 @@ public class UserHandler {
             List<Member> members = guild.getMembers();
             for (Member m : members) {
                 addNewMember(m);
-                System.out.println("Loaded user: " + m.getEffectiveName());
                 setDisplayName(m);
-
             }
         }
     }
@@ -352,10 +354,22 @@ public class UserHandler {
     }
 
     public void saveDailyData() throws IOException {
-        JSONHandler jsonHandler = new JSONHandler();
-        JSONWriter writer = jsonHandler.new JSONWriter("cache/data/" + dailyPath);
-        writer.append(dailyPath, daily.toString());
-        writer.write();
+        try {
+            JSONHandler jsonHandler = new JSONHandler();
+            JSONData reader;
+            reader = (jsonHandler.new JSONReader("cache/data/" + dailyPath)).read();
+            String date = reader.readString("date");
+            JSONWriter writer = jsonHandler.new JSONWriter("cache/data/" + dailyPath);
+            if (date.equals(getDate()))
+                writer.append(dailyPath, daily.toString());
+            else
+                writer.append(dailyPath, (new ArrayList<String>()).toString());
+            writer.append("date", "\"" + getDate() + "\"");
+            writer.write();
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 
     public void saveGuildData() throws IOException {
@@ -438,7 +452,6 @@ public class UserHandler {
     }
 
     public EmbedBuilder getInfo(Member member, TextChannel channel) {
-        addNewMember(member);
         String userId = member.getId();
         DiscordUser user = getUser(member);
 
@@ -447,6 +460,7 @@ public class UserHandler {
             builder.setDescription("Không tìm thấy");
             return builder;
         }
+        
         builder.setAuthor(user.name, null, channel.getGuild().getMemberById(userId).getEffectiveAvatarUrl());
         List<Role> roles = member.getRoles();
         if (roles.size() != 0) {

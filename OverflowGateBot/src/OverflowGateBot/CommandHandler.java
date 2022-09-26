@@ -27,8 +27,12 @@ public class CommandHandler {
         }
 
         else if (command.equals("info")) {
-            if (event.getOptions().size() != 0)
+            if (event.getOption("user") == null) {
                 replyEmbeds(event, userHandler.getInfo(event.getMember(), event.getTextChannel()), 30);
+            } else {
+                User user = event.getOption("user").getAsUser();
+                replyEmbeds(event, userHandler.getInfo(event.getGuild().getMember(user), event.getTextChannel()), 30);
+            }
             return;
         }
 
@@ -43,10 +47,6 @@ public class CommandHandler {
                 reply(event, "Đang lưu...", 10);
                 try {
                     serverStatus.save();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                try {
                     userHandler.save();
                 } catch (IOException e) {
                     e.printStackTrace();

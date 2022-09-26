@@ -115,7 +115,7 @@ public class MessagesHandler extends ListenerAdapter {
 
                 // - User system
 
-                guild.upsertCommand(Commands.slash("info", "Thông tin của thành viên").addOption(OptionType.USER, "user", "Tên thành viên", true)).queue();
+                guild.upsertCommand(Commands.slash("info", "Thông tin của thành viên").addOption(OptionType.USER, "user", "Tên thành viên", false)).queue();
                 guild.upsertCommand(Commands.slash("leaderboard", "Hiển thị bảng xếp hạng lv")).queue();
                 guild.upsertCommand(Commands.slash("help", "Danh sách các lệnh")).queue();
                 guild.upsertCommand(Commands.slash("setnickname", "Đặt biệt danh").addOption(OptionType.STRING, "nickname", "Biệt danh muốn đặt", true).addOption(OptionType.USER, "user", "Tên người muốn đổi(Admin only")).queue();
@@ -183,7 +183,8 @@ public class MessagesHandler extends ListenerAdapter {
 
         commandHandler.handleCommand(event);
 
-        event.deferReply().queue(_message -> _message.deleteOriginal().queueAfter(messageAliveTime, TimeUnit.SECONDS));
+        event.getHook().deleteOriginal().queueAfter(messageAliveTime, TimeUnit.SECONDS);
+
     }
 
     @Override
