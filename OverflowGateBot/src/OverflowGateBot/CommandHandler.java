@@ -18,12 +18,10 @@ public class CommandHandler {
 
         if (command.equals("postmap")) {
             messages.sendMapPreview(event);
-            return;
         }
 
         else if (command.equals("maplist")) {
             replyEmbeds(event, serverStatus.survivalMapLeadther(), 30);
-            return;
         }
 
         else if (command.equals("info")) {
@@ -33,13 +31,11 @@ public class CommandHandler {
                 User user = event.getOption("user").getAsUser();
                 replyEmbeds(event, userHandler.getInfo(event.getGuild().getMember(user), event.getTextChannel()), 30);
             }
-            return;
         }
 
         else if (command.equals("refreshserver")) {
             serverStatus.refreshServerStat(event.getGuild(), event.getMessageChannel());
             reply(event, "Đang làm mới...", 10);
-            return;
         }
 
         else if (command.equals("save")) {
@@ -52,9 +48,8 @@ public class CommandHandler {
                     e.printStackTrace();
                 }
                 return;
-            }
-            reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
-            return;
+            } else
+                reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
         }
 
         else if (command.equals("load")) {
@@ -71,14 +66,13 @@ public class CommandHandler {
                     e.printStackTrace();
                 }
                 return;
-            }
-            reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
-            return;
+            } else
+                reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
         }
 
         else if (command.equals("leaderboard")) {
             replyEmbeds(event, userHandler.getLeaderBoard(), 30);
-            return;
+
         }
 
         else if (command.equals("help")) {
@@ -90,9 +84,8 @@ public class CommandHandler {
                 serverStatus.reloadServer(event.getGuild(), event.getMessageChannel());
                 reply(event, "Đang làm mới", 10);
                 return;
-            }
-            reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
-            return;
+            } else
+                reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
         }
 
         else if (command.equals("setnickname")) {
@@ -106,11 +99,9 @@ public class CommandHandler {
                 userHandler.setNickName(event.getMember(), event.getOption("nickname").getAsString());
                 reply(event, "Đổi biệt danh thành " + event.getOption("nickname").getAsString(), 10);
             }
-            return;
 
         } else if (command.equals("postschem")) {
             messages.sendSchematicPreview(event);
-            return;
 
         } else if (command.equals("hidelv")) {
             userHandler.hidelv(event.getMember(), event.getOption("hide").getAsBoolean());
@@ -118,7 +109,6 @@ public class CommandHandler {
                 reply(event, "Đã ẩn level", 10);
             else
                 reply(event, "Đã tắt ẩn level", 10);
-            return;
 
         } else if (command.equals("ping")) {
             String ip = event.getOption("ip").getAsString();
@@ -127,11 +117,10 @@ public class CommandHandler {
                 EmbedBuilder builder = serverStatus.serverStatusBuilder(ip, result);
                 replyEmbeds(event, builder, 30);
             });
-            return;
 
         } else if (command.equals("say")) {
             String content = event.getOption("content").getAsString();
-            event.reply(content);
+            event.reply("```" + content + "```").queue();
 
         } else if (command.equals("daily")) {
             int money = userHandler.getDaily(event.getMember());
