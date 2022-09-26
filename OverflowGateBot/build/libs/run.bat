@@ -1,0 +1,1 @@
+java -jar E:\OverflowGateBot\OverflowGateBot\build\libs\OverflowGateBot.jar
