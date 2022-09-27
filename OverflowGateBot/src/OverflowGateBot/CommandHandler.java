@@ -3,12 +3,14 @@ package OverflowGateBot;
 import org.jetbrains.annotations.NotNull;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 import static OverflowGateBot.OverflowGateBot.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 public class CommandHandler {
@@ -39,7 +41,7 @@ public class CommandHandler {
         }
 
         else if (command.equals("save")) {
-            if (messagesHandler.isAdmin(event.getMember())) {
+            if (guildConfigHandler.isAdmin(event.getMember())) {
                 reply(event, "Đang lưu...", 10);
                 try {
                     serverStatus.save();
@@ -53,7 +55,7 @@ public class CommandHandler {
         }
 
         else if (command.equals("load")) {
-            if (messagesHandler.isAdmin(event.getMember())) {
+            if (guildConfigHandler.isAdmin(event.getMember())) {
                 reply(event, "Đang tải...", 10);
                 try {
                     serverStatus.load();
@@ -80,7 +82,7 @@ public class CommandHandler {
         }
 
         else if (command.equals("reloadserver")) {
-            if (messagesHandler.isAdmin(event.getMember())) {
+            if (guildConfigHandler.isAdmin(event.getMember())) {
                 serverStatus.reloadServer(event.getGuild(), event.getMessageChannel());
                 reply(event, "Đang làm mới", 10);
                 return;
@@ -91,7 +93,7 @@ public class CommandHandler {
         else if (command.equals("setnickname")) {
             User user = event.getOption("user") == null ? null : event.getOption("user").getAsUser();
 
-            if (user != null && messagesHandler.isAdmin(event.getMember())) {
+            if (user != null && guildConfigHandler.isAdmin(event.getMember())) {
                 userHandler.setNickName(event.getGuild().getMember(user), event.getOption("nickname").getAsString());
                 reply(event, "Đổi biệt danh thành " + event.getOption("nickname").getAsString(), 10);
 
@@ -120,15 +122,33 @@ public class CommandHandler {
 
         } else if (command.equals("say")) {
             String content = event.getOption("content").getAsString();
-            event.reply("```" + content + "```").queue();
+            event.getTextChannel().sendMessage(content).queue();
+            event.deferReply(true).queue();
+            event.getHook().sendMessage("Đã gửi thành công tin nhắn: " + content).queue(_message -> _message.delete().queueAfter(30, TimeUnit.SECONDS));
 
         } else if (command.equals("daily")) {
             int money = userHandler.getDaily(event.getMember());
             if (money > 0)
-                reply(event, "Điểm dành thanh công\nĐiểm nhận được: " + money, 30);
+                reply(event, "Điểm dành thanh công\nĐiểm nhận được: " + money + "MM", 30);
             else
                 reply(event, "Bạn đã điểm danh hôm nay", 30);
 
+        } else if (command.equals("setadminrole")) {
+            Role adminRole = event.getOption("adminrole").getAsRole();
+            if (guildConfigHandler.isAdmin(event.getMember())) {
+                if (guildConfigHandler.adminRoles.containsKey(event.getGuild().getId())) {
+                    if (guildConfigHandler.adminRoles.get(event.getGuild().getId()).contains(adminRole.getId())) {
+                        reply(event, "Đã tồn tại vai trò này trong danh sách admin", 10);
+                        return;
+                    }
+                } else {
+                    guildConfigHandler.adminRoles.put(event.getGuild().getId(), new ArrayList<String>());
+                }
+                guildConfigHandler.adminRoles.get(event.getGuild().getId()).add(adminRole.getId());
+                reply(event, "Thêm thành công vai trò " + adminRole.getName() + " vào danh sách admin", 30);
+
+            } else
+                reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
         } else
             reply(event, "Lệnh sai", 10);
 

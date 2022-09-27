@@ -42,9 +42,7 @@ public class UserHandler {
     public final String dailyPath = "daily.json";
 
     private HashMap<String, HashMap<String, DiscordUser>> users = new HashMap<>();
-    private HashMap<String, String> memberRoleId = new HashMap<>();
     private List<String> daily = new ArrayList<>();
-    private List<String> guildIds = new ArrayList<>();
 
     List<DiscordUser> board = new ArrayList<>();
 
@@ -70,6 +68,7 @@ public class UserHandler {
             this.point = point;
             this.level = level;
             this.hideLv = hideLv;
+            this.money = money;
         }
 
         public String toString() {
@@ -113,7 +112,7 @@ public class UserHandler {
                 Member member = guild.getMemberById(id);
 
                 if (member != null) {
-                    String roleId = memberRoleId.get(guildId);
+                    String roleId = guildConfigHandler.memberRoleId.get(guildId);
                     if (roleId == null)
                         return;
                     Role memberRole = guild.getRoleById(roleId);
@@ -164,7 +163,7 @@ public class UserHandler {
             if (member.getUser().isBot())
                 return;
 
-            if (messagesHandler.isAdmin(member))
+            if (guildConfigHandler.isAdmin(member))
                 return;
 
             if (member.getGuild().getSelfMember().canInteract(member)) {
@@ -188,14 +187,9 @@ public class UserHandler {
             return (int) ((level + 1) * (2 * level + 1) * level / 6) + point;
         }
 
-        public Integer getPosition() {
-            return board.indexOf(this);
-        }
     }
 
     public UserHandler() {
-        guildIds.add("1010373870395596830");
-        memberRoleId.put("1010373870395596830", "1015997862619914291");
         try {
             load();
         } catch (IOException e1) {
@@ -230,7 +224,6 @@ public class UserHandler {
                 users.get(guildId).put(id, user);
                 if (!board.contains(user)) {
                     board.add(user);
-                    sortLeaderBoard();
                 }
             } else {
                 return users.get(guildId).get(id);
@@ -238,9 +231,9 @@ public class UserHandler {
         } else {
             users.put(guildId, new HashMap<>());
             users.get(guildId).put(id, user);
+
             if (!board.contains(user)) {
                 board.add(user);
-                sortLeaderBoard();
             }
         }
 
@@ -262,8 +255,8 @@ public class UserHandler {
             JSONData reader = (jsonHandler.new JSONReader("cache/data/" + guildsDataPath)).read();
             for (Object k : reader.data.keySet()) {
                 String guildId = k.toString();
-                if (!guildIds.contains(guildId))
-                    guildIds.add(guildId);
+                if (!guildConfigHandler.guildIds.contains(guildId))
+                    guildConfigHandler.guildIds.add(guildId);
             }
 
             // Load daily data
@@ -317,8 +310,8 @@ public class UserHandler {
                             name = member.getUser().getName();
                         }
 
-                        if (!guildIds.contains(gid))
-                            guildIds.add(gid);
+                        if (!guildConfigHandler.guildIds.contains(gid))
+                            guildConfigHandler.guildIds.add(gid);
 
                         DiscordUser user = addNewMember(gid, id, name, point, level, money, hideLv);
                         if (level == 0)
@@ -332,7 +325,7 @@ public class UserHandler {
             e.printStackTrace();
         }
 
-        for (String gid : guildIds) {
+        for (String gid : guildConfigHandler.guildIds) {
 
             Guild guild = messagesHandler.jda.getGuildById(gid);
             if (guild == null) {
@@ -388,7 +381,7 @@ public class UserHandler {
         JSONHandler jsonHandler = new JSONHandler();
         // Save guild ids
         JSONWriter writer = jsonHandler.new JSONWriter("cache/data/" + guildsDataPath);
-        for (String k : guildIds) {
+        for (String k : guildConfigHandler.guildIds) {
             writer.append(k, k);
         }
         writer.write();
@@ -411,6 +404,7 @@ public class UserHandler {
             addNewMember(member);
             return;
         }
+        user.addMoney(1);
         if (user.addPoint(1)) {
             setDisplayName(member);
         }
@@ -473,10 +467,10 @@ public class UserHandler {
         }
 
         builder.addField("**Cấp: **", user.level.toString(), false);
-        builder.addField("**Kinh nghiệm: **", user.point.toString() + " \\ " + user.getExpCap(), false);
+        builder.addField("**Kinh nghiệm: **", user.point + " \\ " + user.getExpCap(), false);
         builder.addField("**Tổng kinh nghiệm: **", user.getTotalPoint().toString(), false);
-        builder.addField("**Điểm: **", user.money.toString() + " MM", false);
-        builder.addField("**Hạng: **", user.getPosition().toString() + " \\ " + board.size(), false);
+        builder.addField("**Điểm: **", user.money + " MM", false);
+        builder.addField("**Hạng: **", String.valueOf(board.indexOf(user)) + " \\ " + board.size(), false);
         builder.addBlankField(false);
 
         return builder;
@@ -496,16 +490,16 @@ public class UserHandler {
     }
 
     public EmbedBuilder getLeaderBoard() {
-        EmbedBuilder builder = new EmbedBuilder();
         sortLeaderBoard();
+        EmbedBuilder builder = new EmbedBuilder();
         builder.setTitle("Bảng xếp hạng");
         for (int i = 0; i < (board.size() < 10 ? board.size() : 10); i++) {
             DiscordUser user = board.get(i);
             Guild guild = messagesHandler.jda.getGuildById(user.guildId);
             if (guild == null)
-                builder.addField("Hạng " + (i + 1), (user.getName()) + ": " + user.getTotalPoint(), false);
+                builder.addField("Hạng " + (i + 1), (user.getName()) + ":\nKinh nghiệm: " + user.getTotalPoint() + "\nCấp: " + user.level, false);
             else
-                builder.addField("Hạng " + (i + 1), (user.getName()) + ":\n﻿Kinh nghiệm: " + user.getTotalPoint() + "\n﻿Cấp: " + user.level + "\n﻿Máy chủ: " + guild.getName(), false);
+                builder.addField("Hạng " + (i + 1), "Tên: " + (user.getName()) + "Kinh nghiệm: " + user.getTotalPoint() + "\nCấp: " + user.level + "\nMáy chủ: " + guild.getName(), false);
         }
         return builder;
     }

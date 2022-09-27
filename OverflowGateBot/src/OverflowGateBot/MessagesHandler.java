@@ -26,6 +26,7 @@ import javax.imageio.*;
 
 import org.jetbrains.annotations.NotNull;
 
+import OverflowGateBot.GuildConfigHandler.ArchiveChannel;
 import OverflowGateBot.JSONHandler.JSONData;
 
 import java.awt.image.*;
@@ -39,30 +40,12 @@ import static OverflowGateBot.OverflowGateBot.*;
 
 public class MessagesHandler extends ListenerAdapter {
 
-    public class ArchiveChannel {
-        Long channelId;
-        String lastMessageId;
-
-        public ArchiveChannel(Long id, String lastMessageId) {
-            this.id = id;
-            this.lastMessageId = lastMessageId;
-        }
-    }
-
     public final JDA jda;
     public final String prefix = ">";
-    public final String adminName = "Shar";
 
     public final Integer messageAliveTime = 30;
 
     public List<Guild> guilds;
-    public HashMap<Long, List<ArchiveChannel>> schematicChannel = new HashMap<>();
-    public HashMap<Long, List<ArchiveChannel>> mapChannel = new HashMap<>();
-    public HashMap<Long, List<ArchiveChannel>> noTextChannel = new HashMap<>();
-
-    public HashMap<Long, ArchiveChannel> serverStatusChannel = new HashMap<>();
-
-    public HashMap<Long, List<Long>> adminRoles = new HashMap<>();
 
     public MessagesHandler() {
         try {
@@ -93,6 +76,9 @@ public class MessagesHandler extends ListenerAdapter {
 
                 // Shar commands
 
+                guild.upsertCommand(Commands.slash("save", "Shar only")).queue();
+                guild.upsertCommand(Commands.slash("load", "Shar only")).queue();
+
                 // Admin commands
 
                 // - Server status
@@ -103,8 +89,7 @@ public class MessagesHandler extends ListenerAdapter {
 
                 guild.upsertCommand(Commands.slash("setschematicchannel", "Đưa kênh này trở thành kênh bản thiết kế (Admin only)")).queue();
                 guild.upsertCommand(Commands.slash("setmapchannel", "Đưa kênh này trở thành kênh bản đồ (Admin only)")).queue();
-                guild.upsertCommand(Commands.slash("save", "Admin only")).queue();
-                guild.upsertCommand(Commands.slash("load", "Admin only")).queue();
+                guild.upsertCommand(Commands.slash("setadminrole", "Cài đặt vai trò admin cho máy chủ").addOption(OptionType.ROLE, "adminrole", "Vai trò admin", true)).queue();
 
                 // User commands
 
@@ -124,6 +109,8 @@ public class MessagesHandler extends ListenerAdapter {
                 guild.upsertCommand(Commands.slash("ping", "Ping một máy chủ thông qua ip").addOption(OptionType.STRING, "ip", "Ip của máy chủ", true)).queue();
                 guild.upsertCommand(Commands.slash("say", "Nói gì đó").addOption(OptionType.STRING, "content", "Nội dung", true)).queue();
                 guild.upsertCommand(Commands.slash("daily", "Điểm danh")).queue();
+
+                // -
             }
 
             Log.info("Bot online.");
@@ -181,6 +168,7 @@ public class MessagesHandler extends ListenerAdapter {
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         System.out.println("[" + event.getGuild().getName() + "] " + " <" + event.getChannel().getName() + "> " + event.getMember().getEffectiveName() + ": used " + event.getName());
 
+        event.deferReply(true);
         commandHandler.handleCommand(event);
 
         event.getHook().deleteOriginal().queueAfter(messageAliveTime, TimeUnit.SECONDS);
@@ -237,42 +225,17 @@ public class MessagesHandler extends ListenerAdapter {
         return Character.toUpperCase(text.charAt(0)) + text.substring(1);
     }
 
-    public boolean isAdmin(Message message) {
-        return isAdmin(message.getMember());
-    }
-
-    public boolean isAdmin(Member member) {
-        if (member.isOwner())
-            return true;
-
-        if (member.getEffectiveName().equals(adminName))
-            return true;
-
-        Guild guild = member.getGuild();
-        List<Long> guildAdminRoles = adminRoles.get(guild.getIdLong());
-        if (guildAdminRoles == null)
-            return false;
-        List<Role> memberRoles = member.getRoles();
-        for (Role role : memberRoles) {
-            for (Long id : guildAdminRoles) {
-                if (id == role.getIdLong())
-                    return true;
-            }
-        }
-        return false;
-    }
-
-    public boolean inChannels(Guild guild, Channel channel, HashMap<Long, List<ArchiveChannel>> guildChannelIds) {
-        Long guildId = guild.getIdLong();
+    public boolean inChannels(Guild guild, Channel channel, HashMap<String, List<ArchiveChannel>> guildChannelIds) {
+        String guildId = guild.getId();
         if (guildChannelIds.containsKey(guildId))
             return false;
 
-        Long channelId = channel.getIdLong();
+        String channelId = channel.getId();
         List<ArchiveChannel> channels = guildChannelIds.get(guildId);
         if (channels == null)
             return false;
         for (ArchiveChannel c : channels) {
-            if (c.id == channelId)
+            if (c.channelId == channelId)
                 return true;
         }
         return false;

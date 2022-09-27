@@ -5,6 +5,7 @@ import java.io.IOException;
 public class OverflowGateBot {
     public final static int saveInterval = 6 * 60 * 1000;
 
+    public static GuildConfigHandler guildConfigHandler = new GuildConfigHandler();
     public static ContentHandler contentHandler = new ContentHandler();
     public static CommandHandler commandHandler = new CommandHandler();
     public static ONet onet = new ONet();
