@@ -62,7 +62,7 @@ public class ServerStatus {
 
         // Load all servers for all guilds
         for (String guildId : serverStatusChannels.keySet()) {
-            Guild guild = messages.jda.getGuildById(guildId);
+            Guild guild = messagesHandler.jda.getGuildById(guildId);
             String channelId = serverStatusChannels.get(guildId);
             MessageChannel channel = guild.getTextChannelById(channelId);
             MessageHistory history = MessageHistory.getHistoryFromBeginning(channel).complete();
@@ -164,14 +164,14 @@ public class ServerStatus {
         builder.setTitle("__" + ip.toString() + "__");
         String owner = servers.get(ip);
         if (owner != null) {
-            User user = messages.jda.getUserById(owner);
+            User user = messagesHandler.jda.getUserById(owner);
             builder.setAuthor(user.getName(), user.getEffectiveAvatarUrl(), user.getEffectiveAvatarUrl());
         }
         builder.setColor(Color.CYAN);
 
         if (result.name != null || result.mapname != null) {
             field.append("Tên máy chủ: " + Strings.stripColors(result.name) + "\nNgười chơi: " + result.players + (result.playerLimit == 0 ? "" : " \\ " + result.playerLimit) + "\nBản đồ: " + Strings.stripColors(result.mapname) + "\nChế độ: "
-                    + (result.modeName == null ? messages.capitalize(result.mode.name()) : messages.capitalize(result.modeName)) + "\nĐợt: " + result.wave + (result.description.length() == 0 ? "" : "\nMô tả: " + Strings.stripColors(result.description)) + "\nPhiên bản: " + result.version + "\nPing: "
+                    + (result.modeName == null ? messagesHandler.capitalize(result.mode.name()) : messagesHandler.capitalize(result.modeName)) + "\nĐợt: " + result.wave + (result.description.length() == 0 ? "" : "\nMô tả: " + Strings.stripColors(result.description)) + "\nPhiên bản: " + result.version + "\nPing: "
                     + result.ping + "ms\n");
 
             String mapName = Strings.stripColors(result.mapname);

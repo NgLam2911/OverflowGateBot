@@ -17,7 +17,7 @@ public class CommandHandler {
         String command = event.getName();
 
         if (command.equals("postmap")) {
-            messages.sendMapPreview(event);
+            messagesHandler.sendMapPreview(event);
         }
 
         else if (command.equals("maplist")) {
@@ -39,7 +39,7 @@ public class CommandHandler {
         }
 
         else if (command.equals("save")) {
-            if (messages.isAdmin(event.getMember())) {
+            if (messagesHandler.isAdmin(event.getMember())) {
                 reply(event, "Đang lưu...", 10);
                 try {
                     serverStatus.save();
@@ -53,7 +53,7 @@ public class CommandHandler {
         }
 
         else if (command.equals("load")) {
-            if (messages.isAdmin(event.getMember())) {
+            if (messagesHandler.isAdmin(event.getMember())) {
                 reply(event, "Đang tải...", 10);
                 try {
                     serverStatus.load();
@@ -80,7 +80,7 @@ public class CommandHandler {
         }
 
         else if (command.equals("reloadserver")) {
-            if (messages.isAdmin(event.getMember())) {
+            if (messagesHandler.isAdmin(event.getMember())) {
                 serverStatus.reloadServer(event.getGuild(), event.getMessageChannel());
                 reply(event, "Đang làm mới", 10);
                 return;
@@ -91,7 +91,7 @@ public class CommandHandler {
         else if (command.equals("setnickname")) {
             User user = event.getOption("user") == null ? null : event.getOption("user").getAsUser();
 
-            if (user != null && messages.isAdmin(event.getMember())) {
+            if (user != null && messagesHandler.isAdmin(event.getMember())) {
                 userHandler.setNickName(event.getGuild().getMember(user), event.getOption("nickname").getAsString());
                 reply(event, "Đổi biệt danh thành " + event.getOption("nickname").getAsString(), 10);
 
@@ -101,7 +101,7 @@ public class CommandHandler {
             }
 
         } else if (command.equals("postschem")) {
-            messages.sendSchematicPreview(event);
+            messagesHandler.sendSchematicPreview(event);
 
         } else if (command.equals("hidelv")) {
             userHandler.hidelv(event.getMember(), event.getOption("hide").getAsBoolean());

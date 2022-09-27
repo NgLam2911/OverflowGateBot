@@ -8,7 +8,7 @@ public class OverflowGateBot {
     public static ContentHandler contentHandler = new ContentHandler();
     public static CommandHandler commandHandler = new CommandHandler();
     public static ONet onet = new ONet();
-    public static MessagesHandler messages = new MessagesHandler();
+    public static MessagesHandler messagesHandler = new MessagesHandler();
     public static UserHandler userHandler = new UserHandler();
     public static ServerStatus serverStatus = new ServerStatus();
 

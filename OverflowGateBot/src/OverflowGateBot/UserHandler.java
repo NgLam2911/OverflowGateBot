@@ -106,7 +106,7 @@ public class UserHandler {
 
         public void checkMemberRole() {
             if (level >= 3) {
-                Guild guild = messages.jda.getGuildById(guildId);
+                Guild guild = messagesHandler.jda.getGuildById(guildId);
                 if (guild == null) {
                     System.out.println("Guild not found: " + guildId);
                 }
@@ -133,7 +133,7 @@ public class UserHandler {
         }
 
         public String getDisplayName() {
-            Guild guild = messages.jda.getGuildById(guildId);
+            Guild guild = messagesHandler.jda.getGuildById(guildId);
             if (guild == null) {
                 System.out.println("Guild with id " + guildId + " not found");
                 return "";
@@ -151,7 +151,7 @@ public class UserHandler {
         }
 
         public void setDisplayName() {
-            Guild guild = messages.jda.getGuildById(guildId);
+            Guild guild = messagesHandler.jda.getGuildById(guildId);
             if (guild == null) {
                 System.out.println("Guild with id " + guildId + " not found");
                 return;
@@ -164,7 +164,7 @@ public class UserHandler {
             if (member.getUser().isBot())
                 return;
 
-            if (messages.isAdmin(member))
+            if (messagesHandler.isAdmin(member))
                 return;
 
             if (member.getGuild().getSelfMember().canInteract(member)) {
@@ -308,7 +308,7 @@ public class UserHandler {
                         Boolean hideLv = Boolean.parseBoolean(userData.readString(HIDELV));
                         int money = userData.readInt(MONEY);
 
-                        Guild guild = messages.jda.getGuildById(gid);
+                        Guild guild = messagesHandler.jda.getGuildById(gid);
 
                         if (name.length() == 0) {
                             Member member = guild.getMemberById(id.toString());
@@ -334,7 +334,7 @@ public class UserHandler {
 
         for (String gid : guildIds) {
 
-            Guild guild = messages.jda.getGuildById(gid);
+            Guild guild = messagesHandler.jda.getGuildById(gid);
             if (guild == null) {
                 System.out.println("Guild not found with id: " + gid);
                 continue;
@@ -501,7 +501,7 @@ public class UserHandler {
         builder.setTitle("Bảng xếp hạng");
         for (int i = 0; i < (board.size() < 10 ? board.size() : 10); i++) {
             DiscordUser user = board.get(i);
-            Guild guild = messages.jda.getGuildById(user.guildId);
+            Guild guild = messagesHandler.jda.getGuildById(user.guildId);
             if (guild == null)
                 builder.addField("Hạng " + (i + 1), (user.getName()) + ": " + user.getTotalPoint(), false);
             else

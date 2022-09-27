@@ -40,12 +40,12 @@ import static OverflowGateBot.OverflowGateBot.*;
 public class MessagesHandler extends ListenerAdapter {
 
     public class ArchiveChannel {
-        Long id;
-        Message message;
+        Long channelId;
+        String lastMessageId;
 
-        public ArchiveChannel(Long id, Message message) {
+        public ArchiveChannel(Long id, String lastMessageId) {
             this.id = id;
-            this.message = message;
+            this.lastMessageId = lastMessageId;
         }
     }
 
