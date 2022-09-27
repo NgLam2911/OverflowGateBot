@@ -161,6 +161,12 @@ public class UserHandler {
                 System.out.println("Member with id " + id + " not found");
                 return;
             }
+            if (member.getUser().isBot())
+                return;
+
+            if (messages.isAdmin(member))
+                return;
+
             if (member.getGuild().getSelfMember().canInteract(member)) {
                 if (!member.getUser().isBot()) {
                     String name = getDisplayName();
@@ -218,18 +224,24 @@ public class UserHandler {
     public DiscordUser addNewMember(String guildId, String id, String name, int point, int level, int money, Boolean hideLv) {
         DiscordUser user = new DiscordUser(guildId, id, name, point, level, money, hideLv);
         if (users.containsKey(guildId)) {
+            // Already have guild id
             if (!users.get(guildId).containsKey(id)) {
+                // User not found
                 users.get(guildId).put(id, user);
+                if (!board.contains(user)) {
+                    board.add(user);
+                    sortLeaderBoard();
+                }
             } else {
                 return users.get(guildId).get(id);
             }
         } else {
             users.put(guildId, new HashMap<>());
             users.get(guildId).put(id, user);
-        }
-        if (!board.contains(user)) {
-            board.add(user);
-            sortLeaderBoard();
+            if (!board.contains(user)) {
+                board.add(user);
+                sortLeaderBoard();
+            }
         }
 
         return user;
@@ -286,19 +298,19 @@ public class UserHandler {
                     for (Object k : guildData.data.keySet()) {
 
                         String id = k.toString();
-                        JSONData data = guildData.readJSON(id);
-                        if (data.data == null)
+                        JSONData userData = guildData.readJSON(id);
+                        if (userData.data == null)
                             continue;
-                        String name = data.readString(NAME);
-                        int point = data.readInt(POINT);
-                        int level = data.readInt(LEVEL);
-                        String nickname = data.readString(NICKNAME);
-                        Boolean hideLv = Boolean.parseBoolean(data.readString(HIDELV));
-                        int money = data.readInt(MONEY);
+                        String name = userData.readString(NAME);
+                        int point = userData.readInt(POINT);
+                        int level = userData.readInt(LEVEL);
+                        String nickname = userData.readString(NICKNAME);
+                        Boolean hideLv = Boolean.parseBoolean(userData.readString(HIDELV));
+                        int money = userData.readInt(MONEY);
 
                         Guild guild = messages.jda.getGuildById(gid);
 
-                        if (name.length() == 0 || name.equals("")) {
+                        if (name.length() == 0) {
                             Member member = guild.getMemberById(id.toString());
                             if (member == null || member.getUser().isBot())
                                 continue;
@@ -405,22 +417,10 @@ public class UserHandler {
     }
 
     public void setDisplayName(Member member) {
-        if (member.getUser().isBot())
-            return;
+        DiscordUser user = getUser(member);
+        if (user != null)
+            user.setDisplayName();
 
-        if (member.getGuild().getSelfMember().canInteract(member)) {
-            if (!member.getUser().isBot()) {
-                DiscordUser user = getUser(member);
-                String name = user.getDisplayName();
-
-                if (name.length() == 0) {
-                    System.out.println("Cant modify name of " + member.getEffectiveName());
-                    return;
-                }
-                member.modifyNickname(name).queue();
-            }
-        } else
-            System.out.println("Cant interact with " + member.getEffectiveName());
     }
 
     public void setNickName(Member member, String nickname) {
@@ -460,7 +460,7 @@ public class UserHandler {
             builder.setDescription("Không tìm thấy");
             return builder;
         }
-        
+
         builder.setAuthor(user.name, null, channel.getGuild().getMemberById(userId).getEffectiveAvatarUrl());
         List<Role> roles = member.getRoles();
         if (roles.size() != 0) {

@@ -250,6 +250,8 @@ public class MessagesHandler extends ListenerAdapter {
 
         Guild guild = member.getGuild();
         List<Long> guildAdminRoles = adminRoles.get(guild.getIdLong());
+        if (guildAdminRoles == null)
+            return false;
         List<Role> memberRoles = member.getRoles();
         for (Role role : memberRoles) {
             for (Long id : guildAdminRoles) {
