@@ -1,5 +1,6 @@
 package OverflowGateBot;
 
+
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -268,7 +269,7 @@ public class UserHandler {
             reader = (jsonHandler.new JSONReader("cache/data/" + dailyPath)).read();
             String date = reader.readString("date");
 
-            if (!date.equals("")) {
+            if (date.equals(getDate())) {
                 JSONArray dailyData = reader.readJSONArray(dailyPath);
                 if (dailyData != null)
                     for (Object d : dailyData) {
