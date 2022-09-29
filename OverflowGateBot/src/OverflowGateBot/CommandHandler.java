@@ -27,6 +27,7 @@ public class CommandHandler {
                 try {
                     serverStatus.save();
                     userHandler.save();
+                    guildConfigHandler.save();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
