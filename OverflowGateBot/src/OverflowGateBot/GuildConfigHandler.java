@@ -1,5 +1,6 @@
 package OverflowGateBot;
 
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,7 +25,9 @@ public class GuildConfigHandler {
     // Channels
     public HashMap<String, List<ArchiveChannel>> schematicChannel = new HashMap<>();
     public HashMap<String, List<ArchiveChannel>> mapChannel = new HashMap<>();
+
     public HashMap<String, ArchiveChannel> serverStatusChannel = new HashMap<>();
+    public HashMap<String, ArchiveChannel> universeChatChannel = new HashMap<>();
 
     // Roles
     public HashMap<String, List<String>> adminRoles = new HashMap<>();
@@ -33,7 +36,8 @@ public class GuildConfigHandler {
     // Guilds
     public List<String> guildIds = new ArrayList<>();
 
-    public final String adminName = "Shar";
+    public final String adminName = "Sharlotte";
+
 
     public GuildConfigHandler() {
         guildIds.add("1010373870395596830");
@@ -48,7 +52,7 @@ public class GuildConfigHandler {
         if (member.isOwner())
             return true;
 
-        if (member.getEffectiveName().equals(adminName))
+        if (member.getUser().getName().equals(adminName))
             return true;
 
         Guild guild = member.getGuild();
@@ -64,4 +68,24 @@ public class GuildConfigHandler {
         }
         return false;
     }
+
+    public boolean inChannels(String channelId, String guildId, HashMap<String, List<ArchiveChannel>> channelIds) {
+        List<ArchiveChannel> channels = channelIds.get(guildId);
+        if (channels == null)
+            return false;
+        for (ArchiveChannel channel : channels) {
+            if (channel.channelId == channelId)
+                return true;
+        }
+        return false;
+    }
+
+    public void load() {
+
+    }
+
+    public void save() {
+
+    }
 }
+

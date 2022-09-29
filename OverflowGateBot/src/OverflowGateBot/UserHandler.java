@@ -143,7 +143,7 @@ public class UserHandler {
                 System.out.println("Member with id " + id + " not found");
                 return "";
             }
-            User user = member.getUser();
+            User user = member.getUser(); 
 
             if (hideLv)
                 return (getName().length() == 0 ? user.getName() : getName());

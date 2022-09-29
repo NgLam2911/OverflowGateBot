@@ -21,6 +21,7 @@ public class CommandHandler {
 
         // Shar commands
 
+        // - Save command
         if (command.equals("save")) {
             if (guildConfigHandler.isAdmin(event.getMember())) {
                 reply(event, "Đang lưu...", 10);
@@ -30,32 +31,31 @@ public class CommandHandler {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                return;
             } else
                 reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
         }
 
+        // - Load command
         else if (command.equals("load")) {
             if (guildConfigHandler.isAdmin(event.getMember())) {
                 reply(event, "Đang tải...", 10);
                 try {
                     serverStatus.load();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                try {
                     userHandler.load();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                return;
             } else
                 reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
+
+            // - Send event link to all connected channels
         } else if (command.equals("event")) {
 
         }
 
         // Admin commands
+
+        // - Reload server status
         else if (command.equals("reloadserver")) {
             if (guildConfigHandler.isAdmin(event.getMember())) {
                 serverStatus.reloadServer(event.getGuild(), event.getMessageChannel());
@@ -64,6 +64,7 @@ public class CommandHandler {
             } else
                 reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
 
+            // - Add role to guild admin role
         } else if (command.equals("setadminrole")) {
             Role adminRole = event.getOption("adminrole").getAsRole();
             if (guildConfigHandler.isAdmin(event.getMember())) {
@@ -80,16 +81,35 @@ public class CommandHandler {
 
             } else
                 reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
+
+            // - Add channel to guild schematic channel
+        } else if (command.equals("setschematicchannel")) {
+            if (guildConfigHandler.isAdmin(event.getMember())) {
+            } else
+                reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
+
+            // - Add channel to guild map channel
+        } else if (command.equals("setmapchannel")) {
+            if (guildConfigHandler.isAdmin(event.getMember())) {
+            } else
+                reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
+
+            // - Add channel to guild universe chat channel
+        } else if (command.equals("setuniversechannel")) {
+            if (guildConfigHandler.isAdmin(event.getMember())) {
+
+            } else
+                reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
+
         }
 
         // User commands
-        else if (command.equals("postmap")) {
-            messagesHandler.sendMapPreview(event);
-            userHandler.addMoney(event.getMember(), 30);
 
-        } else if (command.equals("maplist")) {
+        // - Send all survival map and it wave record
+        else if (command.equals("maplist")) {
             replyEmbeds(event, serverStatus.survivalMapLeadther(), 30);
 
+            // - Display user info
         } else if (command.equals("info")) {
             if (event.getOption("user") == null) {
                 replyEmbeds(event, userHandler.getInfo(event.getMember(), event.getTextChannel()), 30);
@@ -98,16 +118,20 @@ public class CommandHandler {
                 replyEmbeds(event, userHandler.getInfo(event.getGuild().getMember(user), event.getTextChannel()), 30);
             }
 
+            // - Refresh server status
         } else if (command.equals("refreshserver")) {
             serverStatus.refreshServerStat(event.getGuild(), event.getMessageChannel());
             reply(event, "Đang làm mới...", 10);
 
+            // - Display top user in all servers
         } else if (command.equals("leaderboard")) {
             replyEmbeds(event, userHandler.getLeaderBoard(), 30);
 
+            // - Help command
         } else if (command.equals("help")) {
             return;
 
+            // - Set user nickname
         } else if (command.equals("setnickname")) {
             User user = event.getOption("user") == null ? null : event.getOption("user").getAsUser();
 
@@ -119,11 +143,17 @@ public class CommandHandler {
                 userHandler.setNickName(event.getMember(), event.getOption("nickname").getAsString());
                 reply(event, "Đổi biệt danh thành " + event.getOption("nickname").getAsString(), 10);
             }
-
+            // - Post a schematic in current channel
         } else if (command.equals("postschem")) {
             messagesHandler.sendSchematicPreview(event);
             userHandler.addMoney(event.getMember(), 10);
 
+            // - Post a map on current channel
+        } else if (command.equals("postmap")) {
+            messagesHandler.sendMapPreview(event);
+            userHandler.addMoney(event.getMember(), 30);
+
+            // - Hide user level
         } else if (command.equals("hidelv")) {
             userHandler.hidelv(event.getMember(), event.getOption("hide").getAsBoolean());
             if (event.getOption("hide").getAsBoolean())
@@ -131,6 +161,7 @@ public class CommandHandler {
             else
                 reply(event, "Đã tắt ẩn level", 10);
 
+            // - Ping a mindustry server
         } else if (command.equals("ping")) {
             String ip = event.getOption("ip").getAsString();
             onet.pingServer(ip, result -> {
@@ -138,12 +169,14 @@ public class CommandHandler {
                 replyEmbeds(event, builder, 30);
             });
 
+            // - Make bot say something in current channel
         } else if (command.equals("say")) {
             String content = event.getOption("content").getAsString();
             event.getTextChannel().sendMessage(content).queue();
             event.deferReply(true).queue();
             event.getHook().sendMessage("Đã gửi thành công tin nhắn: " + content).queue(_message -> _message.delete().queueAfter(30, TimeUnit.SECONDS));
 
+            // - Get daily reward
         } else if (command.equals("daily")) {
             int money = userHandler.getDaily(event.getMember());
             if (money > 0)
@@ -151,8 +184,8 @@ public class CommandHandler {
             else
                 reply(event, "Bạn đã điểm danh hôm nay", 30);
 
+            // - Wrong command lol
         } else
-
             reply(event, "Lệnh sai", 10);
 
     }

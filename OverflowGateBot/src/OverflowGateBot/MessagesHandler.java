@@ -48,6 +48,8 @@ public class MessagesHandler extends ListenerAdapter {
 
     public List<Guild> guilds;
 
+    public HashMap<String, TextChannel> serverChatChannel = new HashMap<String, TextChannel>();
+
     public MessagesHandler() {
         try {
             File file = new File("token.json");
@@ -72,9 +74,6 @@ public class MessagesHandler extends ListenerAdapter {
 
             for (Guild guild : guilds) {
 
-                // Load all channels from file
-                loadChannels(guild);
-
                 // Shar commands
 
                 guild.upsertCommand(Commands.slash("save", "Shar only")).queue();
@@ -91,6 +90,8 @@ public class MessagesHandler extends ListenerAdapter {
 
                 guild.upsertCommand(Commands.slash("setschematicchannel", "Đưa kênh này trở thành kênh bản thiết kế (Admin only)")).queue();
                 guild.upsertCommand(Commands.slash("setmapchannel", "Đưa kênh này trở thành kênh bản đồ (Admin only)")).queue();
+                guild.upsertCommand(Commands.slash("setuniversechannel", "Đưa kênh này trở thành kênh tin nhắn vũ trụ (Admin only)")).queue();
+
                 guild.upsertCommand(Commands.slash("setadminrole", "Cài đặt vai trò admin cho máy chủ").addOption(OptionType.ROLE, "adminrole", "Vai trò admin", true)).queue();
 
                 // User commands
@@ -122,13 +123,8 @@ public class MessagesHandler extends ListenerAdapter {
         }
     }
 
-    public void loadChannels(Guild guild) {
-        // TODO Load all channels from file
-    }
-
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
-
         Message message = event.getMessage();
         if (message.getAuthor().isBot())
             return;
@@ -156,6 +152,14 @@ public class MessagesHandler extends ListenerAdapter {
         userHandler.messageSent(message);
 
         System.out.println("[" + message.getGuild().getName() + "] " + " <" + message.getChannel().getName() + "> " + message.getMember().getEffectiveName() + ": " + message.getContentRaw());
+
+        // Send message to all needed channels
+        if (!message.getContentRaw().isBlank()) {
+            for (TextChannel c : serverChatChannel.values()) {
+                if (!message.getChannel().getName().equals(c.getName()))
+                    c.sendMessage("[" + message.getGuild().getName() + "] " + " <" + message.getChannel().getName() + "> " + message.getMember().getEffectiveName() + ": " + message.getContentRaw() + message.getContentDisplay()).queue();
+            }
+        }
 
     }
 
