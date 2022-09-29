@@ -1,5 +1,6 @@
 package OverflowGateBot;
 
+
 import org.jetbrains.annotations.NotNull;
 
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -18,29 +19,9 @@ public class CommandHandler {
     public void handleCommand(@NotNull SlashCommandInteractionEvent event) {
         String command = event.getName();
 
-        if (command.equals("postmap")) {
-            messagesHandler.sendMapPreview(event);
-        }
+        // Shar commands
 
-        else if (command.equals("maplist")) {
-            replyEmbeds(event, serverStatus.survivalMapLeadther(), 30);
-        }
-
-        else if (command.equals("info")) {
-            if (event.getOption("user") == null) {
-                replyEmbeds(event, userHandler.getInfo(event.getMember(), event.getTextChannel()), 30);
-            } else {
-                User user = event.getOption("user").getAsUser();
-                replyEmbeds(event, userHandler.getInfo(event.getGuild().getMember(user), event.getTextChannel()), 30);
-            }
-        }
-
-        else if (command.equals("refreshserver")) {
-            serverStatus.refreshServerStat(event.getGuild(), event.getMessageChannel());
-            reply(event, "Đang làm mới...", 10);
-        }
-
-        else if (command.equals("save")) {
+        if (command.equals("save")) {
             if (guildConfigHandler.isAdmin(event.getMember())) {
                 reply(event, "Đang lưu...", 10);
                 try {
@@ -70,17 +51,11 @@ public class CommandHandler {
                 return;
             } else
                 reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
-        }
-
-        else if (command.equals("leaderboard")) {
-            replyEmbeds(event, userHandler.getLeaderBoard(), 30);
+        } else if (command.equals("event")) {
 
         }
 
-        else if (command.equals("help")) {
-            return;
-        }
-
+        // Admin commands
         else if (command.equals("reloadserver")) {
             if (guildConfigHandler.isAdmin(event.getMember())) {
                 serverStatus.reloadServer(event.getGuild(), event.getMessageChannel());
@@ -88,9 +63,52 @@ public class CommandHandler {
                 return;
             } else
                 reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
+
+        } else if (command.equals("setadminrole")) {
+            Role adminRole = event.getOption("adminrole").getAsRole();
+            if (guildConfigHandler.isAdmin(event.getMember())) {
+                if (guildConfigHandler.adminRoles.containsKey(event.getGuild().getId())) {
+                    if (guildConfigHandler.adminRoles.get(event.getGuild().getId()).contains(adminRole.getId())) {
+                        reply(event, "Đã tồn tại vai trò này trong danh sách admin", 10);
+                        return;
+                    }
+                } else {
+                    guildConfigHandler.adminRoles.put(event.getGuild().getId(), new ArrayList<String>());
+                }
+                guildConfigHandler.adminRoles.get(event.getGuild().getId()).add(adminRole.getId());
+                reply(event, "Thêm thành công vai trò " + adminRole.getName() + " vào danh sách admin", 30);
+
+            } else
+                reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
         }
 
-        else if (command.equals("setnickname")) {
+        // User commands
+        else if (command.equals("postmap")) {
+            messagesHandler.sendMapPreview(event);
+            userHandler.addMoney(event.getMember(), 30);
+
+        } else if (command.equals("maplist")) {
+            replyEmbeds(event, serverStatus.survivalMapLeadther(), 30);
+
+        } else if (command.equals("info")) {
+            if (event.getOption("user") == null) {
+                replyEmbeds(event, userHandler.getInfo(event.getMember(), event.getTextChannel()), 30);
+            } else {
+                User user = event.getOption("user").getAsUser();
+                replyEmbeds(event, userHandler.getInfo(event.getGuild().getMember(user), event.getTextChannel()), 30);
+            }
+
+        } else if (command.equals("refreshserver")) {
+            serverStatus.refreshServerStat(event.getGuild(), event.getMessageChannel());
+            reply(event, "Đang làm mới...", 10);
+
+        } else if (command.equals("leaderboard")) {
+            replyEmbeds(event, userHandler.getLeaderBoard(), 30);
+
+        } else if (command.equals("help")) {
+            return;
+
+        } else if (command.equals("setnickname")) {
             User user = event.getOption("user") == null ? null : event.getOption("user").getAsUser();
 
             if (user != null && guildConfigHandler.isAdmin(event.getMember())) {
@@ -104,6 +122,7 @@ public class CommandHandler {
 
         } else if (command.equals("postschem")) {
             messagesHandler.sendSchematicPreview(event);
+            userHandler.addMoney(event.getMember(), 10);
 
         } else if (command.equals("hidelv")) {
             userHandler.hidelv(event.getMember(), event.getOption("hide").getAsBoolean());
@@ -114,7 +133,6 @@ public class CommandHandler {
 
         } else if (command.equals("ping")) {
             String ip = event.getOption("ip").getAsString();
-
             onet.pingServer(ip, result -> {
                 EmbedBuilder builder = serverStatus.serverStatusBuilder(ip, result);
                 replyEmbeds(event, builder, 30);
@@ -133,23 +151,8 @@ public class CommandHandler {
             else
                 reply(event, "Bạn đã điểm danh hôm nay", 30);
 
-        } else if (command.equals("setadminrole")) {
-            Role adminRole = event.getOption("adminrole").getAsRole();
-            if (guildConfigHandler.isAdmin(event.getMember())) {
-                if (guildConfigHandler.adminRoles.containsKey(event.getGuild().getId())) {
-                    if (guildConfigHandler.adminRoles.get(event.getGuild().getId()).contains(adminRole.getId())) {
-                        reply(event, "Đã tồn tại vai trò này trong danh sách admin", 10);
-                        return;
-                    }
-                } else {
-                    guildConfigHandler.adminRoles.put(event.getGuild().getId(), new ArrayList<String>());
-                }
-                guildConfigHandler.adminRoles.get(event.getGuild().getId()).add(adminRole.getId());
-                reply(event, "Thêm thành công vai trò " + adminRole.getName() + " vào danh sách admin", 30);
-
-            } else
-                reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
         } else
+
             reply(event, "Lệnh sai", 10);
 
     }

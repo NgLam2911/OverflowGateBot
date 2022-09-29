@@ -21,12 +21,16 @@ public class GuildConfigHandler {
         }
     }
 
+    // Channels
     public HashMap<String, List<ArchiveChannel>> schematicChannel = new HashMap<>();
     public HashMap<String, List<ArchiveChannel>> mapChannel = new HashMap<>();
-    public HashMap<String, List<ArchiveChannel>> noTextChannel = new HashMap<>();
     public HashMap<String, ArchiveChannel> serverStatusChannel = new HashMap<>();
+
+    // Roles
     public HashMap<String, List<String>> adminRoles = new HashMap<>();
     public HashMap<String, String> memberRoleId = new HashMap<>();
+
+    // Guilds
     public List<String> guildIds = new ArrayList<>();
 
     public final String adminName = "Shar";

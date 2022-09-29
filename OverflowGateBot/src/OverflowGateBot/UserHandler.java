@@ -187,6 +187,10 @@ public class UserHandler {
             return (int) ((level + 1) * (2 * level + 1) * level / 6) + point;
         }
 
+        public int getPosition() {
+            sortLeaderBoard();
+            return board.lastIndexOf(this) + 1;
+        }
     }
 
     public UserHandler() {
@@ -410,6 +414,15 @@ public class UserHandler {
         }
     }
 
+    public void addMoney(Member member, int money) {
+        DiscordUser user = getUser(member);
+        if (user == null) {
+            addNewMember(member);
+            return;
+        }
+        user.addMoney(money);
+    }
+
     public void setDisplayName(Member member) {
         DiscordUser user = getUser(member);
         if (user != null)
@@ -470,8 +483,7 @@ public class UserHandler {
         builder.addField("**Kinh nghiệm: **", user.point + " \\ " + user.getExpCap(), false);
         builder.addField("**Tổng kinh nghiệm: **", user.getTotalPoint().toString(), false);
         builder.addField("**Điểm: **", user.money + " MM", false);
-        builder.addField("**Hạng: **", String.valueOf(board.indexOf(user)) + " \\ " + board.size(), false);
-        builder.addBlankField(false);
+        builder.addField("**Hạng: **", user.getPosition() + " \\ " + board.size(), false);
 
         return builder;
     }
@@ -499,7 +511,7 @@ public class UserHandler {
             if (guild == null)
                 builder.addField("Hạng " + (i + 1), (user.getName()) + ":\nKinh nghiệm: " + user.getTotalPoint() + "\nCấp: " + user.level, false);
             else
-                builder.addField("Hạng " + (i + 1), "Tên: " + (user.getName()) + "Kinh nghiệm: " + user.getTotalPoint() + "\nCấp: " + user.level + "\nMáy chủ: " + guild.getName(), false);
+                builder.addField("Hạng " + (i + 1), "Tên: " + (user.getName()) + "\nKinh nghiệm: " + user.getTotalPoint() + "\nCấp: " + user.level + "\nMáy chủ: " + guild.getName(), false);
         }
         return builder;
     }

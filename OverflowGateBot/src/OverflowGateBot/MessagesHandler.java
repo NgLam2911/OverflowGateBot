@@ -1,5 +1,6 @@
 package OverflowGateBot;
 
+
 import arc.files.*;
 import arc.util.*;
 import arc.util.io.Streams;
@@ -78,6 +79,7 @@ public class MessagesHandler extends ListenerAdapter {
 
                 guild.upsertCommand(Commands.slash("save", "Shar only")).queue();
                 guild.upsertCommand(Commands.slash("load", "Shar only")).queue();
+                guild.upsertCommand(Commands.slash("event", "Shar only").addOption(OptionType.STRING, "content", "Nội dung")).queue();
 
                 // Admin commands
 
@@ -326,7 +328,7 @@ public class MessagesHandler extends ListenerAdapter {
          */
         try {
             BufferedImage preview = contentHandler.previewSchematic(schem);
-            String sname = schem.name().replace("/", "_").replace(" ", "_");
+            String sname = schem.name().replace("/", "_").replace(" ", "_").replace(":", "_");
             if (sname.isEmpty())
                 sname = "empty";
 
@@ -369,6 +371,7 @@ public class MessagesHandler extends ListenerAdapter {
 
         } catch (Exception e) {
             e.printStackTrace();
+            sendTempMessage(channel, "Bản thiết kế lỗi: " + e.getMessage(), 30);
         }
     }
 
