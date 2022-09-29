@@ -11,7 +11,6 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import static OverflowGateBot.OverflowGateBot.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 public class CommandHandler {
@@ -60,7 +59,6 @@ public class CommandHandler {
             if (guildConfigHandler.isAdmin(event.getMember())) {
                 serverStatus.reloadServer(event.getGuild(), event.getMessageChannel());
                 reply(event, "Đang làm mới", 10);
-                return;
             } else
                 reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
 
@@ -68,16 +66,8 @@ public class CommandHandler {
         } else if (command.equals("setadminrole")) {
             Role adminRole = event.getOption("adminrole").getAsRole();
             if (guildConfigHandler.isAdmin(event.getMember())) {
-                if (guildConfigHandler.adminRoles.containsKey(event.getGuild().getId())) {
-                    if (guildConfigHandler.adminRoles.get(event.getGuild().getId()).contains(adminRole.getId())) {
-                        reply(event, "Đã tồn tại vai trò này trong danh sách admin", 10);
-                        return;
-                    }
-                } else {
-                    guildConfigHandler.adminRoles.put(event.getGuild().getId(), new ArrayList<String>());
-                }
-                guildConfigHandler.adminRoles.get(event.getGuild().getId()).add(adminRole.getId());
-                reply(event, "Thêm thành công vai trò " + adminRole.getName() + " vào danh sách admin", 30);
+                guildConfigHandler.adminRole.put(event.getGuild().getId(), adminRole.getId());
+                reply(event, "Thêm thành công vai trò " + adminRole.getName() + " làm admin", 30);
 
             } else
                 reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
@@ -85,19 +75,32 @@ public class CommandHandler {
             // - Add channel to guild schematic channel
         } else if (command.equals("setschematicchannel")) {
             if (guildConfigHandler.isAdmin(event.getMember())) {
+                guildConfigHandler.addToChannel(event, guildConfigHandler.schematicChannel);
+                reply(event, "Thêm thành công kênh " + event.getChannel().getName() + " vào kênh bản thiết kế", 30);
             } else
                 reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
 
             // - Add channel to guild map channel
         } else if (command.equals("setmapchannel")) {
             if (guildConfigHandler.isAdmin(event.getMember())) {
+                guildConfigHandler.addToChannel(event, guildConfigHandler.mapChannel);
+                reply(event, "Thêm thành công kênh " + event.getChannel().getName() + " vào kênh bản đồ", 30);
             } else
                 reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
 
-            // - Add channel to guild universe chat channel
+            // - Set channel to be guild universe chat channel
         } else if (command.equals("setuniversechannel")) {
             if (guildConfigHandler.isAdmin(event.getMember())) {
+                guildConfigHandler.setChannel(event, guildConfigHandler.universeChatChannel);
+                reply(event, "Đặt thành công kênh " + event.getChannel().getName() + " thành kênh tin nhắn vũ trụ", 30);
+            } else
+                reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
 
+            // - Set channel to be guild server status chat channel
+        } else if (command.equals("setserverstatuschannel")) {
+            if (guildConfigHandler.isAdmin(event.getMember())) {
+                guildConfigHandler.setChannel(event, guildConfigHandler.serverStatusChannel);
+                reply(event, "Đặt thành công kênh " + event.getChannel().getName() + " thành kênh thông tin máy chủ", 30);
             } else
                 reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
 

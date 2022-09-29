@@ -1,7 +1,9 @@
 package OverflowGateBot;
 
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -23,6 +25,8 @@ public class JSONHandler {
         String data = "";
 
         public JSONWriter(String filePath) throws IOException {
+            if (!filePath.endsWith(".json"))
+                filePath += ".json";
             writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filePath), "UTF-8"));
         }
 
@@ -40,12 +44,19 @@ public class JSONHandler {
         }
     }
 
+
     public class JSONReader {
         Writer reader;
         JSONObject data;
         JSONParser jsonParser = new JSONParser();
 
         public JSONReader(String filePath) throws IOException, ParseException {
+            if (!filePath.endsWith(".json"))
+                filePath += ".json";
+            File file = new File(filePath);
+            if (!file.exists())
+                file.createNewFile();
+
             Reader reader = new BufferedReader(new InputStreamReader(new FileInputStream(filePath), "UTF-8"));
             data = (JSONObject) jsonParser.parse(reader);
         }
@@ -56,6 +67,7 @@ public class JSONHandler {
             return jsonData;
         }
     }
+
 
     public class JSONData {
         JSONObject data;

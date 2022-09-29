@@ -2,7 +2,6 @@ package OverflowGateBot;
 
 
 import java.io.DataInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.Clock;
@@ -37,10 +36,6 @@ public class UserHandler {
     final String GUILDID = "g";
     final String HIDELV = "h";
     final String MONEY = "m";
-
-    public final String usersDataPath = "users.json";
-    public final String guildsDataPath = "guilds.json";
-    public final String dailyPath = "daily.json";
 
     private HashMap<String, HashMap<String, DiscordUser>> users = new HashMap<>();
     private List<String> daily = new ArrayList<>();
@@ -113,7 +108,7 @@ public class UserHandler {
                 Member member = guild.getMemberById(id);
 
                 if (member != null) {
-                    String roleId = guildConfigHandler.memberRoleId.get(guildId);
+                    String roleId = guildConfigHandler.memberRole.get(guildId);
                     if (roleId == null)
                         return;
                     Role memberRole = guild.getRoleById(roleId);
@@ -143,7 +138,7 @@ public class UserHandler {
                 System.out.println("Member with id " + id + " not found");
                 return "";
             }
-            User user = member.getUser(); 
+            User user = member.getUser();
 
             if (hideLv)
                 return (getName().length() == 0 ? user.getName() : getName());
@@ -255,9 +250,8 @@ public class UserHandler {
 
             JSONHandler jsonHandler = new JSONHandler();
             // Load guild ids
-            File file = new File("cache/data/" + guildsDataPath);
 
-            JSONData reader = (jsonHandler.new JSONReader("cache/data/" + guildsDataPath)).read();
+            JSONData reader = (jsonHandler.new JSONReader(guildFilePath)).read();
             for (Object k : reader.data.keySet()) {
                 String guildId = k.toString();
                 if (!guildConfigHandler.guildIds.contains(guildId))
@@ -265,12 +259,11 @@ public class UserHandler {
             }
 
             // Load daily data
-            file = new File("cache/data/" + dailyPath);
-            reader = (jsonHandler.new JSONReader("cache/data/" + dailyPath)).read();
+            reader = (jsonHandler.new JSONReader(dailyFilePath)).read();
             String date = reader.readString("date");
 
             if (date.equals(getDate())) {
-                JSONArray dailyData = reader.readJSONArray(dailyPath);
+                JSONArray dailyData = reader.readJSONArray("data");
                 if (dailyData != null)
                     for (Object d : dailyData) {
                         String id = d.toString();
@@ -281,13 +274,8 @@ public class UserHandler {
                 System.out.println("New date");
 
             // Load user data
-            new File("cache/").mkdir();
 
-            file = new File("cache/data/" + usersDataPath);
-            if (!file.exists())
-                file.createNewFile();
-
-            reader = (jsonHandler.new JSONReader("cache/data/" + usersDataPath)).read();
+            reader = (jsonHandler.new JSONReader("cache/data/" + userFilePath)).read();
 
             if (reader.size() != 0) {
                 for (Object guildId : reader.data.keySet()) {
@@ -348,8 +336,6 @@ public class UserHandler {
     public void save() throws IOException {
 
         try {
-            // Save guild ids
-            saveGuildData();
 
             // Save daily data
             saveDailyData();
@@ -367,13 +353,13 @@ public class UserHandler {
         try {
             JSONHandler jsonHandler = new JSONHandler();
             JSONData reader;
-            reader = (jsonHandler.new JSONReader("cache/data/" + dailyPath)).read();
+            reader = (jsonHandler.new JSONReader(dailyFilePath)).read();
             String date = reader.readString("date");
-            JSONWriter writer = jsonHandler.new JSONWriter("cache/data/" + dailyPath);
+            JSONWriter writer = jsonHandler.new JSONWriter(dailyFilePath);
             if (date.equals(getDate()))
-                writer.append(dailyPath, daily.toString());
+                writer.append("data", daily.toString());
             else
-                writer.append(dailyPath, (new ArrayList<String>()).toString());
+                writer.append("data", (new ArrayList<String>()).toString());
             writer.append("date", "\"" + getDate() + "\"");
             writer.write();
 
@@ -382,19 +368,9 @@ public class UserHandler {
         }
     }
 
-    public void saveGuildData() throws IOException {
-        JSONHandler jsonHandler = new JSONHandler();
-        // Save guild ids
-        JSONWriter writer = jsonHandler.new JSONWriter("cache/data/" + guildsDataPath);
-        for (String k : guildConfigHandler.guildIds) {
-            writer.append(k, k);
-        }
-        writer.write();
-    }
-
     public void saveUserData() throws IOException {
         JSONHandler jsonHandler = new JSONHandler();
-        JSONWriter writer = jsonHandler.new JSONWriter("cache/data/" + usersDataPath);
+        JSONWriter writer = jsonHandler.new JSONWriter(userFilePath);
         for (String gid : users.keySet()) {
             writer.append(gid, new JSONObject(users.get(gid)).toJSONString());
         }

@@ -91,6 +91,7 @@ public class MessagesHandler extends ListenerAdapter {
                 guild.upsertCommand(Commands.slash("setschematicchannel", "Đưa kênh này trở thành kênh bản thiết kế (Admin only)")).queue();
                 guild.upsertCommand(Commands.slash("setmapchannel", "Đưa kênh này trở thành kênh bản đồ (Admin only)")).queue();
                 guild.upsertCommand(Commands.slash("setuniversechannel", "Đưa kênh này trở thành kênh tin nhắn vũ trụ (Admin only)")).queue();
+                guild.upsertCommand(Commands.slash("setserverstatus", "Đưa kênh này trở thành kênh thông tin máy chủ (Admin only)")).queue();
 
                 guild.upsertCommand(Commands.slash("setadminrole", "Cài đặt vai trò admin cho máy chủ").addOption(OptionType.ROLE, "adminrole", "Vai trò admin", true)).queue();
 
