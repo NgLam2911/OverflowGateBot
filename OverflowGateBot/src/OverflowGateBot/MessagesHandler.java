@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.entities.Activity.ActivityType;
 import net.dv8tion.jda.api.entities.Message.Attachment;
 import net.dv8tion.jda.api.events.message.*;
 import net.dv8tion.jda.api.hooks.*;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.GatewayIntent;
@@ -24,8 +25,6 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 
 import javax.annotation.Nonnull;
 import javax.imageio.*;
-
-import org.jetbrains.annotations.NotNull;
 
 import OverflowGateBot.GuildConfigHandler.ArchiveChannel;
 import OverflowGateBot.JSONHandler.JSONData;
@@ -124,8 +123,28 @@ public class MessagesHandler extends ListenerAdapter {
         }
     }
 
+    public String getMessageSender(Message message) {
+        Member member = message.getMember();
+        if (member == null)
+            return "[" + message.getGuild().getName() + "] " + " <" + message.getChannel().getName() + "> " + "Unknown";
+        return "[" + message.getGuild().getName() + "] " + " <" + message.getChannel().getName() + "> " + member.getEffectiveName();
+    }
+
+    public String getMessageSender(@Nonnull SlashCommandInteractionEvent event) {
+        Member member = event.getMember();
+        Guild guild = event.getGuild();
+        String guildName;
+        if (guild == null)
+            guildName = "Unknown";
+        else
+            guildName = guild.getName();
+        if (member == null)
+            return "[" + guildName + "] " + " <" + event.getChannel().getName() + "> " + "Unknown";
+        return "[" + guildName + "] " + " <" + event.getChannel().getName() + "> " + member.getEffectiveName();
+    }
+
     @Override
-    public void onMessageReceived(MessageReceivedEvent event) {
+    public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
         Message message = event.getMessage();
         if (message.getAuthor().isBot())
             return;
@@ -139,7 +158,7 @@ public class MessagesHandler extends ListenerAdapter {
         List<Attachment> attachments = message.getAttachments();
         // Schematic preview
         if ((isSchematicText(message) && attachments.isEmpty()) || isSchematicFile(attachments)) {
-            System.out.println("[" + message.getGuild().getName() + "] " + " <" + message.getChannel().getName() + "> " + message.getMember().getEffectiveName() + ": sent a schematic");
+            System.out.println(getMessageSender(message) + ": sent a schematic");
             sendSchematicPreview(message, message.getChannel());
             return;
         }
@@ -152,28 +171,28 @@ public class MessagesHandler extends ListenerAdapter {
         // Update exp on message sent
         userHandler.messageSent(message);
 
-        System.out.println("[" + message.getGuild().getName() + "] " + " <" + message.getChannel().getName() + "> " + message.getMember().getEffectiveName() + ": " + message.getContentRaw());
+        System.out.println(getMessageSender(message) + ": " + message.getContentRaw());
 
         // Send message to all needed channels
         if (!message.getContentRaw().isBlank()) {
             for (TextChannel c : serverChatChannel.values()) {
                 if (!message.getChannel().getName().equals(c.getName()))
-                    c.sendMessage("[" + message.getGuild().getName() + "] " + " <" + message.getChannel().getName() + "> " + message.getMember().getEffectiveName() + ": " + message.getContentRaw() + message.getContentDisplay()).queue();
+                    c.sendMessage(getMessageSender(message) + ": " + message.getContentRaw() + message.getContentDisplay()).queue();
             }
         }
 
     }
 
     @Override
-    public void onGuildMemberUpdateNickname(@NotNull GuildMemberUpdateNicknameEvent event) {
+    public void onGuildMemberUpdateNickname(@Nonnull GuildMemberUpdateNicknameEvent event) {
         if (event.getMember().getUser().isBot())
             return;
         userHandler.setDisplayName(event.getEntity());
     }
 
     @Override
-    public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
-        System.out.println("[" + event.getGuild().getName() + "] " + " <" + event.getChannel().getName() + "> " + event.getMember().getEffectiveName() + ": used " + event.getName());
+    public void onSlashCommandInteraction(@Nonnull SlashCommandInteractionEvent event) {
+        System.out.println(getMessageSender(event) + ": used " + event.getName());
 
         event.deferReply(true);
         commandHandler.handleCommand(event);
@@ -197,7 +216,10 @@ public class MessagesHandler extends ListenerAdapter {
     }
 
     public boolean isSchematicFile(Attachment attachment) {
-        return attachment.getFileExtension() != null && attachment.getFileExtension().equals(Vars.schematicExtension);
+        String fileExtension = attachment.getFileExtension();
+        if (fileExtension == null)
+            return false;
+        return fileExtension.equals(Vars.schematicExtension);
     }
 
     public boolean isSchematicFile(List<Attachment> attachments) {
@@ -262,7 +284,11 @@ public class MessagesHandler extends ListenerAdapter {
 
             if (map.description != null)
                 builder.setFooter(map.description);
-            channel.sendFile(mapFile).addFile(imageFile.file()).setEmbeds(builder.build()).queue();
+
+            File f = imageFile.file();
+            if (f == null)
+                return;
+            channel.sendFile(mapFile).addFile(f).setEmbeds(builder.build()).queue();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -280,7 +306,10 @@ public class MessagesHandler extends ListenerAdapter {
     }
 
     public void sendMapPreview(SlashCommandInteractionEvent event) {
-        Attachment attachment = event.getOption("mapfile").getAsAttachment();
+        OptionMapping fileOption = event.getOption("mapfile");
+        if (fileOption == null)
+            return;
+        Attachment attachment = fileOption.getAsAttachment();
 
         if (!isMapFile(attachment)) {
             event.reply("File được chọn không phải là file bản đồ");
@@ -293,7 +322,11 @@ public class MessagesHandler extends ListenerAdapter {
     }
 
     public void sendSchematicPreview(SlashCommandInteractionEvent event) {
-        Attachment attachment = event.getOption("schematicfile").getAsAttachment();
+        OptionMapping fileOption = event.getOption("mapfile");
+        if (fileOption == null)
+            return;
+        Attachment attachment = fileOption.getAsAttachment();
+
         if (!isSchematicFile(attachment)) {
             event.reply("File được chọn không phải là file bản thiết kế");
             return;
@@ -354,7 +387,10 @@ public class MessagesHandler extends ListenerAdapter {
 
             // Item requirements
             for (ItemStack stack : schem.requirements()) {
-                List<Emote> emotes = member.getGuild().getEmotesByName(stack.item.name.replace("-", ""), true);
+                String itemName = stack.item.name.replace("-", "");
+                if (itemName == null)
+                    continue;
+                List<Emote> emotes = member.getGuild().getEmotesByName(itemName, true);
                 if (!emotes.isEmpty())
                     field.append(emotes.get(0).getAsMention()).append(stack.amount).append("  ");
                 else

@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
 
+import javax.annotation.Nonnull;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
@@ -48,7 +50,9 @@ public class UserHandler {
 
     public class DiscordUser {
 
+        @Nonnull
         String id;
+        @Nonnull
         String guildId;
         String name;
         String nickname = "";
@@ -57,7 +61,7 @@ public class UserHandler {
         Integer money = 0;
         Boolean hideLv = false;
 
-        public DiscordUser(String guildId, String id, String name, Integer point, Integer level, Integer money, Boolean hideLv) {
+        public DiscordUser(@Nonnull String guildId, @Nonnull String id, String name, Integer point, Integer level, Integer money, Boolean hideLv) {
             this.id = id;
             this.guildId = guildId;
             this.name = name;
@@ -104,12 +108,13 @@ public class UserHandler {
                 Guild guild = messagesHandler.jda.getGuildById(guildId);
                 if (guild == null) {
                     System.out.println("Guild not found: " + guildId);
+                    return;
                 }
                 Member member = guild.getMemberById(id);
 
                 if (member != null) {
                     String roleId = guildConfigHandler.memberRole.get(guildId);
-                    if (roleId == null)
+                    if (roleId == null || roleId.isEmpty())
                         return;
                     Role memberRole = guild.getRoleById(roleId);
                     if (memberRole != null)
@@ -215,7 +220,7 @@ public class UserHandler {
         setDisplayName(member);
     }
 
-    public DiscordUser addNewMember(String guildId, String id, String name, int point, int level, int money, Boolean hideLv) {
+    public DiscordUser addNewMember(@Nonnull String guildId, @Nonnull String id, String name, int point, int level, int money, Boolean hideLv) {
         DiscordUser user = new DiscordUser(guildId, id, name, point, level, money, hideLv);
         if (users.containsKey(guildId)) {
             // Already have guild id
@@ -249,17 +254,9 @@ public class UserHandler {
         try {
 
             JSONHandler jsonHandler = new JSONHandler();
-            // Load guild ids
-
-            JSONData reader = (jsonHandler.new JSONReader(guildFilePath)).read();
-            for (Object k : reader.data.keySet()) {
-                String guildId = k.toString();
-                if (!guildConfigHandler.guildIds.contains(guildId))
-                    guildConfigHandler.guildIds.add(guildId);
-            }
 
             // Load daily data
-            reader = (jsonHandler.new JSONReader(dailyFilePath)).read();
+            JSONData reader = (jsonHandler.new JSONReader(dailyFilePath)).read();
             String date = reader.readString("date");
 
             if (date.equals(getDate())) {
@@ -275,15 +272,21 @@ public class UserHandler {
 
             // Load user data
 
-            reader = (jsonHandler.new JSONReader("cache/data/" + userFilePath)).read();
+            reader = (jsonHandler.new JSONReader(userFilePath)).read();
 
             if (reader.size() != 0) {
                 for (Object guildId : reader.data.keySet()) {
                     String gid = guildId.toString();
+                    if (gid == null)
+                        continue;
+
                     JSONData guildData = reader.readJSON(gid);
                     for (Object k : guildData.data.keySet()) {
 
                         String id = k.toString();
+                        if (id == null)
+                            continue;
+
                         JSONData userData = guildData.readJSON(id);
                         if (userData.data == null)
                             continue;
@@ -296,8 +299,11 @@ public class UserHandler {
 
                         Guild guild = messagesHandler.jda.getGuildById(gid);
 
+                        if (guild == null)
+                            continue;
+
                         if (name.length() == 0) {
-                            Member member = guild.getMemberById(id.toString());
+                            Member member = guild.getMemberById(id);
                             if (member == null || member.getUser().isBot())
                                 continue;
                             name = member.getUser().getName();
@@ -319,6 +325,9 @@ public class UserHandler {
         }
 
         for (String gid : guildConfigHandler.guildIds) {
+
+            if (gid == null)
+                break;
 
             Guild guild = messagesHandler.jda.getGuildById(gid);
             if (guild == null) {
@@ -379,6 +388,8 @@ public class UserHandler {
 
     public void messageSent(Message message) {
         Member member = message.getMember();
+        if (member == null)
+            return;
         DiscordUser user = getUser(member);
         if (user == null) {
             System.out.println("User " + member.getEffectiveName() + " not found");
@@ -436,7 +447,6 @@ public class UserHandler {
     }
 
     public EmbedBuilder getInfo(Member member, TextChannel channel) {
-        String userId = member.getId();
         DiscordUser user = getUser(member);
 
         EmbedBuilder builder = new EmbedBuilder();
@@ -445,7 +455,8 @@ public class UserHandler {
             return builder;
         }
 
-        builder.setAuthor(user.name, null, channel.getGuild().getMemberById(userId).getEffectiveAvatarUrl());
+
+        builder.setAuthor(user.name, null, member.getEffectiveAvatarUrl());
         List<Role> roles = member.getRoles();
         if (roles.size() != 0) {
             String r = "";

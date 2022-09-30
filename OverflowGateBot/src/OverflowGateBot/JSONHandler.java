@@ -42,11 +42,16 @@ public class JSONHandler {
             writer.write("{" + this.data + "}");
             writer.flush();
         }
+
+        public void write(String _data) throws IOException {
+            writer.write(_data);
+            writer.flush();
+        }
     }
 
 
     public class JSONReader {
-        Writer reader;
+
         JSONObject data;
         JSONParser jsonParser = new JSONParser();
 
@@ -58,7 +63,8 @@ public class JSONHandler {
                 file.createNewFile();
 
             Reader reader = new BufferedReader(new InputStreamReader(new FileInputStream(filePath), "UTF-8"));
-            data = (JSONObject) jsonParser.parse(reader);
+            if (reader.ready())
+                data = (JSONObject) jsonParser.parse(reader);
         }
 
         public JSONData read() {

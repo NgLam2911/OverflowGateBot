@@ -32,8 +32,13 @@ public class GuildConfigHandler {
         }
 
         public String toString() {
-            return "{channelId:\"" + channelId + "\", lastMessageId:\"" + lastMessageId + "\"}";
+            return "{\"channelId\":\"" + channelId + "\", \"lastMessageId\":\"" + lastMessageId + "\"}";
         }
+    }
+
+
+    public class GuildConfig {
+
     }
 
     // Channels
@@ -95,20 +100,25 @@ public class GuildConfigHandler {
     }
 
     public void setChannel(JSONData archiveChannel, String guildId, HashMap<String, ArchiveChannel> channelIds) {
+        if (archiveChannel.data == null)
+            return;
         String channelId = archiveChannel.readString("channelId");
-        if (channelId.isEmpty())
+        if (channelId.isEmpty() || channelIds.equals("null"))
             return;
         String lastMessageId = archiveChannel.readString("lastMessageId");
         channelIds.put(guildId, new ArchiveChannel(channelId, lastMessageId));
     }
 
     public void setChannel(SlashCommandInteractionEvent event, HashMap<String, ArchiveChannel> channelIds) {
-        channelIds.put(event.getGuild().getId(), new ArchiveChannel(event.getChannel().getId(), null));
+        Guild guild = event.getGuild();
+        if (guild == null)
+            return;
+        channelIds.put(guild.getId(), new ArchiveChannel(event.getChannel().getId(), ""));
     }
 
     public void addToChannel(JSONData archiveChannel, String guildId, HashMap<String, List<ArchiveChannel>> channelIds) {
         String channelId = archiveChannel.readString("channelId");
-        if (channelId.isEmpty())
+        if (channelId.isEmpty() || channelIds.equals("null"))
             return;
         String lastMessageId = archiveChannel.readString("lastMessageId");
         addToChannel(channelId, lastMessageId, guildId, channelIds);
@@ -127,13 +137,18 @@ public class GuildConfigHandler {
     }
 
     public void addToChannel(JSONArray archiveChannels, String guildId, HashMap<String, List<ArchiveChannel>> channelIds) {
+        if (archiveChannels == null)
+            return;
         for (Object ac : archiveChannels) {
             addToChannel((JSONData) ac, guildId, channelIds);
         }
     }
 
     public void addToChannel(SlashCommandInteractionEvent event, HashMap<String, List<ArchiveChannel>> channelIds) {
-        addToChannel(event.getChannel().getId(), null, event.getGuild().getId(), channelIds);
+        Guild guild = event.getGuild();
+        if (guild == null)
+            return;
+        addToChannel(event.getChannel().getId(), "", guild.getId(), channelIds);
     }
 
     public void setRole(String guildId, String roleId, HashMap<String, String> roleIds) {
@@ -141,10 +156,16 @@ public class GuildConfigHandler {
     }
 
     public void load() throws IOException {
+        for (Guild guild : messagesHandler.jda.getGuilds()) {
+            if (!guildIds.contains(guild.getId()))
+                guildIds.add(guild.getId());
+        }
+
         try {
             JSONHandler handler = new JSONHandler();
             JSONData reader = (handler.new JSONReader(guildFilePath)).read();
-
+            if (reader.data == null)
+                return;
             for (Object key : reader.data.keySet()) {
                 String guildId = key.toString();
                 JSONData guildData = reader.readJSON(guildId);
@@ -163,11 +184,6 @@ public class GuildConfigHandler {
                 setRole(guildId, memberRoleId, memberRole);
             }
 
-            for (Guild guild : messagesHandler.jda.getGuilds()) {
-                if (!guildIds.contains(guild.getId()))
-                    guildIds.add(guild.getId());
-            }
-
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -178,10 +194,38 @@ public class GuildConfigHandler {
         try {
             JSONHandler handler = new JSONHandler();
             JSONWriter writer = handler.new JSONWriter(guildFilePath);
-            writer.append("schematicChannel", (new JSONObject(schematicChannel)).toJSONString());
-            writer.append("mapChannel", (new JSONObject(mapChannel)).toJSONString());
-            writer.append("serverStatusChannel", (new JSONObject(serverStatusChannel)).toJSONString());
-            writer.append("universeChatChannel", (new JSONObject(universeChatChannel)).toJSONString());
+            HashMap<String, Object> data = new HashMap<String, Object>();
+            for (String guildId : guildIds) {
+                HashMap<String, Object> sub = new HashMap<String, Object>();
+                if (schematicChannel.containsKey(guildId))
+                    sub.put("schematicChannel", (schematicChannel.get(guildId).toString()));
+                else
+                    sub.put("schematicChannel", new JSONArray());
+                if (mapChannel.containsKey(guildId))
+                    sub.put("mapChannel", mapChannel.get(guildId).toString());
+                else
+                    sub.put("mapChannel", new JSONArray());
+                if (serverStatusChannel.containsKey(guildId))
+                    sub.put("serverStatusChannel", serverStatusChannel.get(guildId));
+                else
+                    sub.put("serverStatusChannel", new ArchiveChannel("", ""));
+                if (universeChatChannel.containsKey(guildId))
+                    sub.put("universeChatChannel", universeChatChannel.get(guildId));
+                else
+                    sub.put("universeChatChannel", new ArchiveChannel("", ""));
+                if (adminRole.containsKey(guildId))
+                    sub.put("adminRole", adminRole.get(guildId));
+                else
+                    sub.put("adminRole", "");
+                if (memberRole.containsKey(guildId))
+                    sub.put("memberRole", memberRole.get(guildId));
+                else
+                    sub.put("memberRole", "");
+
+
+                data.put(guildId, sub);
+            }
+            writer.write((new JSONObject(data)).toJSONString());
 
 
         } catch (Exception e) {

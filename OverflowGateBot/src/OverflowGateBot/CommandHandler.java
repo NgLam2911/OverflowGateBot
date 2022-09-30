@@ -4,9 +4,11 @@ package OverflowGateBot;
 import org.jetbrains.annotations.NotNull;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 
 import static OverflowGateBot.OverflowGateBot.*;
 
@@ -65,9 +67,17 @@ public class CommandHandler {
 
             // - Add role to guild admin role
         } else if (command.equals("setadminrole")) {
-            Role adminRole = event.getOption("adminrole").getAsRole();
+            OptionMapping adminRoleOption = event.getOption("adminrole");
+            if (adminRoleOption == null)
+                return;
+            Role adminRole = adminRoleOption.getAsRole();
+
+            Guild guild = event.getGuild();
+            if (guild == null)
+                return;
+
             if (guildConfigHandler.isAdmin(event.getMember())) {
-                guildConfigHandler.adminRole.put(event.getGuild().getId(), adminRole.getId());
+                guildConfigHandler.adminRole.put(guild.getId(), adminRole.getId());
                 reply(event, "Thêm thành công vai trò " + adminRole.getName() + " làm admin", 30);
 
             } else
@@ -118,8 +128,16 @@ public class CommandHandler {
             if (event.getOption("user") == null) {
                 replyEmbeds(event, userHandler.getInfo(event.getMember(), event.getTextChannel()), 30);
             } else {
-                User user = event.getOption("user").getAsUser();
-                replyEmbeds(event, userHandler.getInfo(event.getGuild().getMember(user), event.getTextChannel()), 30);
+                OptionMapping userOption = event.getOption("user");
+                if (userOption == null)
+                    return;
+                User user = userOption.getAsUser();
+
+                Guild guild = event.getGuild();
+                if (guild == null)
+                    return;
+
+                replyEmbeds(event, userHandler.getInfo(guild.getMember(user), event.getTextChannel()), 30);
             }
 
             // - Refresh server status
@@ -137,15 +155,25 @@ public class CommandHandler {
 
             // - Set user nickname
         } else if (command.equals("setnickname")) {
-            User user = event.getOption("user") == null ? null : event.getOption("user").getAsUser();
+            Guild guild = event.getGuild();
+            if (guild == null)
+                return;
+            OptionMapping userOption = event.getOption("user");
 
-            if (user != null && guildConfigHandler.isAdmin(event.getMember())) {
-                userHandler.setNickName(event.getGuild().getMember(user), event.getOption("nickname").getAsString());
-                reply(event, "Đổi biệt danh thành " + event.getOption("nickname").getAsString(), 10);
+            OptionMapping nicknameOption = event.getOption("nickname");
+            if (nicknameOption == null)
+                return;
 
+            if (userOption != null) {
+                if (guildConfigHandler.isAdmin(event.getMember())) {
+                    User user = userOption.getAsUser();
+                    userHandler.setNickName(guild.getMember(user), nicknameOption.getAsString());
+                    reply(event, "Đổi biệt danh thành " + nicknameOption.getAsString(), 10);
+                } else
+                    reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
             } else {
-                userHandler.setNickName(event.getMember(), event.getOption("nickname").getAsString());
-                reply(event, "Đổi biệt danh thành " + event.getOption("nickname").getAsString(), 10);
+                userHandler.setNickName(event.getMember(), nicknameOption.getAsString());
+                reply(event, "Đổi biệt danh thành " + nicknameOption.getAsString(), 10);
             }
             // - Post a schematic in current channel
         } else if (command.equals("postschem")) {
@@ -159,15 +187,24 @@ public class CommandHandler {
 
             // - Hide user level
         } else if (command.equals("hidelv")) {
-            userHandler.hidelv(event.getMember(), event.getOption("hide").getAsBoolean());
-            if (event.getOption("hide").getAsBoolean())
+            Boolean hidelv;
+            OptionMapping hideOption = event.getOption("hide");
+            if (hideOption == null)
+                hidelv = true;
+            else
+                hidelv = hideOption.getAsBoolean();
+            userHandler.hidelv(event.getMember(), hidelv);
+            if (hidelv)
                 reply(event, "Đã ẩn level", 10);
             else
                 reply(event, "Đã tắt ẩn level", 10);
 
             // - Ping a mindustry server
         } else if (command.equals("ping")) {
-            String ip = event.getOption("ip").getAsString();
+            OptionMapping ipOption = event.getOption("ip");
+            if (ipOption == null)
+                return;
+            String ip = ipOption.getAsString();
             onet.pingServer(ip, result -> {
                 EmbedBuilder builder = serverStatus.serverStatusBuilder(ip, result);
                 replyEmbeds(event, builder, 30);
@@ -175,7 +212,10 @@ public class CommandHandler {
 
             // - Make bot say something in current channel
         } else if (command.equals("say")) {
-            String content = event.getOption("content").getAsString();
+            OptionMapping contentOption = event.getOption("content");
+            if (contentOption == null)
+                return;
+            String content = contentOption.getAsString();
             event.getTextChannel().sendMessage(content).queue();
             event.deferReply(true).queue();
             event.getHook().sendMessage("Đã gửi thành công tin nhắn: " + content).queue(_message -> _message.delete().queueAfter(30, TimeUnit.SECONDS));

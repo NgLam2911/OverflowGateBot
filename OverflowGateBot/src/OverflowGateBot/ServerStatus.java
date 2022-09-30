@@ -1,5 +1,6 @@
 package OverflowGateBot;
 
+
 import java.awt.Color;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -13,6 +14,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import javax.annotation.Nonnull;
 
 import mindustry.net.*;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -62,9 +65,17 @@ public class ServerStatus {
 
         // Load all servers for all guilds
         for (String guildId : serverStatusChannels.keySet()) {
+            if (guildId == null)
+                break;
             Guild guild = messagesHandler.jda.getGuildById(guildId);
+            if (guild == null)
+                continue;
             String channelId = serverStatusChannels.get(guildId);
+            if (channelId == null)
+                continue;
             MessageChannel channel = guild.getTextChannelById(channelId);
+            if (channel == null)
+                continue;
             MessageHistory history = MessageHistory.getHistoryFromBeginning(channel).complete();
 
             List<Message> msg = history.getRetrievedHistory();
@@ -73,7 +84,11 @@ public class ServerStatus {
             msg.forEach(_msg -> {
                 List<MessageEmbed> embed = _msg.getEmbeds();
                 embed.forEach(_embed -> {
-                    String title = _embed.getTitle().replace("_", "");
+                    String title = _embed.getTitle();
+                    if (title == null)
+                        return;
+                    else
+                        title = title.replace("_", "");
                     boolean found = false;
                     for (String ip : servers.keySet()) {
                         if (ip.equals(title)) {
@@ -91,8 +106,6 @@ public class ServerStatus {
                 });
             });
 
-            if (channel == null)
-                continue;
             servers.keySet().forEach(ip -> displayServerStatus(guild, channel, ip));
         }
 
@@ -148,7 +161,7 @@ public class ServerStatus {
         });
     }
 
-    public void reloadServer(Guild guild, MessageChannel channel) {
+    public void reloadServer(Guild guild, @Nonnull MessageChannel channel) {
 
         MessageHistory history = MessageHistory.getHistoryFromBeginning(channel).complete();
 
@@ -165,14 +178,15 @@ public class ServerStatus {
         String owner = servers.get(ip);
         if (owner != null) {
             User user = messagesHandler.jda.getUserById(owner);
-            builder.setAuthor(user.getName(), user.getEffectiveAvatarUrl(), user.getEffectiveAvatarUrl());
+            if (user != null)
+                builder.setAuthor(user.getName(), user.getEffectiveAvatarUrl(), user.getEffectiveAvatarUrl());
         }
         builder.setColor(Color.CYAN);
 
         if (result.name != null || result.mapname != null) {
             field.append("Tên máy chủ: " + Strings.stripColors(result.name) + "\nNgười chơi: " + result.players + (result.playerLimit == 0 ? "" : " \\ " + result.playerLimit) + "\nBản đồ: " + Strings.stripColors(result.mapname) + "\nChế độ: "
-                    + (result.modeName == null ? messagesHandler.capitalize(result.mode.name()) : messagesHandler.capitalize(result.modeName)) + "\nĐợt: " + result.wave + (result.description.length() == 0 ? "" : "\nMô tả: " + Strings.stripColors(result.description)) + "\nPhiên bản: " + result.version + "\nPing: "
-                    + result.ping + "ms\n");
+                    + (result.modeName == null ? messagesHandler.capitalize(result.mode.name()) : messagesHandler.capitalize(result.modeName)) + "\nĐợt: " + result.wave + (result.description.length() == 0 ? "" : "\nMô tả: " + Strings.stripColors(result.description)) + "\nPhiên bản: "
+                    + result.version + "\nPing: " + result.ping + "ms\n");
 
             String mapName = Strings.stripColors(result.mapname);
             if ((result.modeName != null && result.modeName.equals("Survival")) || (result.mode.name().equals("survival"))) {
