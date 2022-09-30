@@ -232,7 +232,6 @@ public class CommandHandler extends ListenerAdapter {
             if (adminRoleOption == null)
                 return;
             Role adminRole = adminRoleOption.getAsRole();
-
             Guild guild = event.getGuild();
             if (guild == null)
                 return;

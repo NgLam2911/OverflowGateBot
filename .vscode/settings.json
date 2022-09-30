@@ -98,5 +98,6 @@
         "viên",
         "vndustry",
         "wyqynv"
-    ]
+    ],
+    "terminal.integrated.shellArgs.windows": ["-NoExit", "/c", "chcp.com 65001"],
 }

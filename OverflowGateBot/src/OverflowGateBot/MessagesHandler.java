@@ -16,8 +16,8 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
-import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
+import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.events.guild.member.update.GuildMemberUpdateNicknameEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
@@ -139,7 +139,13 @@ public class MessagesHandler extends ListenerAdapter {
     }
 
     @Override
-    public void onGuildLeave(@Nonnull GuildLeaveEvent event) {
+    public void onGuildMemberRemove(@Nonnull GuildMemberRemoveEvent event) {
+        User user = event.getUser();
+        List<NewsChannel> inviteChannels = event.getGuild().getNewsChannels();
+        if (inviteChannels.isEmpty())
+            return;
+        Invite invite = inviteChannels.get(0).createInvite().complete();
+        user.openPrivateChannel().flatMap(channel -> channel.sendMessage(invite.getUrl())).queue();
         return;
     }
 
