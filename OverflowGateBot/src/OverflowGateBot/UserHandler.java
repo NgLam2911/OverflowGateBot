@@ -176,7 +176,7 @@ public class UserHandler {
                     }
                     member.modifyNickname(name).queue();
                 }
-            } else
+            } else if (!guildConfigHandler.isAdmin(member))
                 System.out.println("Cant interact with " + member.getEffectiveName());
         }
 

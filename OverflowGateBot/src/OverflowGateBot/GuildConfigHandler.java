@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -16,6 +18,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 import static OverflowGateBot.OverflowGateBot.*;
@@ -86,6 +89,35 @@ public class GuildConfigHandler {
             if (role.getId().equals(adminRole.get(member.getGuild().getId())))
                 return true;
         return false;
+    }
+
+    public HashMap<String, String> getGuildsName() {
+        HashMap<String, String> names = new HashMap<>();
+        for (String guildId : guildIds) {
+            if (guildId == null)
+                break;
+            Guild guild = messagesHandler.jda.getGuildById(guildId);
+            if (guild == null)
+                continue;
+            names.put(guild.getName(), guildId);
+        }
+        return names;
+    }
+
+    public HashMap<String, String> getChannelsName(@Nonnull String guildId) {
+        HashMap<String, String> names = new HashMap<>();
+        Guild guild = messagesHandler.jda.getGuildById(guildId);
+        if (guild == null) {
+            System.out.println("Not found guild " + guildId);
+            return names;
+        }
+
+        List<TextChannel> channels = guild.getTextChannels();
+        for (TextChannel channel : channels) {
+            names.put(channel.getName(), channel.getId());
+        }
+        return names;
+
     }
 
     public boolean inChannels(String channelId, String guildId, HashMap<String, List<ArchiveChannel>> channelIds) {

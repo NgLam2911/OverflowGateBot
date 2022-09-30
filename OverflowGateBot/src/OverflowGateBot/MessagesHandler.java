@@ -13,8 +13,6 @@ import net.dv8tion.jda.api.entities.Message.Attachment;
 import net.dv8tion.jda.api.events.message.*;
 import net.dv8tion.jda.api.hooks.*;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
@@ -45,8 +43,6 @@ public class MessagesHandler extends ListenerAdapter {
 
     public final Integer messageAliveTime = 30;
 
-    public List<Guild> guilds;
-
     public HashMap<String, TextChannel> serverChatChannel = new HashMap<String, TextChannel>();
 
     public MessagesHandler() {
@@ -67,54 +63,6 @@ public class MessagesHandler extends ListenerAdapter {
             jda.addEventListener(this);
 
             jda.getPresence().setActivity(Activity.of(ActivityType.PLAYING, " /help để bắt đầu"));
-
-            // Get all guilds and register slash commands
-            guilds = jda.getGuilds();
-
-            for (Guild guild : guilds) {
-
-                // Shar commands
-
-                guild.upsertCommand(Commands.slash("save", "Shar only")).queue();
-                guild.upsertCommand(Commands.slash("load", "Shar only")).queue();
-                guild.upsertCommand(Commands.slash("event", "Shar only").addOption(OptionType.STRING, "content", "Nội dung")).queue();
-
-                // Admin commands
-
-                // - Server status
-                guild.upsertCommand(Commands.slash("reloadserver", "Tải lại tất cả máy chủ (Admin only)")).queue();
-                guild.upsertCommand(Commands.slash("refreshserver", "Làm mới danh sách máy chủ (Admin only)")).queue();
-
-                // - Bot config
-
-                guild.upsertCommand(Commands.slash("setschematicchannel", "Đưa kênh này trở thành kênh bản thiết kế (Admin only)")).queue();
-                guild.upsertCommand(Commands.slash("setmapchannel", "Đưa kênh này trở thành kênh bản đồ (Admin only)")).queue();
-                guild.upsertCommand(Commands.slash("setuniversechannel", "Đưa kênh này trở thành kênh tin nhắn vũ trụ (Admin only)")).queue();
-                guild.upsertCommand(Commands.slash("setserverstatus", "Đưa kênh này trở thành kênh thông tin máy chủ (Admin only)")).queue();
-
-                guild.upsertCommand(Commands.slash("setadminrole", "Cài đặt vai trò admin cho máy chủ").addOption(OptionType.ROLE, "adminrole", "Vai trò admin", true)).queue();
-
-                // User commands
-
-                // - Mindustry embed
-
-                guild.upsertCommand(Commands.slash("postmap", "Chuyển tập tin bản đồ thành hình ảnh").addOption(OptionType.ATTACHMENT, "mapfile", "Tập tin map.msv", true)).queue();
-                guild.upsertCommand(Commands.slash("maplist", "In danh sách bản đồ")).queue();
-
-                // - User system
-
-                guild.upsertCommand(Commands.slash("info", "Thông tin của thành viên").addOption(OptionType.USER, "user", "Tên thành viên", false)).queue();
-                guild.upsertCommand(Commands.slash("leaderboard", "Hiển thị bảng xếp hạng lv")).queue();
-                guild.upsertCommand(Commands.slash("help", "Danh sách các lệnh")).queue();
-                guild.upsertCommand(Commands.slash("setnickname", "Đặt biệt danh").addOption(OptionType.STRING, "nickname", "Biệt danh muốn đặt", true).addOption(OptionType.USER, "user", "Tên người muốn đổi(Admin only")).queue();
-                guild.upsertCommand(Commands.slash("postschem", "Chuyển tập tin bản thiết kế thành hình ảnh").addOption(OptionType.ATTACHMENT, "schematicfile", "file to review", true)).queue();
-                guild.upsertCommand(Commands.slash("hidelv", "Ẩn level của bản thân").addOption(OptionType.BOOLEAN, "hide", "Ẩn", true)).queue();
-                guild.upsertCommand(Commands.slash("ping", "Ping một máy chủ thông qua ip").addOption(OptionType.STRING, "ip", "Ip của máy chủ", true)).queue();
-                guild.upsertCommand(Commands.slash("say", "Nói gì đó").addOption(OptionType.STRING, "content", "Nội dung", true)).queue();
-                guild.upsertCommand(Commands.slash("daily", "Điểm danh")).queue();
-
-                // -
-            }
 
             Log.info("Bot online.");
 
@@ -188,17 +136,6 @@ public class MessagesHandler extends ListenerAdapter {
         if (event.getMember().getUser().isBot())
             return;
         userHandler.setDisplayName(event.getEntity());
-    }
-
-    @Override
-    public void onSlashCommandInteraction(@Nonnull SlashCommandInteractionEvent event) {
-        System.out.println(getMessageSender(event) + ": used " + event.getName());
-
-        event.deferReply(true);
-        commandHandler.handleCommand(event);
-
-        event.getHook().deleteOriginal().queueAfter(messageAliveTime, TimeUnit.SECONDS);
-
     }
 
     @Override
