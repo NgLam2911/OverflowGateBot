@@ -3,6 +3,14 @@ package OverflowGateBot;
 
 import java.io.IOException;
 
+import OverflowGateBot.bot.CommandHandler;
+import OverflowGateBot.bot.GuildConfigHandler;
+import OverflowGateBot.bot.MessagesHandler;
+import OverflowGateBot.mindustry.ContentHandler;
+import OverflowGateBot.mindustry.ONet;
+import OverflowGateBot.mindustry.ServerStatus;
+import OverflowGateBot.user.UserHandler;
+
 public class OverflowGateBot {
     public final static int saveInterval = 5 * 60 * 1000;
 

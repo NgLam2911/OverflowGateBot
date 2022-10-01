@@ -1,4 +1,4 @@
-package OverflowGateBot;
+package OverflowGateBot.mindustry;
 
 import arc.*;
 import arc.files.*;
@@ -24,6 +24,9 @@ import mindustry.world.blocks.environment.*;
 import mindustry.world.blocks.legacy.*;
 
 import javax.imageio.*;
+
+import OverflowGateBot.OverflowGateBot;
+
 import java.awt.*;
 import java.awt.geom.*;
 import java.awt.image.*;

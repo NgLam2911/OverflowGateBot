@@ -1,4 +1,4 @@
-package OverflowGateBot;
+package OverflowGateBot.mindustry;
 
 
 import java.awt.Color;

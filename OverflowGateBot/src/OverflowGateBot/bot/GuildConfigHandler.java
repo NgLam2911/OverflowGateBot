@@ -1,4 +1,4 @@
-package OverflowGateBot;
+package OverflowGateBot.bot;
 
 
 import java.io.File;
@@ -12,8 +12,9 @@ import javax.annotation.Nonnull;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import OverflowGateBot.JSONHandler.JSONData;
-import OverflowGateBot.JSONHandler.JSONWriter;
+import OverflowGateBot.misc.JSONHandler;
+import OverflowGateBot.misc.JSONHandler.JSONData;
+import OverflowGateBot.misc.JSONHandler.JSONWriter;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
@@ -135,7 +136,7 @@ public class GuildConfigHandler {
         if (archiveChannel.data == null)
             return;
         String channelId = archiveChannel.readString("channelId");
-        if (channelId.isEmpty() || channelIds.equals("null"))
+        if (channelId.isEmpty())
             return;
         String lastMessageId = archiveChannel.readString("lastMessageId");
         channelIds.put(guildId, new ArchiveChannel(channelId, lastMessageId));
@@ -150,7 +151,7 @@ public class GuildConfigHandler {
 
     public void addToChannel(JSONData archiveChannel, String guildId, HashMap<String, List<ArchiveChannel>> channelIds) {
         String channelId = archiveChannel.readString("channelId");
-        if (channelId.isEmpty() || channelIds.equals("null"))
+        if (channelId.isEmpty())
             return;
         String lastMessageId = archiveChannel.readString("lastMessageId");
         addToChannel(channelId, lastMessageId, guildId, channelIds);

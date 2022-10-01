@@ -1,4 +1,4 @@
-package OverflowGateBot;
+package OverflowGateBot.misc;
 
 
 import java.io.BufferedReader;
@@ -76,7 +76,7 @@ public class JSONHandler {
 
 
     public class JSONData {
-        JSONObject data;
+        public JSONObject data;
 
         public JSONData() {
         }

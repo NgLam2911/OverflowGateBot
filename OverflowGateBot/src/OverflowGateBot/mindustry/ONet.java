@@ -1,4 +1,4 @@
-package OverflowGateBot;
+package OverflowGateBot.mindustry;
 
 import arc.util.*;
 import mindustry.net.*;

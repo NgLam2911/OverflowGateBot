@@ -1,4 +1,4 @@
-package OverflowGateBot;
+package OverflowGateBot.user;
 
 
 import java.io.DataInputStream;
@@ -7,6 +7,7 @@ import java.text.SimpleDateFormat;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
@@ -17,8 +18,9 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
-import OverflowGateBot.JSONHandler.JSONData;
-import OverflowGateBot.JSONHandler.JSONWriter;
+import OverflowGateBot.misc.JSONHandler;
+import OverflowGateBot.misc.JSONHandler.JSONData;
+import OverflowGateBot.misc.JSONHandler.JSONWriter;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -47,6 +49,11 @@ public class UserHandler {
     DataInputStream data;
 
     Clock clock = Clock.systemDefaultZone();
+
+    Comparator<DiscordUser> sortByPoint = (o1, o2) -> o2.getTotalPoint().compareTo(o1.getTotalPoint());
+    Comparator<DiscordUser> sortByMoney = (o1, o2) -> o2.money.compareTo(o1.money);
+
+    HashMap<String, Comparator<DiscordUser>> sorter = new HashMap<>();
 
     public class DiscordUser {
 
@@ -189,18 +196,17 @@ public class UserHandler {
         }
 
         public int getPosition() {
-            sortLeaderBoard();
+            board.sort((o1, o2) -> o2.getTotalPoint().compareTo(o1.getTotalPoint()));
             return board.lastIndexOf(this) + 1;
         }
     }
 
     public UserHandler() {
+        sorter.put("Money", sortByMoney);
+        sorter.put("Level", sortByPoint);
+
         try {
             load();
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        }
-        try {
             save();
         } catch (IOException e) {
             e.printStackTrace();
@@ -476,21 +482,9 @@ public class UserHandler {
         return builder;
     }
 
-    public void sortLeaderBoard() {
-        for (int i = 0; i < board.size() - 1; i++) {
-            for (int j = i + 1; j < board.size(); j++) {
-                DiscordUser f = board.get(i);
-                DiscordUser e = board.get(j);
-                if (f.getTotalPoint() < e.getTotalPoint()) {
-                    board.set(i, e);
-                    board.set(j, f);
-                }
-            }
-        }
-    }
 
     public EmbedBuilder getLeaderBoard() {
-        sortLeaderBoard();
+        board.sort((o1, o2) -> o2.getTotalPoint().compareTo(o1.getTotalPoint()));
         EmbedBuilder builder = new EmbedBuilder();
         builder.setTitle("Bảng xếp hạng");
         for (int i = 0; i < (board.size() < 10 ? board.size() : 10); i++) {
