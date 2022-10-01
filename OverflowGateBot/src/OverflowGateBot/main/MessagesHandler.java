@@ -4,8 +4,10 @@ package OverflowGateBot.main;
 import arc.files.*;
 import arc.util.*;
 import arc.util.io.Streams;
+
 import mindustry.*;
 import mindustry.game.*;
+
 import net.dv8tion.jda.api.*;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.Activity.ActivityType;
@@ -118,10 +120,23 @@ public class MessagesHandler extends ListenerAdapter {
             return;
         }
 
-        // Update exp on message sent
-        userHandler.messageSent(message);
+        // Log member message/file/image url to terminal
+        if (!message.getContentRaw().isEmpty())
+            System.out.println(getMessageSender(message) + ": " + message.getContentDisplay());
+        else if (!message.getAttachments().isEmpty())
+            message.getAttachments().forEach(attachment -> {
+                System.out.println(getMessageSender(message) + ": " + attachment.getUrl());
+            });
 
-        System.out.println(getMessageSender(message) + ": " + message.getContentRaw());
+        // Delete in channel that it should not be
+        if (inChannels(message.getGuild(), message.getChannel(), guildConfigHandler.schematicChannel) || inChannels(message.getGuild(), message.getChannel(), guildConfigHandler.mapChannel)) {
+            replyTempMessage(message, "Vui lòng không gửi tin nhắn vào kênh này!", 30);
+            message.delete().queue();
+        }
+
+        // Update exp on message sent
+        userHandler.onMessage(message);
+
 
         // Send message to all needed channels
         if (!message.getContentRaw().isBlank()) {
@@ -135,6 +150,7 @@ public class MessagesHandler extends ListenerAdapter {
 
     @Override
     public void onGuildMemberUpdateNickname(@Nonnull GuildMemberUpdateNicknameEvent event) {
+        // You can't change your nickname XD
         if (event.getMember().getUser().isBot())
             return;
         userHandler.setDisplayName(event.getEntity());
@@ -142,6 +158,7 @@ public class MessagesHandler extends ListenerAdapter {
 
     @Override
     public void onGuildMemberRemove(@Nonnull GuildMemberRemoveEvent event) {
+        // Send invite link to member who left the guild
         User user = event.getUser();
         List<NewsChannel> inviteChannels = event.getGuild().getNewsChannels();
         if (inviteChannels.isEmpty())
@@ -195,6 +212,7 @@ public class MessagesHandler extends ListenerAdapter {
         return false;
     }
 
+    // Its bad lol
     public String capitalize(String text) {
         return Character.toUpperCase(text.charAt(0)) + text.substring(1);
     }
@@ -226,7 +244,7 @@ public class MessagesHandler extends ListenerAdapter {
             ImageIO.write(map.image, "png", imageFile.file());
 
             EmbedBuilder builder = new EmbedBuilder().setImage("attachment://" + imageFile.name()).setAuthor(member.getEffectiveName(), member.getEffectiveAvatarUrl(), member.getEffectiveAvatarUrl()).setTitle(map.name == null ? attachment.getFileName().replace(".msav", "") : map.name);
-
+            builder.addField("Size: ", map.image.getWidth() + "x" + map.image.getHeight(), false);
             if (map.description != null)
                 builder.setFooter(map.description);
 

@@ -25,7 +25,6 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.TextChannel;
 
 import static OverflowGateBot.OverflowGateBot.*;
 
@@ -57,11 +56,18 @@ public class UserHandler {
         }
     }
 
-    public int getPosition(DiscordUser user) {
-        board.sort((o1, o2) -> o2.getTotalPoint().compareTo(o1.getTotalPoint()));
+
+    // Get user rank base on <orderBy>
+    public int getPosition(DiscordUser user, String orderBy) {
+        Comparator<DiscordUser> comparator = sorter.get(orderBy);
+        if (comparator == null) {
+            comparator = sortByPoint;
+        }
+        board.sort(comparator);
         return board.lastIndexOf(user) + 1;
     }
 
+    // Get DiscordUser from Member, return null if not found
     public DiscordUser getUser(Member member) {
         if (users.containsKey(member.getGuild().getId()))
             return users.get(member.getGuild().getId()).get(member.getId());
@@ -86,12 +92,18 @@ public class UserHandler {
                     board.add(user);
                 }
             } else {
+                // User already exists, return user
+                // Add user to leaderboard
+                if (!board.contains(user)) {
+                    board.add(user);
+                }
                 return users.get(guildId).get(id);
             }
         } else {
+            // Guild and user not exists, add to database
             users.put(guildId, new HashMap<>());
             users.get(guildId).put(id, user);
-
+            // Add user to leaderboard
             if (!board.contains(user)) {
                 board.add(user);
             }
@@ -101,11 +113,13 @@ public class UserHandler {
 
     }
 
+    // Get date for daily command
     public String getDate() {
         return (new SimpleDateFormat("dd-MM-yyyy").format(Calendar.getInstance().getTime())).toString();
     }
 
-    public void messageSent(Message message) {
+    // Update point, money, level on massage sent
+    public void onMessage(Message message) {
         Member member = message.getMember();
         if (member == null)
             return;
@@ -121,6 +135,7 @@ public class UserHandler {
         }
     }
 
+    // Add money for member
     public void addMoney(Member member, int money) {
         DiscordUser user = getUser(member);
         if (user == null) {
@@ -130,6 +145,7 @@ public class UserHandler {
         user.addMoney(money);
     }
 
+    // Set name to [Lv<Level>] <Nickname>
     public void setDisplayName(Member member) {
         DiscordUser user = getUser(member);
         if (user != null)
@@ -137,8 +153,7 @@ public class UserHandler {
 
     }
 
-    // Commands
-
+    // Set user nickname and save it
     public void setNickName(Member member, String nickname) {
         DiscordUser user = getUser(member);
         if (user == null)
@@ -147,6 +162,7 @@ public class UserHandler {
         setDisplayName(member);
     }
 
+    // Hide member level, affect setDisplayName
     public void hidelv(Member member, Boolean hide) {
         DiscordUser user = getUser(member);
         if (user == null)
@@ -155,6 +171,7 @@ public class UserHandler {
         setDisplayName(member);
     }
 
+    // Get daily reward
     public int getDaily(Member member) {
         DiscordUser user = getUser(member);
         if (user == null)
@@ -167,7 +184,8 @@ public class UserHandler {
         return money;
     }
 
-    public EmbedBuilder getInfo(Member member, TextChannel channel) {
+    // Display roles, levels, points, and money
+    public EmbedBuilder getUserInfo(Member member) {
         DiscordUser user = getUser(member);
 
         EmbedBuilder builder = new EmbedBuilder();
@@ -179,24 +197,38 @@ public class UserHandler {
         builder.setAuthor(user.name, null, member.getEffectiveAvatarUrl());
         List<Role> roles = member.getRoles();
         if (roles.size() != 0) {
-            String roleList = "";
+            List<String> roleList = new ArrayList<String>();
             for (Role role : roles) {
-                roleList += ", " + role.getName();
+                roleList.add(role.getName());
             }
-            roleList = roleList.substring(1);
-            builder.addField("**Vai trò: **", roleList, false);
+            builder.addField("**Vai trò: **", roleList.toString(), false);
         }
 
         builder.addField("**Cấp: **", user.level.toString(), false);
         builder.addField("**Kinh nghiệm: **", user.point + " \\ " + user.getExpCap(), false);
         builder.addField("**Tổng kinh nghiệm: **", user.getTotalPoint().toString(), false);
         builder.addField("**Điểm: **", user.money + " MM", false);
-        builder.addField("**Hạng: **", getPosition(user) + " \\ " + board.size(), false);
 
         return builder;
     }
 
+    public String getUserStat(DiscordUser user, String stat) {
+        Guild guild = messagesHandler.jda.getGuildById(user.guildId);
+        String guildName = "Unknown guild";
+        if (guild != null)
+            guildName = guild.getName();
 
+        String displayedStat = "Cấp: " + user.level + "\nKinh nghiệm: " + user.getTotalPoint();
+        switch (stat) {
+        case "Money":
+            displayedStat = "Điểm: " + user.money;
+            break;
+        }
+
+        return "Tên: " + (user.getName()) + "\n" + displayedStat + "\nMáy chủ: " + guildName;
+    }
+
+    // Leaderboard base on <orderBy>
     public EmbedBuilder getLeaderBoard(String orderBy) {
         Comparator<DiscordUser> comparator = sorter.get(orderBy);
         if (comparator == null) {
@@ -209,16 +241,13 @@ public class UserHandler {
         builder.setTitle("Bảng xếp hạng");
         for (int i = 0; i < (board.size() < 10 ? board.size() : 10); i++) {
             DiscordUser user = board.get(i);
-            Guild guild = messagesHandler.jda.getGuildById(user.guildId);
-            if (guild == null)
-                builder.addField("Hạng " + (i + 1), (user.getName()) + ":\nKinh nghiệm: " + user.getTotalPoint() + "\nCấp: " + user.level, false);
-            else
-                builder.addField("Hạng " + (i + 1), "Tên: " + (user.getName()) + "\nKinh nghiệm: " + user.getTotalPoint() + "\nCấp: " + user.level + "\nMáy chủ: " + guild.getName(), false);
+            builder.addField("Hạng " + (i + 1), getUserStat(user, orderBy), false);
         }
+
         return builder;
     }
 
-
+    // TODO Database
     public void load() throws IOException {
         try {
 
@@ -312,7 +341,7 @@ public class UserHandler {
     }
 
     // Save and load
-
+    // TODO Database
     public void save() throws IOException {
 
         try {
@@ -329,6 +358,7 @@ public class UserHandler {
         }
     }
 
+    // TODO Database
     public void saveDailyData() throws IOException {
         try {
             JSONHandler jsonHandler = new JSONHandler();
@@ -348,6 +378,7 @@ public class UserHandler {
         }
     }
 
+    // TODO Database
     public void saveUserData() throws IOException {
         JSONHandler jsonHandler = new JSONHandler();
         JSONWriter writer = jsonHandler.new JSONWriter(userFilePath);

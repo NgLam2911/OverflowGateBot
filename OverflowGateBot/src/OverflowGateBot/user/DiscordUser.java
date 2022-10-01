@@ -36,6 +36,7 @@ public class DiscordUser {
         this.money = money;
     }
 
+    // To json string, use to store data in json file(Temporary)
     public String toString() {
         TreeMap<String, String> map = new TreeMap<>();
         map.put("GUILDID", guildId);
@@ -48,10 +49,12 @@ public class DiscordUser {
         return new JSONObject(map).toJSONString();
     }
 
+    // Get level cap
     public int getExpCap() {
-        return level * level + 1;
+        return level * level;
     }
 
+    // Add point for user
     public boolean addPoint(int p) {
         boolean lvUp = false;
         this.point += p;
@@ -64,10 +67,12 @@ public class DiscordUser {
         return lvUp;
     }
 
+    // Add money :v
     public void addMoney(int p) {
         this.money += p;
     }
 
+    // Give player member role if all requirements satisfied
     public void checkMemberRole() {
         if (level >= 3) {
             Guild guild = messagesHandler.jda.getGuildById(guildId);
@@ -90,6 +95,7 @@ public class DiscordUser {
         }
     }
 
+    // Get nickname
     public String getName() {
         if (this.nickname.length() == 0) {
             return this.name;
@@ -97,6 +103,7 @@ public class DiscordUser {
         return this.nickname;
     }
 
+    // Name with [Lv<Level>] <Nickname>
     public String getDisplayName() {
         Guild guild = messagesHandler.jda.getGuildById(guildId);
         if (guild == null) {
@@ -115,6 +122,7 @@ public class DiscordUser {
         return "[Lv" + level + "] " + (getName().length() == 0 ? user.getName() : getName());
     }
 
+    // Change user nickname to [Lv<Level>] <Nickname>
     public void setDisplayName() {
         Guild guild = messagesHandler.jda.getGuildById(guildId);
         if (guild == null) {
@@ -145,10 +153,12 @@ public class DiscordUser {
             System.out.println("Cant interact with " + member.getEffectiveName());
     }
 
+    // Set nickname in database
     public void setNickname(String nickname) {
         this.nickname = nickname;
     }
 
+    // Math!!!
     public Integer getTotalPoint() {
         return (int) ((level + 1) * (2 * level + 1) * level / 6) + point;
     }

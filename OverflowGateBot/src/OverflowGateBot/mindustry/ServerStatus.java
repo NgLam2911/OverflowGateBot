@@ -112,13 +112,6 @@ public class ServerStatus {
         new File("cache/data/").mkdir();
         try {
             load();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        try {
             save();
         } catch (IOException e) {
             e.printStackTrace();
@@ -213,7 +206,7 @@ public class ServerStatus {
         return 0;
     }
 
-    public EmbedBuilder survivalMapLeadther() {
+    public EmbedBuilder survivalMapLeaderboard() {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setTitle("**Danh sách bản đồ:**");
         StringBuilder field = new StringBuilder();
@@ -226,6 +219,7 @@ public class ServerStatus {
         return builder;
     }
 
+    // TODO Database
     public void save() throws IOException {
         JSONObject map = new JSONObject(survivalMap);
 
@@ -238,6 +232,7 @@ public class ServerStatus {
         }
     }
 
+    // TODO Database
     public void load() throws FileNotFoundException, IOException {
         new File("cache/").mkdir();
         JSONParser jsonParser = new JSONParser();

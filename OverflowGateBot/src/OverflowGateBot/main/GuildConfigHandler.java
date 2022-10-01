@@ -188,6 +188,7 @@ public class GuildConfigHandler {
         roleIds.put(guildId, roleId);
     }
 
+    // TODO Database
     public void load() throws IOException {
         for (Guild guild : messagesHandler.jda.getGuilds()) {
             if (!guildIds.contains(guild.getId()))
@@ -223,6 +224,7 @@ public class GuildConfigHandler {
         }
     }
 
+    // TODO Database
     public void save() {
         try {
             JSONHandler handler = new JSONHandler();

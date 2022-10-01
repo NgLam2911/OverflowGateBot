@@ -28,6 +28,7 @@ public class OverflowGateBot {
     public static ServerStatus serverStatus = new ServerStatus();
 
     public static void main(String[] args) {
+        // TODO Database
         onet.run(0, saveInterval, () -> {
             try {
                 userHandler.save();
