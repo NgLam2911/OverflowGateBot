@@ -1,4 +1,4 @@
-package OverflowGateBot.bot;
+package OverflowGateBot.main;
 
 
 import arc.files.*;
@@ -24,7 +24,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import javax.annotation.Nonnull;
 import javax.imageio.*;
 
-import OverflowGateBot.bot.GuildConfigHandler.ArchiveChannel;
+import OverflowGateBot.main.GuildConfigHandler.ArchiveChannel;
 import OverflowGateBot.mindustry.ContentHandler;
 import OverflowGateBot.misc.JSONHandler;
 import OverflowGateBot.misc.JSONHandler.JSONData;

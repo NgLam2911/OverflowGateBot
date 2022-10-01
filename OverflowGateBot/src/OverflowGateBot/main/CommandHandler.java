@@ -1,4 +1,4 @@
-package OverflowGateBot.bot;
+package OverflowGateBot.main;
 
 
 import org.jetbrains.annotations.NotNull;

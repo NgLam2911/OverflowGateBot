@@ -3,9 +3,9 @@ package OverflowGateBot;
 
 import java.io.IOException;
 
-import OverflowGateBot.bot.CommandHandler;
-import OverflowGateBot.bot.GuildConfigHandler;
-import OverflowGateBot.bot.MessagesHandler;
+import OverflowGateBot.main.CommandHandler;
+import OverflowGateBot.main.GuildConfigHandler;
+import OverflowGateBot.main.MessagesHandler;
 import OverflowGateBot.mindustry.ContentHandler;
 import OverflowGateBot.mindustry.ONet;
 import OverflowGateBot.mindustry.ServerStatus;
