@@ -43,8 +43,7 @@ public class UserHandler {
     Comparator<DiscordUser> sortByPoint = (o1, o2) -> o2.getTotalPoint().compareTo(o1.getTotalPoint());
     Comparator<DiscordUser> sortByMoney = (o1, o2) -> o2.money.compareTo(o1.money);
 
-    HashMap<String, Comparator<DiscordUser>> sorter = new HashMap<>();
-
+    public HashMap<String, Comparator<DiscordUser>> sorter = new HashMap<>();
 
     public UserHandler() {
         sorter.put("Money", sortByMoney);
@@ -105,6 +104,120 @@ public class UserHandler {
     public String getDate() {
         return (new SimpleDateFormat("dd-MM-yyyy").format(Calendar.getInstance().getTime())).toString();
     }
+
+    public void messageSent(Message message) {
+        Member member = message.getMember();
+        if (member == null)
+            return;
+        DiscordUser user = getUser(member);
+        if (user == null) {
+            System.out.println("User " + member.getEffectiveName() + " not found");
+            addNewMember(member);
+            return;
+        }
+        user.addMoney(1);
+        if (user.addPoint(1)) {
+            setDisplayName(member);
+        }
+    }
+
+    public void addMoney(Member member, int money) {
+        DiscordUser user = getUser(member);
+        if (user == null) {
+            addNewMember(member);
+            return;
+        }
+        user.addMoney(money);
+    }
+
+    public void setDisplayName(Member member) {
+        DiscordUser user = getUser(member);
+        if (user != null)
+            user.setDisplayName();
+
+    }
+
+    // Commands
+
+    public void setNickName(Member member, String nickname) {
+        DiscordUser user = getUser(member);
+        if (user == null)
+            return;
+        user.setNickname(nickname);
+        setDisplayName(member);
+    }
+
+    public void hidelv(Member member, Boolean hide) {
+        DiscordUser user = getUser(member);
+        if (user == null)
+            return;
+        user.hideLv = hide;
+        setDisplayName(member);
+    }
+
+    public int getDaily(Member member) {
+        DiscordUser user = getUser(member);
+        if (user == null)
+            return -1;
+        if (daily.contains(user.id))
+            return -1;
+        daily.add(user.id);
+        int money = user.getExpCap();
+        user.addMoney(money);
+        return money;
+    }
+
+    public EmbedBuilder getInfo(Member member, TextChannel channel) {
+        DiscordUser user = getUser(member);
+
+        EmbedBuilder builder = new EmbedBuilder();
+        if (user == null) {
+            builder.setDescription("Không tìm thấy");
+            return builder;
+        }
+
+        builder.setAuthor(user.name, null, member.getEffectiveAvatarUrl());
+        List<Role> roles = member.getRoles();
+        if (roles.size() != 0) {
+            String roleList = "";
+            for (Role role : roles) {
+                roleList += ", " + role.getName();
+            }
+            roleList = roleList.substring(1);
+            builder.addField("**Vai trò: **", roleList, false);
+        }
+
+        builder.addField("**Cấp: **", user.level.toString(), false);
+        builder.addField("**Kinh nghiệm: **", user.point + " \\ " + user.getExpCap(), false);
+        builder.addField("**Tổng kinh nghiệm: **", user.getTotalPoint().toString(), false);
+        builder.addField("**Điểm: **", user.money + " MM", false);
+        builder.addField("**Hạng: **", getPosition(user) + " \\ " + board.size(), false);
+
+        return builder;
+    }
+
+
+    public EmbedBuilder getLeaderBoard(String orderBy) {
+        Comparator<DiscordUser> comparator = sorter.get(orderBy);
+        if (comparator == null) {
+            comparator = sortByPoint;
+        }
+        // Sort the leaderboard by <orderBy>, default is sort by point
+        board.sort(comparator);
+        // Build embed
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setTitle("Bảng xếp hạng");
+        for (int i = 0; i < (board.size() < 10 ? board.size() : 10); i++) {
+            DiscordUser user = board.get(i);
+            Guild guild = messagesHandler.jda.getGuildById(user.guildId);
+            if (guild == null)
+                builder.addField("Hạng " + (i + 1), (user.getName()) + ":\nKinh nghiệm: " + user.getTotalPoint() + "\nCấp: " + user.level, false);
+            else
+                builder.addField("Hạng " + (i + 1), "Tên: " + (user.getName()) + "\nKinh nghiệm: " + user.getTotalPoint() + "\nCấp: " + user.level + "\nMáy chủ: " + guild.getName(), false);
+        }
+        return builder;
+    }
+
 
     public void load() throws IOException {
         try {
@@ -198,6 +311,8 @@ public class UserHandler {
         }
     }
 
+    // Save and load
+
     public void save() throws IOException {
 
         try {
@@ -240,111 +355,5 @@ public class UserHandler {
             writer.append(gid, new JSONObject(users.get(gid)).toJSONString());
         }
         writer.write();
-    }
-
-    public void messageSent(Message message) {
-        Member member = message.getMember();
-        if (member == null)
-            return;
-        DiscordUser user = getUser(member);
-        if (user == null) {
-            System.out.println("User " + member.getEffectiveName() + " not found");
-            addNewMember(member);
-            return;
-        }
-        user.addMoney(1);
-        if (user.addPoint(1)) {
-            setDisplayName(member);
-        }
-    }
-
-    public void addMoney(Member member, int money) {
-        DiscordUser user = getUser(member);
-        if (user == null) {
-            addNewMember(member);
-            return;
-        }
-        user.addMoney(money);
-    }
-
-    public void setDisplayName(Member member) {
-        DiscordUser user = getUser(member);
-        if (user != null)
-            user.setDisplayName();
-
-    }
-
-    public void setNickName(Member member, String nickname) {
-        DiscordUser user = getUser(member);
-        if (user == null)
-            return;
-        user.setNickname(nickname);
-        setDisplayName(member);
-    }
-
-    public void hidelv(Member member, Boolean hide) {
-        DiscordUser user = getUser(member);
-        if (user == null)
-            return;
-        user.hideLv = hide;
-        setDisplayName(member);
-    }
-
-    public int getDaily(Member member) {
-        DiscordUser user = getUser(member);
-        if (user == null)
-            return -1;
-        if (daily.contains(user.id))
-            return -1;
-        daily.add(user.id);
-        int money = user.getExpCap();
-        user.addMoney(money);
-        return money;
-    }
-
-    public EmbedBuilder getInfo(Member member, TextChannel channel) {
-        DiscordUser user = getUser(member);
-
-        EmbedBuilder builder = new EmbedBuilder();
-        if (user == null) {
-            builder.setDescription("Không tìm thấy");
-            return builder;
-        }
-
-
-        builder.setAuthor(user.name, null, member.getEffectiveAvatarUrl());
-        List<Role> roles = member.getRoles();
-        if (roles.size() != 0) {
-            String r = "";
-            for (Role rn : roles) {
-                r += ", " + rn.getName();
-            }
-            r = r.substring(1);
-            builder.addField("**Vai trò: **", r, false);
-        }
-
-        builder.addField("**Cấp: **", user.level.toString(), false);
-        builder.addField("**Kinh nghiệm: **", user.point + " \\ " + user.getExpCap(), false);
-        builder.addField("**Tổng kinh nghiệm: **", user.getTotalPoint().toString(), false);
-        builder.addField("**Điểm: **", user.money + " MM", false);
-        builder.addField("**Hạng: **", getPosition(user) + " \\ " + board.size(), false);
-
-        return builder;
-    }
-
-
-    public EmbedBuilder getLeaderBoard() {
-        board.sort((o1, o2) -> o2.getTotalPoint().compareTo(o1.getTotalPoint()));
-        EmbedBuilder builder = new EmbedBuilder();
-        builder.setTitle("Bảng xếp hạng");
-        for (int i = 0; i < (board.size() < 10 ? board.size() : 10); i++) {
-            DiscordUser user = board.get(i);
-            Guild guild = messagesHandler.jda.getGuildById(user.guildId);
-            if (guild == null)
-                builder.addField("Hạng " + (i + 1), (user.getName()) + ":\nKinh nghiệm: " + user.getTotalPoint() + "\nCấp: " + user.level, false);
-            else
-                builder.addField("Hạng " + (i + 1), "Tên: " + (user.getName()) + "\nKinh nghiệm: " + user.getTotalPoint() + "\nCấp: " + user.level + "\nMáy chủ: " + guild.getName(), false);
-        }
-        return builder;
     }
 }

@@ -73,7 +73,7 @@ public class CommandHandler extends ListenerAdapter {
             // - User system
 
             guild.upsertCommand(Commands.slash("info", "Thông tin của thành viên").addOption(OptionType.USER, "user", "Tên thành viên", false)).queue();
-            guild.upsertCommand(Commands.slash("leaderboard", "Hiển thị bảng xếp hạng lv")).queue();
+            guild.upsertCommand(Commands.slash("leaderboard", "Hiển thị bảng xếp hạng").addOption(OptionType.STRING, "orderby", "Tên bảng xếp hạng", false, true)).queue();
             guild.upsertCommand(Commands.slash("help", "Danh sách các lệnh")).queue();
             guild.upsertCommand(Commands.slash("setnickname", "Đặt biệt danh").addOption(OptionType.STRING, "nickname", "Biệt danh muốn đặt", true).addOption(OptionType.USER, "user", "Tên người muốn đổi(Admin only")).queue();
             guild.upsertCommand(Commands.slash("postschem", "Chuyển tập tin bản thiết kế thành hình ảnh").addOption(OptionType.ATTACHMENT, "schematicfile", "file to review", true)).queue();
@@ -122,6 +122,10 @@ public class CommandHandler extends ListenerAdapter {
                         sendAutoComplete(event, guildConfigHandler.getChannelsName(guildId).keySet());
                     }
                 }
+            }
+        } else if (command.equals("leaderboard")) {
+            if (focus.equals("orderby")) {
+                sendAutoComplete(event, userHandler.sorter.keySet());
             }
         }
     }
@@ -307,7 +311,13 @@ public class CommandHandler extends ListenerAdapter {
 
             // - Display top user in all servers
         } else if (command.equals("leaderboard")) {
-            replyEmbeds(event, userHandler.getLeaderBoard(), 30);
+            OptionMapping orderOption = event.getOption("orderby");
+            String orderBy;
+            if (orderOption == null)
+                orderBy = "Level";
+            else
+                orderBy = orderOption.getAsString();
+            replyEmbeds(event, userHandler.getLeaderBoard(orderBy), 30);
 
             // - Help command
         } else if (command.equals("help")) {
