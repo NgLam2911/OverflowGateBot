@@ -46,7 +46,6 @@ public class CommandHandler extends ListenerAdapter {
     }
 
     void registerCommand(Guild guild) {
-        unregisterCommand(guild);
         // Shar commands
         guild.upsertCommand(Commands.slash("shar", "Shar only").addSubcommands(//
                 new SubcommandData("save", "Shar only"), //
