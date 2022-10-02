@@ -45,15 +45,6 @@ public class CommandHandler extends ListenerAdapter {
         jda.upsertCommand(Commands.slash("unregisterguild", "Shar only")).queue();
     }
 
-
-    void unregisterCommand(Guild guild) {
-        guild.retrieveCommands().queue(commands -> {
-            for (Command command : commands) {
-                command.delete().queue();
-            }
-        });
-    }
-
     void registerCommand(Guild guild) {
         unregisterCommand(guild);
         // Shar commands
@@ -111,6 +102,14 @@ public class CommandHandler extends ListenerAdapter {
                 new SubcommandData("transferpoint", "Chuyển điểm (tiền) của bản thân sang người khác").addOption(OptionType.USER, "user", "Người muốn chuyển", true).addOption(OptionType.INTEGER, "point", "Số điểm muốn chuyển", true), //
                 new SubcommandData("daily", "Điểm danh"))//
         ).queue();
+    }
+
+    void unregisterCommand(Guild guild) {
+        guild.retrieveCommands().queue(commands -> {
+            for (Command command : commands) {
+                command.delete().queue();
+            }
+        });
     }
 
     @Override
