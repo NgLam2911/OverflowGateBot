@@ -107,8 +107,8 @@ public class CommandHandler extends ListenerAdapter {
                 new SubcommandData("leaderboard", "Hiển thị bảng xếp hạng").addOption(OptionType.STRING, "orderby", "Tên bảng xếp hạng", false, true), //
                 new SubcommandData("setnickname", "Đặt biệt danh").addOption(OptionType.STRING, "nickname", "Biệt danh muốn đặt", true).addOption(OptionType.USER, "user", "Tên người muốn đổi(Admin only"), //
                 new SubcommandData("hidelv", "Ẩn level của bản thân").addOption(OptionType.BOOLEAN, "hide", "Ẩn", true), //
-                new SubcommandData("transferpvppoint", "Chuyển điểm pvp của bản thân sang người khác").addOption(OptionType.USER, "user", "Người muốn chuyển").addOption(OptionType.INTEGER, "point", "Số điểm muốn chuyển"), //
-                new SubcommandData("transferpoint", "Chuyển điểm (tiền) của bản thân sang người khác").addOption(OptionType.USER, "user", "Người muốn chuyển").addOption(OptionType.INTEGER, "point", "Số điểm muốn chuyển"), //
+                new SubcommandData("transferpvppoint", "Chuyển điểm pvp của bản thân sang người khác").addOption(OptionType.USER, "user", "Người muốn chuyển", true).addOption(OptionType.INTEGER, "point", "Số điểm muốn chuyển", true), //
+                new SubcommandData("transferpoint", "Chuyển điểm (tiền) của bản thân sang người khác").addOption(OptionType.USER, "user", "Người muốn chuyển", true).addOption(OptionType.INTEGER, "point", "Số điểm muốn chuyển", true), //
                 new SubcommandData("daily", "Điểm danh"))//
         ).queue();
     }
@@ -257,9 +257,9 @@ public class CommandHandler extends ListenerAdapter {
             guildConfigHandler.addGuild(guild.getId());
             userHandler.loadGuild(guild.getId());
             // Remove all commands from guild
-            unregisterCommand(event.getGuild());
+            registerCommand(event.getGuild());
             guildConfigHandler.save();
-            reply(event, "Đã gỡ duyệt máy chủ", 30);
+            reply(event, "Đã duyệt máy chủ", 30);
         }
 
         if (command.equals("unregisterguild")) {
@@ -273,7 +273,8 @@ public class CommandHandler extends ListenerAdapter {
             guildConfigHandler.guildIds.remove(guild.getId());
             // Add all command to guild
             unregisterCommand(event.getGuild());
-            reply(event, "Đã duyệt máy chủ", 30);
+            guildConfigHandler.save();
+            reply(event, "Đã gỡ duyệt máy chủ", 30);
         }
 
         // Shar commands

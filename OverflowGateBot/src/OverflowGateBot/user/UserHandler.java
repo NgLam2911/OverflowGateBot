@@ -251,7 +251,7 @@ public class UserHandler {
             displayedStat = "Điểm: " + user.money;
             break;
         case "PVPPoint":
-            displayedStat = "Điểm PVP:" + user.pvpPoint;
+            displayedStat = "Điểm PVP: " + user.pvpPoint;
             break;
         }
 
