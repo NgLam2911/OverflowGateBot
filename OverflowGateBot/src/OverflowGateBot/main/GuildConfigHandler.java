@@ -92,6 +92,13 @@ public class GuildConfigHandler {
         return false;
     }
 
+    public void addGuild(String guildId) {
+        if (guildIds.contains(guildId))
+            return;
+        guildIds.add(guildId);
+        save();
+    }
+
     public HashMap<String, String> getGuildsName() {
         HashMap<String, String> names = new HashMap<>();
         for (String guildId : guildIds) {

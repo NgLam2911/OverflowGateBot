@@ -39,50 +39,82 @@ public class CommandHandler extends ListenerAdapter {
     public CommandHandler() {
 
         jda.addEventListener(this);
+        jda.upsertCommand(Commands.slash("registerguild", "Shar only")).queue();
+    }
+
+
+    // Reset all commands
+    void resetCommand(Guild guild) {
+        // Delete all commands
+        unregisterCommand(guild);
+        // Register it
+        registerCommand(guild);
+    }
+
+    void unregisterCommand(Guild guild) {
+        guild.retrieveCommands().queue(commands -> {
+            for (Command command : commands) {
+                command.delete().queue();
+            }
+        });
+    }
+
+    void registerCommand(Guild guild) {
 
         // Shar commands
-        jda.upsertCommand(Commands.slash("shar", "Shar only").addSubcommands(//
+        guild.upsertCommand(Commands.slash("shar", "Shar only").addSubcommands(//
                 new SubcommandData("save", "Shar only"), //
                 new SubcommandData("load", "Shar only"), //
+                new SubcommandData("resetcommand", "Shar only"), //
                 new SubcommandData("event", "Shar only").addOption(OptionType.STRING, "content", "Nội dung"), //
-                new SubcommandData("say", "Nói gì đó").addOption(OptionType.STRING, "content", "Nội dung", true).addOption(OptionType.STRING, "guild", "Máy chủ muốn gửi", false, true).addOption(OptionType.STRING, "channel", "Kênh muốn gửi", false, true))//
+                new SubcommandData("say", "Shar only").addOption(OptionType.STRING, "content", "Nội dung", true).addOption(OptionType.STRING, "guild", "Máy chủ muốn gửi", false, true).addOption(OptionType.STRING, "channel", "Kênh muốn gửi", false, true))//
         ).queue();
 
         // Admin commands
 
         // - Server status
-        jda.upsertCommand(Commands.slash("reloadserver", "Tải lại tất cả máy chủ (Admin only)")).queue();
-        jda.upsertCommand(Commands.slash("refreshserver", "Làm mới danh sách máy chủ (Admin only)")).queue();
+        guild.upsertCommand(Commands.slash("admin", "Lệnh dành cho admin").addSubcommands(//
+                new SubcommandData("reloadserver", "Tải lại tất cả máy chủ (Admin only)"), //
+                new SubcommandData("refreshserver", "Làm mới danh sách máy chủ (Admin only)"), //
 
-        // - Bot config
+                // - Guild config
 
-        jda.upsertCommand(Commands.slash("setschematicchannel", "Đưa kênh này trở thành kênh bản thiết kế (Admin only)")).queue();
-        jda.upsertCommand(Commands.slash("setmapchannel", "Đưa kênh này trở thành kênh bản đồ (Admin only)")).queue();
-        jda.upsertCommand(Commands.slash("setuniversechannel", "Đưa kênh này trở thành kênh tin nhắn vũ trụ (Admin only)")).queue();
-        jda.upsertCommand(Commands.slash("setserverstatus", "Đưa kênh này trở thành kênh thông tin máy chủ (Admin only)")).queue();
-
-        jda.upsertCommand(Commands.slash("setadminrole", "Cài đặt vai trò admin cho máy chủ").addOption(OptionType.ROLE, "adminrole", "Vai trò admin", true)).queue();
+                new SubcommandData("setschematicchannel", "Đưa kênh này trở thành kênh bản thiết kế (Admin only)"), //
+                new SubcommandData("setmapchannel", "Đưa kênh này trở thành kênh bản đồ (Admin only)"), //
+                new SubcommandData("setuniversechannel", "Đưa kênh này trở thành kênh tin nhắn vũ trụ (Admin only)"), //
+                new SubcommandData("setserverstatus", "Đưa kênh này trở thành kênh thông tin máy chủ (Admin only)"), //
+                new SubcommandData("setadminrole", "Cài đặt vai trò admin cho máy chủ").addOption(OptionType.ROLE, "adminrole", "Vai trò admin", true))//
+        ).queue();
 
         // User commands
 
         // - Mindustry embed
 
-        jda.upsertCommand(Commands.slash("postmap", "Chuyển tập tin bản đồ thành hình ảnh").addOption(OptionType.ATTACHMENT, "mapfile", "Tập tin map.msv", true)).queue();
-        jda.upsertCommand(Commands.slash("maplist", "In danh sách bản đồ")).queue();
+        guild.upsertCommand(Commands.slash("mindustry", "Lệnh mindustry").addSubcommands(//
+                new SubcommandData("postmap", "Chuyển tập tin bản đồ thành hình ảnh").addOption(OptionType.ATTACHMENT, "mapfile", "Tập tin map.msv", true), //
+                new SubcommandData("postschem", "Chuyển tập tin bản thiết kế thành hình ảnh").addOption(OptionType.ATTACHMENT, "schematicfile", "file to review", true), //
+                new SubcommandData("ping", "Ping một máy chủ thông qua ip").addOption(OptionType.STRING, "ip", "Ip của máy chủ", true), //
+                new SubcommandData("maplist", "In danh sách bản đồ"))//
+        ).queue();
+
+        // - Bot info
+
+        guild.upsertCommand(Commands.slash("bot", "Lệnh thuộc về bot").addSubcommands(//
+                new SubcommandData("help", "Danh sách các lệnh"), //
+                new SubcommandData("allserver", "Hiển thị các máy chủ mà bot đang ở"), //
+                new SubcommandData("server", "Hiển thị thông tin máy chủ").addOption(OptionType.STRING, "servername", "Tên máy chủ"), //
+                new SubcommandData("info", "Thông tin về bot"))//
+        ).queue();
 
         // - User system
 
-        jda.upsertCommand(Commands.slash("info", "Thông tin của thành viên").addOption(OptionType.USER, "user", "Tên thành viên", false)).queue();
-        jda.upsertCommand(Commands.slash("leaderboard", "Hiển thị bảng xếp hạng").addOption(OptionType.STRING, "orderby", "Tên bảng xếp hạng", false, true)).queue();
-        jda.upsertCommand(Commands.slash("help", "Danh sách các lệnh")).queue();
-        jda.upsertCommand(Commands.slash("setnickname", "Đặt biệt danh").addOption(OptionType.STRING, "nickname", "Biệt danh muốn đặt", true).addOption(OptionType.USER, "user", "Tên người muốn đổi(Admin only")).queue();
-        jda.upsertCommand(Commands.slash("postschem", "Chuyển tập tin bản thiết kế thành hình ảnh").addOption(OptionType.ATTACHMENT, "schematicfile", "file to review", true)).queue();
-        jda.upsertCommand(Commands.slash("hidelv", "Ẩn level của bản thân").addOption(OptionType.BOOLEAN, "hide", "Ẩn", true)).queue();
-        jda.upsertCommand(Commands.slash("ping", "Ping một máy chủ thông qua ip").addOption(OptionType.STRING, "ip", "Ip của máy chủ", true)).queue();
-        jda.upsertCommand(Commands.slash("daily", "Điểm danh")).queue();
-
-        // -
-
+        guild.upsertCommand(Commands.slash("user", "Lệnh thuộc về  hệ thống quản lí người dùng").addSubcommands(//
+                new SubcommandData("info", "Thông tin của thành viên").addOption(OptionType.USER, "user", "Tên thành viên", false), //
+                new SubcommandData("leaderboard", "Hiển thị bảng xếp hạng").addOption(OptionType.STRING, "orderby", "Tên bảng xếp hạng", false, true), //
+                new SubcommandData("setnickname", "Đặt biệt danh").addOption(OptionType.STRING, "nickname", "Biệt danh muốn đặt", true).addOption(OptionType.USER, "user", "Tên người muốn đổi(Admin only"), //
+                new SubcommandData("hidelv", "Ẩn level của bản thân").addOption(OptionType.BOOLEAN, "hide", "Ẩn", true), //
+                new SubcommandData("daily", "Điểm danh"))//
+        ).queue();
     }
 
     @Override
@@ -103,40 +135,53 @@ public class CommandHandler extends ListenerAdapter {
         String focus = event.getFocusedOption().getName();
         Member member = event.getMember();
 
+        // No subcommand -> return immediately
+        if (subcommand == null)
+            return;
+
         // Shar command group
         if (command.equals("shar")) {
-            if (subcommand == null)
+
+            // Check if member is Shar
+            if (member == null)
                 return;
 
+            // Shar ID
+            if (!member.getId().equals("719322804549320725"))
+                return;
+
+            // Say something with bot
             if (subcommand.equals("say")) {
-                if (guildConfigHandler.isAdmin(member)) {
-                    if (focus.equals("guild"))
-                        sendAutoComplete(event, guildConfigHandler.getGuildsName().keySet());
+                // Show all guilds
+                if (focus.equals("guild"))
+                    sendAutoComplete(event, guildConfigHandler.getGuildsName().keySet());
 
-                    else if (focus.equals("channel")) {
-                        // Get all channel form selected guild
-                        OptionMapping guildIdOption = event.getOption("guild");
-                        if (guildIdOption == null)
-                            return;
-                        HashMap<String, String> guilds = guildConfigHandler.getGuildsName();
-                        String guildName = guildIdOption.getAsString();
+                // Show all channels
+                else if (focus.equals("channel")) {
+                    // Get all channel form selected guild
+                    OptionMapping guildIdOption = event.getOption("guild");
+                    if (guildIdOption == null)
+                        return;
+                    HashMap<String, String> guilds = guildConfigHandler.getGuildsName();
+                    String guildName = guildIdOption.getAsString();
 
-                        if (guilds.containsKey(guildName)) {
-                            String guildId = guilds.get(guildName);
-                            if (guildId == null) {
-                                System.out.println("Not found guild " + guildName);
-                                return;
-                            }
-                            sendAutoComplete(event, guildConfigHandler.getChannelsName(guildId).keySet());
-                        }
+                    if (!guilds.containsKey(guildName))
+                        return;
+
+                    String guildId = guilds.get(guildName);
+                    if (guildId == null) {
+                        System.out.println("Not found guild " + guildName);
+                        return;
                     }
+                    sendAutoComplete(event, guildConfigHandler.getChannelsName(guildId).keySet());
+
                 }
             }
-
-
             // User command
-        } else {
-            if (command.equals("leaderboard")) {
+        } else if (command.equals("user"))
+
+        {
+            if (subcommand.equals("leaderboard")) {
                 if (focus.equals("orderby")) {
                     sendAutoComplete(event, userHandler.sorter.keySet());
                 }
@@ -157,7 +202,7 @@ public class CommandHandler extends ListenerAdapter {
         }
 
         if (options.isEmpty()) {
-            System.out.println("No options available");
+            System.out.println("No options available for " + event.getFocusedOption().toString());
             return;
         }
         event.replyChoices(options).queue();
@@ -168,37 +213,66 @@ public class CommandHandler extends ListenerAdapter {
         String subcommand = event.getSubcommandName();
         Member member = event.getMember();
 
+        if (command.equals("registerguild")) {
+            if (member == null)
+                return;
+
+            if (!member.getId().equals("719322804549320725")) {
+                reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
+                return;
+            }
+            Guild guild = event.getGuild();
+            if (guild == null)
+                return;
+            // Add guild to registered guilds list
+            guildConfigHandler.addGuild(guild.getId());
+            // Add all command to guild
+            registerCommand(event.getGuild());
+            reply(event, "Đã duyệt máy chủ", 30);
+        }
+
         // Shar commands
-        if (command.equals("shar")) {
+        else if (command.equals("shar")) {
+
+            // OH NO member is null
+            if (member == null)
+                return;
+
+            if (!member.getId().equals("719322804549320725")) {
+                reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
+                return;
+            }
+
+            // Null check
             if (subcommand == null)
                 return;
+
             // - Save command
             if (subcommand.equals("save")) {
-                if (guildConfigHandler.isAdmin(event.getMember())) {
-                    reply(event, "Đang lưu...", 10);
-                    try {
-                        serverStatus.save();
-                        userHandler.save();
-                        guildConfigHandler.save();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                } else
-                    reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
+                reply(event, "Đang lưu...", 10);
+                try {
+                    serverStatus.save();
+                    userHandler.save();
+                    guildConfigHandler.save();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
 
             // - Load command
             else if (subcommand.equals("load")) {
-                if (guildConfigHandler.isAdmin(event.getMember())) {
-                    reply(event, "Đang tải...", 10);
-                    try {
-                        serverStatus.load();
-                        userHandler.load();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                } else
-                    reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
+                reply(event, "Đang tải...", 10);
+                try {
+                    serverStatus.load();
+                    userHandler.load();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            } else if (subcommand.equals("resetcommand")) {
+                reply(event, "Đang tải", 10);
+                Guild guild = event.getGuild();
+                resetCommand(guild);
 
                 // - Make bot say something in current channel
             } else if (subcommand.equals("say")) {
@@ -234,17 +308,21 @@ public class CommandHandler extends ListenerAdapter {
 
             }
 
-            // Admin commands
+            // Admin related commands
         } else if (command.equals("admin")) {
+            // Null check again
             if (subcommand == null)
                 return;
+
+            if (!guildConfigHandler.isAdmin(event.getMember())) {
+                reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
+                return;
+            }
+
             // - Reload server status
             if (subcommand.equals("reloadserver")) {
-                if (guildConfigHandler.isAdmin(event.getMember())) {
-                    serverStatus.reloadServer(event.getGuild(), event.getMessageChannel());
-                    reply(event, "Đang làm mới", 10);
-                } else
-                    reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
+                serverStatus.reloadServer(event.getGuild(), event.getMessageChannel());
+                reply(event, "Đang làm mới", 10);
 
                 // - Add role to guild admin role
             } else if (subcommand.equals("setadminrole")) {
@@ -256,166 +334,173 @@ public class CommandHandler extends ListenerAdapter {
                 if (guild == null)
                     return;
 
-                if (guildConfigHandler.isAdmin(event.getMember())) {
-                    guildConfigHandler.adminRole.put(guild.getId(), adminRole.getId());
-                    reply(event, "Thêm thành công vai trò " + adminRole.getName() + " làm admin", 30);
+                guildConfigHandler.adminRole.put(guild.getId(), adminRole.getId());
+                reply(event, "Thêm thành công vai trò " + adminRole.getName() + " làm admin", 30);
 
-                } else
-                    reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
 
                 // - Add channel to guild schematic channel
             } else if (subcommand.equals("setschematicchannel")) {
-                if (guildConfigHandler.isAdmin(event.getMember())) {
-                    guildConfigHandler.addToChannel(event, guildConfigHandler.schematicChannel);
-                    reply(event, "Thêm thành công kênh " + event.getChannel().getName() + " vào kênh bản thiết kế", 30);
-                } else
-                    reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
+                guildConfigHandler.addToChannel(event, guildConfigHandler.schematicChannel);
+                reply(event, "Thêm thành công kênh " + event.getChannel().getName() + " vào kênh bản thiết kế", 30);
+
 
                 // - Add channel to guild map channel
             } else if (subcommand.equals("setmapchannel")) {
-                if (guildConfigHandler.isAdmin(event.getMember())) {
-                    guildConfigHandler.addToChannel(event, guildConfigHandler.mapChannel);
-                    reply(event, "Thêm thành công kênh " + event.getChannel().getName() + " vào kênh bản đồ", 30);
-                } else
-                    reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
+
+                guildConfigHandler.addToChannel(event, guildConfigHandler.mapChannel);
+                reply(event, "Thêm thành công kênh " + event.getChannel().getName() + " vào kênh bản đồ", 30);
 
                 // - Set channel to be guild universe chat channel
             } else if (subcommand.equals("setuniversechannel")) {
-                if (guildConfigHandler.isAdmin(event.getMember())) {
-                    guildConfigHandler.setChannel(event, guildConfigHandler.universeChatChannel);
-                    reply(event, "Đặt thành công kênh " + event.getChannel().getName() + " thành kênh tin nhắn vũ trụ", 30);
-                } else
-                    reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
+                guildConfigHandler.setChannel(event, guildConfigHandler.universeChatChannel);
+                reply(event, "Đặt thành công kênh " + event.getChannel().getName() + " thành kênh tin nhắn vũ trụ", 30);
+
 
                 // - Set channel to be guild server status chat channel
             } else if (subcommand.equals("setserverstatuschannel")) {
-                if (guildConfigHandler.isAdmin(event.getMember())) {
-                    guildConfigHandler.setChannel(event, guildConfigHandler.serverStatusChannel);
-                    reply(event, "Đặt thành công kênh " + event.getChannel().getName() + " thành kênh thông tin máy chủ", 30);
-                } else
-                    reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
+                guildConfigHandler.setChannel(event, guildConfigHandler.serverStatusChannel);
+                reply(event, "Đặt thành công kênh " + event.getChannel().getName() + " thành kênh thông tin máy chủ", 30);
 
             }
         }
 
+        // Bot related commands
+        else if (command.equals("bot")) {
+            // Null check n times
+            if (subcommand == null)
+                return;
+            // - Help command
+            if (subcommand.equals("help")) {
+                return;
+            }
 
-        // User commands
+            // Mindustry related commands
+        } else if (command.equals("mindustry")) {
+            // LOL I hate null check
+            if (subcommand == null)
+                return;
 
-        // - Send all survival map and its wave record
-        else if (command.equals("maplist")) {
-            replyEmbeds(event, serverStatus.survivalMapLeaderboard(), 30);
+            // - Send all survival map and its wave record
+            if (subcommand.equals("maplist"))
+                replyEmbeds(event, serverStatus.survivalMapLeaderboard(), 30);
 
-            // - Display user info
-        } else if (command.equals("info")) {
-            if (event.getOption("user") == null) {
-                replyEmbeds(event, userHandler.getUserInfo(event.getMember()), 30);
-            } else {
-                OptionMapping userOption = event.getOption("user");
-                if (userOption == null)
+            // - Refresh server status
+            else if (subcommand.equals("refreshserver")) {
+                serverStatus.refreshServerStat(event.getGuild(), event.getMessageChannel());
+                reply(event, "Đang làm mới...", 10);
+
+                // - Post a schematic in current channel
+            } else if (subcommand.equals("postschem")) {
+                messagesHandler.sendSchematicPreview(event);
+                userHandler.addMoney(event.getMember(), 10);
+
+                // - Post a map on current channel
+            } else if (subcommand.equals("postmap")) {
+                messagesHandler.sendMapPreview(event);
+                userHandler.addMoney(event.getMember(), 30);
+                // - Ping a mindustry server
+            } else if (subcommand.equals("ping")) {
+                OptionMapping ipOption = event.getOption("ip");
+                if (ipOption == null)
                     return;
-                User user = userOption.getAsUser();
+                String ip = ipOption.getAsString();
+                onet.pingServer(ip, result -> {
+                    EmbedBuilder builder = serverStatus.serverStatusBuilder(ip, result);
+                    replyEmbeds(event, builder, 30);
+                });
+            }
 
+            // User commands
+        } else if (command.equals("user")) {
+            // Hate it
+            if (subcommand == null)
+                return;
+            // - Display user info
+            if (subcommand.equals("info")) {
+                if (event.getOption("user") == null) {
+                    replyEmbeds(event, userHandler.getUserInfo(event.getMember()), 30);
+                } else {
+                    OptionMapping userOption = event.getOption("user");
+                    if (userOption == null)
+                        return;
+                    User user = userOption.getAsUser();
+
+                    Guild guild = event.getGuild();
+                    if (guild == null)
+                        return;
+
+                    replyEmbeds(event, userHandler.getUserInfo(guild.getMember(user)), 30);
+                }
+
+                // - Display top user in all servers
+            } else if (subcommand.equals("leaderboard")) {
+                OptionMapping orderOption = event.getOption("orderby");
+                String orderBy;
+
+                // Default is sort by level
+                if (orderOption == null)
+                    orderBy = "Level";
+                else
+                    orderBy = orderOption.getAsString();
+
+                EmbedBuilder builder = userHandler.getLeaderBoard(orderBy);
+                DiscordUser user = userHandler.getUser(member);
+                int position = userHandler.getPosition(user, orderBy);
+
+                // Display sender position if its not contained in the leaderboard
+                if (position > 10)
+                    builder.addField("Hạng: " + position, userHandler.getUserStat(user, orderBy), false);
+                replyEmbeds(event, builder, 30);
+
+                // - Set user nickname
+            } else if (subcommand.equals("setnickname")) {
                 Guild guild = event.getGuild();
                 if (guild == null)
                     return;
+                OptionMapping userOption = event.getOption("user");
 
-                replyEmbeds(event, userHandler.getUserInfo(guild.getMember(user)), 30);
-            }
+                OptionMapping nicknameOption = event.getOption("nickname");
+                if (nicknameOption == null)
+                    return;
 
-            // - Refresh server status
-        } else if (command.equals("refreshserver")) {
-            serverStatus.refreshServerStat(event.getGuild(), event.getMessageChannel());
-            reply(event, "Đang làm mới...", 10);
-
-            // - Display top user in all servers
-        } else if (command.equals("leaderboard")) {
-            OptionMapping orderOption = event.getOption("orderby");
-            String orderBy;
-            // Default is sort by level
-            if (orderOption == null)
-                orderBy = "Level";
-            else
-                orderBy = orderOption.getAsString();
-            EmbedBuilder builder = userHandler.getLeaderBoard(orderBy);
-            DiscordUser user = userHandler.getUser(member);
-            int position = userHandler.getPosition(user, orderBy);
-            if (position > 10)
-                builder.addField("Hạng: " + position, userHandler.getUserStat(user, orderBy), false);
-            replyEmbeds(event, builder, 30);
-
-            // - Help command
-        } else if (command.equals("help")) {
-            return;
-
-            // - Set user nickname
-        } else if (command.equals("setnickname")) {
-            Guild guild = event.getGuild();
-            if (guild == null)
-                return;
-            OptionMapping userOption = event.getOption("user");
-
-            OptionMapping nicknameOption = event.getOption("nickname");
-            if (nicknameOption == null)
-                return;
-
-            if (userOption != null) {
-                if (guildConfigHandler.isAdmin(event.getMember())) {
-                    User user = userOption.getAsUser();
-                    userHandler.setNickName(guild.getMember(user), nicknameOption.getAsString());
+                if (userOption != null) {
+                    if (guildConfigHandler.isAdmin(event.getMember())) {
+                        User user = userOption.getAsUser();
+                        userHandler.setNickName(guild.getMember(user), nicknameOption.getAsString());
+                        reply(event, "Đổi biệt danh thành " + nicknameOption.getAsString(), 10);
+                    } else
+                        reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
+                } else {
+                    userHandler.setNickName(event.getMember(), nicknameOption.getAsString());
                     reply(event, "Đổi biệt danh thành " + nicknameOption.getAsString(), 10);
-                } else
-                    reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
-            } else {
-                userHandler.setNickName(event.getMember(), nicknameOption.getAsString());
-                reply(event, "Đổi biệt danh thành " + nicknameOption.getAsString(), 10);
-            }
-            // - Post a schematic in current channel
-        } else if (command.equals("postschem")) {
-            messagesHandler.sendSchematicPreview(event);
-            userHandler.addMoney(event.getMember(), 10);
+                }
 
-            // - Post a map on current channel
-        } else if (command.equals("postmap")) {
-            messagesHandler.sendMapPreview(event);
-            userHandler.addMoney(event.getMember(), 30);
+                // - Hide user level
+            } else if (subcommand.equals("hidelv")) {
+                Boolean hidelv;
+                OptionMapping hideOption = event.getOption("hide");
+                if (hideOption == null)
+                    hidelv = true;
+                else
+                    hidelv = hideOption.getAsBoolean();
+                userHandler.hidelv(event.getMember(), hidelv);
+                if (hidelv)
+                    reply(event, "Đã ẩn level", 10);
+                else
+                    reply(event, "Đã tắt ẩn level", 10);
 
-            // - Hide user level
-        } else if (command.equals("hidelv")) {
-            Boolean hidelv;
-            OptionMapping hideOption = event.getOption("hide");
-            if (hideOption == null)
-                hidelv = true;
-            else
-                hidelv = hideOption.getAsBoolean();
-            userHandler.hidelv(event.getMember(), hidelv);
-            if (hidelv)
-                reply(event, "Đã ẩn level", 10);
-            else
-                reply(event, "Đã tắt ẩn level", 10);
+                // - Get daily reward
+            } else if (subcommand.equals("daily")) {
+                int money = userHandler.getDaily(event.getMember());
+                if (money > 0)
+                    reply(event, "Điểm dành thanh công\nĐiểm nhận được: " + money + "MM", 30);
+                else
+                    reply(event, "Bạn đã điểm danh hôm nay", 10);
 
-            // - Ping a mindustry server
-        } else if (command.equals("ping")) {
-            OptionMapping ipOption = event.getOption("ip");
-            if (ipOption == null)
-                return;
-            String ip = ipOption.getAsString();
-            onet.pingServer(ip, result -> {
-                EmbedBuilder builder = serverStatus.serverStatusBuilder(ip, result);
-                replyEmbeds(event, builder, 30);
-            });
-
-            // - Get daily reward
-        } else if (command.equals("daily")) {
-            int money = userHandler.getDaily(event.getMember());
-            if (money > 0)
-                reply(event, "Điểm dành thanh công\nĐiểm nhận được: " + money + "MM", 30);
-            else
-                reply(event, "Bạn đã điểm danh hôm nay", 30);
-
-            // - Wrong command lol
-        } else
-            reply(event, "Lệnh sai", 10);
-
+            } else
+                // - Wrong command lol
+                reply(event, "Lệnh sai", 10);
+        }
     }
 
     void replyEmbeds(SlashCommandInteractionEvent event, EmbedBuilder builder, int sec) {
