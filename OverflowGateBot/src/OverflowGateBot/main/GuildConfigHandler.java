@@ -197,10 +197,6 @@ public class GuildConfigHandler {
 
     // TODO Database
     public void load() throws IOException {
-        for (Guild guild : messagesHandler.jda.getGuilds()) {
-            if (!guildIds.contains(guild.getId()))
-                guildIds.add(guild.getId());
-        }
 
         try {
             JSONHandler handler = new JSONHandler();
@@ -209,6 +205,8 @@ public class GuildConfigHandler {
                 return;
             for (Object key : reader.data.keySet()) {
                 String guildId = key.toString();
+                if (!guildIds.contains(guildId))
+                    guildIds.add(guildId);
                 JSONData guildData = reader.readJSON(guildId);
                 JSONArray schematicChannels = guildData.readJSONArray("schematicChannel");
                 addToChannel(schematicChannels, guildId, schematicChannel);

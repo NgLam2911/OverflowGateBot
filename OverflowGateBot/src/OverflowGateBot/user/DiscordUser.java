@@ -23,10 +23,11 @@ public class DiscordUser {
     String nickname = "";
     Integer point;
     Integer level;
-    Integer money = 0;
+    public Integer money = 0;
+    Integer pvpPoint;
     Boolean hideLv = false;
 
-    public DiscordUser(@Nonnull String guildId, @Nonnull String id, String name, Integer point, Integer level, Integer money, Boolean hideLv) {
+    public DiscordUser(@Nonnull String guildId, @Nonnull String id, String name, Integer point, Integer level, Integer money, Integer pvpPoint, Boolean hideLv) {
         this.id = id;
         this.guildId = guildId;
         this.name = name;
@@ -34,6 +35,7 @@ public class DiscordUser {
         this.level = level;
         this.hideLv = hideLv;
         this.money = money;
+        this.pvpPoint = pvpPoint;
     }
 
     // To json string, use to store data in json file(Temporary)
@@ -46,6 +48,7 @@ public class DiscordUser {
         map.put("NICKNAME", nickname);
         map.put("HIDELV", hideLv.toString());
         map.put("MONEY", money.toString());
+        map.put("PVPPOINT", pvpPoint.toString());
         return new JSONObject(map).toJSONString();
     }
 

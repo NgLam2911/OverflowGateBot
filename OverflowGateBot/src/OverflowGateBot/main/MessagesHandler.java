@@ -66,7 +66,7 @@ public class MessagesHandler extends ListenerAdapter {
 
             jda.addEventListener(this);
 
-            jda.getPresence().setActivity(Activity.of(ActivityType.PLAYING, " /help để bắt đầu"));
+            jda.getPresence().setActivity(Activity.of(ActivityType.PLAYING, " /bot help để bắt đầu"));
 
             Log.info("Bot online.");
 

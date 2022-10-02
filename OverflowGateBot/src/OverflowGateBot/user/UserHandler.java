@@ -41,12 +41,14 @@ public class UserHandler {
 
     Comparator<DiscordUser> sortByPoint = (o1, o2) -> o2.getTotalPoint().compareTo(o1.getTotalPoint());
     Comparator<DiscordUser> sortByMoney = (o1, o2) -> o2.money.compareTo(o1.money);
+    Comparator<DiscordUser> sortByPVPPoint = (o1, o2) -> o2.pvpPoint.compareTo(o1.pvpPoint);
 
     public HashMap<String, Comparator<DiscordUser>> sorter = new HashMap<>();
 
     public UserHandler() {
         sorter.put("Money", sortByMoney);
         sorter.put("Level", sortByPoint);
+        sorter.put("PVPPoint", sortByPVPPoint);
 
         try {
             load();
@@ -56,6 +58,22 @@ public class UserHandler {
         }
     }
 
+    // Transfer points from one user to another user
+    public int transferMoney(DiscordUser sender, DiscordUser receiver, int amount) {
+        if (sender.money < amount)
+            return -1;
+        sender.money -= amount;
+        receiver.addMoney(amount);
+        return amount;
+    }
+
+    public int transferPVPPoint(DiscordUser sender, DiscordUser receiver, int amount) {
+        if (sender.pvpPoint < amount)
+            return -1;
+        sender.pvpPoint -= amount;
+        receiver.pvpPoint += amount;
+        return amount;
+    }
 
     // Get user rank base on <orderBy>
     public int getPosition(DiscordUser user, String orderBy) {
@@ -83,12 +101,12 @@ public class UserHandler {
         // Not to store bot data
         if (member.getUser().isBot())
             return;
-        addNewMember(member.getGuild().getId(), member.getId(), member.getUser().getName(), 0, 1, 0, false);
+        addNewMember(member.getGuild().getId(), member.getId(), member.getUser().getName(), 0, 1, 0, 0, false);
         setDisplayName(member);
     }
 
-    public DiscordUser addNewMember(@Nonnull String guildId, @Nonnull String id, String name, int point, int level, int money, Boolean hideLv) {
-        DiscordUser user = new DiscordUser(guildId, id, name, point, level, money, hideLv);
+    public DiscordUser addNewMember(@Nonnull String guildId, @Nonnull String id, String name, int point, int level, int money, int pvpPoint, Boolean hideLv) {
+        DiscordUser user = new DiscordUser(guildId, id, name, point, level, money, pvpPoint, hideLv);
         if (users.containsKey(guildId)) {
             // Already have guild id
             if (!users.get(guildId).containsKey(id)) {
@@ -152,9 +170,13 @@ public class UserHandler {
 
     // Set name to [Lv<Level>] <Nickname>
     public void setDisplayName(Member member) {
+        if (member.getUser().isBot())
+            return;
         DiscordUser user = getUser(member);
         if (user != null)
             user.setDisplayName();
+        else
+            System.out.println("Not found " + member.getEffectiveName());
 
     }
 
@@ -228,6 +250,9 @@ public class UserHandler {
         case "Money":
             displayedStat = "Điểm: " + user.money;
             break;
+        case "PVPPoint":
+            displayedStat = "Điểm PVP:" + user.pvpPoint;
+            break;
         }
 
         return "Tên: " + (user.getName()) + "\n" + displayedStat + "\nMáy chủ: " + guildName;
@@ -299,6 +324,7 @@ public class UserHandler {
                         String nickname = userData.readString("NICKNAME");
                         Boolean hideLv = Boolean.parseBoolean(userData.readString("HIDELV"));
                         int money = userData.readInt("MONEY");
+                        int pvpPoint = userData.readInt("PVPPOINT");
 
                         Guild guild = messagesHandler.jda.getGuildById(gid);
 
@@ -312,10 +338,7 @@ public class UserHandler {
                             name = member.getUser().getName();
                         }
 
-                        if (!guildConfigHandler.guildIds.contains(gid))
-                            guildConfigHandler.guildIds.add(gid);
-
-                        DiscordUser user = addNewMember(gid, id, name, point, level, money, hideLv);
+                        DiscordUser user = addNewMember(gid, id, name, point, level, money, pvpPoint, hideLv);
                         if (level == 0)
                             System.out.println("\tUser error " + user.name);
                         user.setNickname(nickname);
@@ -332,16 +355,20 @@ public class UserHandler {
             if (gid == null)
                 break;
 
-            Guild guild = messagesHandler.jda.getGuildById(gid);
-            if (guild == null) {
-                System.out.println("Guild not found with id: " + gid);
-                continue;
-            }
-            List<Member> members = guild.getMembers();
-            for (Member m : members) {
-                addNewMember(m);
-                setDisplayName(m);
-            }
+            loadGuild(gid);
+        }
+    }
+
+    public void loadGuild(@Nonnull String guildId) {
+        Guild guild = messagesHandler.jda.getGuildById(guildId);
+        if (guild == null) {
+            System.out.println("Guild not found with id: " + guildId);
+            return;
+        }
+        List<Member> members = guild.getMembers();
+        for (Member m : members) {
+            addNewMember(m);
+            setDisplayName(m);
         }
     }
 

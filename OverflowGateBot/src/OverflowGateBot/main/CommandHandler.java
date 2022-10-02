@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import OverflowGateBot.user.DiscordUser;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
@@ -25,6 +26,7 @@ import static OverflowGateBot.OverflowGateBot.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -40,16 +42,9 @@ public class CommandHandler extends ListenerAdapter {
 
         jda.addEventListener(this);
         jda.upsertCommand(Commands.slash("registerguild", "Shar only")).queue();
+        jda.upsertCommand(Commands.slash("unregisterguild", "Shar only")).queue();
     }
 
-
-    // Reset all commands
-    void resetCommand(Guild guild) {
-        // Delete all commands
-        unregisterCommand(guild);
-        // Register it
-        registerCommand(guild);
-    }
 
     void unregisterCommand(Guild guild) {
         guild.retrieveCommands().queue(commands -> {
@@ -60,12 +55,11 @@ public class CommandHandler extends ListenerAdapter {
     }
 
     void registerCommand(Guild guild) {
-
+        unregisterCommand(guild);
         // Shar commands
         guild.upsertCommand(Commands.slash("shar", "Shar only").addSubcommands(//
                 new SubcommandData("save", "Shar only"), //
                 new SubcommandData("load", "Shar only"), //
-                new SubcommandData("resetcommand", "Shar only"), //
                 new SubcommandData("event", "Shar only").addOption(OptionType.STRING, "content", "Nội dung"), //
                 new SubcommandData("say", "Shar only").addOption(OptionType.STRING, "content", "Nội dung", true).addOption(OptionType.STRING, "guild", "Máy chủ muốn gửi", false, true).addOption(OptionType.STRING, "channel", "Kênh muốn gửi", false, true))//
         ).queue();
@@ -101,8 +95,8 @@ public class CommandHandler extends ListenerAdapter {
 
         guild.upsertCommand(Commands.slash("bot", "Lệnh thuộc về bot").addSubcommands(//
                 new SubcommandData("help", "Danh sách các lệnh"), //
-                new SubcommandData("allserver", "Hiển thị các máy chủ mà bot đang ở"), //
-                new SubcommandData("server", "Hiển thị thông tin máy chủ").addOption(OptionType.STRING, "servername", "Tên máy chủ"), //
+                new SubcommandData("allguild", "Hiển thị các máy chủ mà bot đang ở"), //
+                new SubcommandData("guild", "Hiển thị thông tin máy chủ").addOption(OptionType.STRING, "guild", "Tên máy chủ", true, true), //
                 new SubcommandData("info", "Thông tin về bot"))//
         ).queue();
 
@@ -113,6 +107,8 @@ public class CommandHandler extends ListenerAdapter {
                 new SubcommandData("leaderboard", "Hiển thị bảng xếp hạng").addOption(OptionType.STRING, "orderby", "Tên bảng xếp hạng", false, true), //
                 new SubcommandData("setnickname", "Đặt biệt danh").addOption(OptionType.STRING, "nickname", "Biệt danh muốn đặt", true).addOption(OptionType.USER, "user", "Tên người muốn đổi(Admin only"), //
                 new SubcommandData("hidelv", "Ẩn level của bản thân").addOption(OptionType.BOOLEAN, "hide", "Ẩn", true), //
+                new SubcommandData("transferpvppoint", "Chuyển điểm pvp của bản thân sang người khác").addOption(OptionType.USER, "user", "Người muốn chuyển").addOption(OptionType.INTEGER, "point", "Số điểm muốn chuyển"), //
+                new SubcommandData("transferpoint", "Chuyển điểm (tiền) của bản thân sang người khác").addOption(OptionType.USER, "user", "Người muốn chuyển").addOption(OptionType.INTEGER, "point", "Số điểm muốn chuyển"), //
                 new SubcommandData("daily", "Điểm danh"))//
         ).queue();
     }
@@ -177,10 +173,20 @@ public class CommandHandler extends ListenerAdapter {
 
                 }
             }
-            // User command
-        } else if (command.equals("user"))
 
-        {
+            // bot command
+        } else if (command.equals("bot")) {
+            if (subcommand.equals("guild")) {
+                // Show all guilds
+                if (focus.equals("guild")) {
+                    Set<String> guildNames = new HashSet<String>();
+                    for (Guild g : jda.getGuilds())
+                        guildNames.add(g.getName());
+                    sendAutoComplete(event, guildNames);
+                }
+            }
+            // User command
+        } else if (command.equals("user")) {
             if (subcommand.equals("leaderboard")) {
                 if (focus.equals("orderby")) {
                     sendAutoComplete(event, userHandler.sorter.keySet());
@@ -212,31 +218,66 @@ public class CommandHandler extends ListenerAdapter {
         String command = event.getName();
         String subcommand = event.getSubcommandName();
         Member member = event.getMember();
+        Guild guild = event.getGuild();
 
+        // Null check
+        if (guild == null)
+            return;
+
+        // OH NO member is null
+        if (member == null)
+            return;
+
+        // Get bot member
+        Member botMember = guild.getMember(jda.getSelfUser());
+        if (botMember == null)
+            return;
+
+        // If bot don't have manager server permission then return
+        if (!botMember.hasPermission(Permission.ADMINISTRATOR)) {
+            reply(event, "Vui lòng cho bot vai trò người quản lí để sử dụng bot", 30);
+            return;
+        }
+
+        // Shar permission to use bot
+        if (!guildConfigHandler.guildIds.contains(guild.getId()) && !member.getId().equals("719322804549320725")) {
+            reply(event, "Máy chủ của bạn chưa được duyệt, liên hệ admin Shar để được duyệt", 30);
+            return;
+        }
+
+        // Global command to register guild
         if (command.equals("registerguild")) {
-            if (member == null)
-                return;
 
             if (!member.getId().equals("719322804549320725")) {
                 reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
                 return;
             }
-            Guild guild = event.getGuild();
-            if (guild == null)
-                return;
+
             // Add guild to registered guilds list
             guildConfigHandler.addGuild(guild.getId());
+            userHandler.loadGuild(guild.getId());
+            // Remove all commands from guild
+            unregisterCommand(event.getGuild());
+            guildConfigHandler.save();
+            reply(event, "Đã gỡ duyệt máy chủ", 30);
+        }
+
+        if (command.equals("unregisterguild")) {
+
+            if (!member.getId().equals("719322804549320725")) {
+                reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
+                return;
+            }
+
+            // Add guild to registered guilds list
+            guildConfigHandler.guildIds.remove(guild.getId());
             // Add all command to guild
-            registerCommand(event.getGuild());
+            unregisterCommand(event.getGuild());
             reply(event, "Đã duyệt máy chủ", 30);
         }
 
         // Shar commands
         else if (command.equals("shar")) {
-
-            // OH NO member is null
-            if (member == null)
-                return;
 
             if (!member.getId().equals("719322804549320725")) {
                 reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
@@ -269,11 +310,6 @@ public class CommandHandler extends ListenerAdapter {
                     e.printStackTrace();
                 }
 
-            } else if (subcommand.equals("resetcommand")) {
-                reply(event, "Đang tải", 10);
-                Guild guild = event.getGuild();
-                resetCommand(guild);
-
                 // - Make bot say something in current channel
             } else if (subcommand.equals("say")) {
 
@@ -293,8 +329,8 @@ public class CommandHandler extends ListenerAdapter {
                     List<Guild> guilds = jda.getGuildsByName(guildOption.getAsString(), false);
                     if (guilds.isEmpty())
                         return;
-                    Guild guild = guilds.get(0);
-                    List<TextChannel> channels = guild.getTextChannelsByName(channelOption.getAsString(), false);
+                    Guild firstGuild = guilds.get(0);
+                    List<TextChannel> channels = firstGuild.getTextChannelsByName(channelOption.getAsString(), false);
                     if (channels.isEmpty())
                         return;
                     TextChannel channel = channels.get(0);
@@ -330,13 +366,8 @@ public class CommandHandler extends ListenerAdapter {
                 if (adminRoleOption == null)
                     return;
                 Role adminRole = adminRoleOption.getAsRole();
-                Guild guild = event.getGuild();
-                if (guild == null)
-                    return;
-
                 guildConfigHandler.adminRole.put(guild.getId(), adminRole.getId());
                 reply(event, "Thêm thành công vai trò " + adminRole.getName() + " làm admin", 30);
-
 
                 // - Add channel to guild schematic channel
             } else if (subcommand.equals("setschematicchannel")) {
@@ -371,7 +402,50 @@ public class CommandHandler extends ListenerAdapter {
                 return;
             // - Help command
             if (subcommand.equals("help")) {
+                EmbedBuilder builder = new EmbedBuilder();
+                guild.retrieveCommands().queue(commands -> {
+                    for (Command c : commands) {
+                        builder.addField(c.getName(), c.getDescription(), false);
+                    }
+                });
+                replyEmbeds(event, builder, 30);
                 return;
+
+                // - All server command
+            } else if (subcommand.equals("allguild")) {
+                List<Guild> guilds = jda.getGuilds();
+                EmbedBuilder builder = new EmbedBuilder();
+                StringBuilder field = new StringBuilder();
+                for (Guild g : guilds) {
+                    String registered = guildConfigHandler.guildIds.contains(g.getId()) ? "Đã được duyệt" : "Chưa được duyệt";
+                    field.append("_" + g.getName() + "_: " + registered + "\n");
+                }
+                builder.addField("_Máy chủ_", field.toString(), false);
+                replyEmbeds(event, builder, 30);
+
+                // Server command
+            } else if (subcommand.equals("guild")) {
+                OptionMapping guildOption = event.getOption("guild");
+                if (guildOption == null) {
+                    reply(event, "Tên máy chủ không tồn tại", 10);
+                    return;
+                }
+                // Get the guild base on name
+                String guildName = guildOption.getAsString();
+                List<Guild> guilds = jda.getGuildsByName(guildOption.getAsString(), false);
+                if (guilds.isEmpty())
+                    return;
+                Guild firstGuild = guilds.get(0);
+                EmbedBuilder builder = new EmbedBuilder();
+                StringBuilder field = new StringBuilder();
+                builder.setAuthor(guildName, null, firstGuild.getIconUrl());
+                Member owner = firstGuild.getOwner();
+                if (owner != null)
+                    field.append("Chủ máy chủ: " + owner.getEffectiveName() + "\n");
+                field.append("Số thành viên: " + firstGuild.getMemberCount() + "\n" + //
+                        "Link mời: " + firstGuild.getTextChannels().get(0).createInvite().complete().getUrl());
+                builder.addField("Thông tin cơ bản:", field.toString(), false);
+                replyEmbeds(event, builder, 30);
             }
 
             // Mindustry related commands
@@ -425,10 +499,6 @@ public class CommandHandler extends ListenerAdapter {
                         return;
                     User user = userOption.getAsUser();
 
-                    Guild guild = event.getGuild();
-                    if (guild == null)
-                        return;
-
                     replyEmbeds(event, userHandler.getUserInfo(guild.getMember(user)), 30);
                 }
 
@@ -454,9 +524,6 @@ public class CommandHandler extends ListenerAdapter {
 
                 // - Set user nickname
             } else if (subcommand.equals("setnickname")) {
-                Guild guild = event.getGuild();
-                if (guild == null)
-                    return;
                 OptionMapping userOption = event.getOption("user");
 
                 OptionMapping nicknameOption = event.getOption("nickname");
@@ -496,6 +563,52 @@ public class CommandHandler extends ListenerAdapter {
                     reply(event, "Điểm dành thanh công\nĐiểm nhận được: " + money + "MM", 30);
                 else
                     reply(event, "Bạn đã điểm danh hôm nay", 10);
+
+                // Transfer money
+            } else if (command.equals("transferpoint")) {
+                OptionMapping userOption = event.getOption("user");
+                if (userOption == null)
+                    return;
+                OptionMapping pointsOption = event.getOption("points");
+                if (pointsOption == null)
+                    return;
+                User user = userOption.getAsUser();
+                int points = pointsOption.getAsInt();
+                Member receiver = guild.getMember(user);
+                if (receiver == null)
+                    return;
+                DiscordUser dUserSender = userHandler.getUser(member);
+                DiscordUser dUserReceiver = userHandler.getUser(receiver);
+                if (dUserSender == null || dUserReceiver == null)
+                    return;
+                int result = userHandler.transferMoney(dUserSender, dUserReceiver, points);
+                if (result == -1)
+                    reply(event, "Bạn không có đủ điểm để chuyển", 10);
+                else
+                    reply(event, "Chuyển thành công " + result + " đến " + dUserReceiver.getDisplayName(), 30);
+
+                // Transfer pvp point
+            } else if (command.equals("transferpvppoint")) {
+                OptionMapping userOption = event.getOption("user");
+                if (userOption == null)
+                    return;
+                OptionMapping pointsOption = event.getOption("points");
+                if (pointsOption == null)
+                    return;
+                User user = userOption.getAsUser();
+                int points = pointsOption.getAsInt();
+                Member receiver = guild.getMember(user);
+                if (receiver == null)
+                    return;
+                DiscordUser dUserSender = userHandler.getUser(member);
+                DiscordUser dUserReceiver = userHandler.getUser(receiver);
+                if (dUserSender == null || dUserReceiver == null)
+                    return;
+                int result = userHandler.transferPVPPoint(dUserSender, dUserReceiver, points);
+                if (result == -1)
+                    reply(event, "Bạn không có đủ điểm để chuyển", 10);
+                else
+                    reply(event, "Chuyển thành công " + result + " đến " + dUserReceiver.getDisplayName(), 30);
 
             } else
                 // - Wrong command lol
