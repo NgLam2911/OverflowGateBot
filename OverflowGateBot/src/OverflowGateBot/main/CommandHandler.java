@@ -410,7 +410,6 @@ public class CommandHandler extends ListenerAdapter {
                     }
                 });
                 replyEmbeds(event, builder, 30);
-                return;
 
                 // - All server command
             } else if (subcommand.equals("allguild")) {
@@ -566,55 +565,63 @@ public class CommandHandler extends ListenerAdapter {
                     reply(event, "Bạn đã điểm danh hôm nay", 10);
 
                 // Transfer money
-            } else if (command.equals("transferpoint")) {
+            } else if (subcommand.equals("transferpoint")) {
                 OptionMapping userOption = event.getOption("user");
                 if (userOption == null)
                     return;
-                OptionMapping pointsOption = event.getOption("points");
-                if (pointsOption == null)
+                OptionMapping pointOption = event.getOption("point");
+                if (pointOption == null)
                     return;
                 User user = userOption.getAsUser();
-                int points = pointsOption.getAsInt();
+                int point = pointOption.getAsInt();
                 Member receiver = guild.getMember(user);
-                if (receiver == null)
+                if (receiver == null) {
+                    System.out.println("No receiver found for user " + user);
                     return;
+                }
                 DiscordUser dUserSender = userHandler.getUser(member);
                 DiscordUser dUserReceiver = userHandler.getUser(receiver);
-                if (dUserSender == null || dUserReceiver == null)
+                if (dUserSender == null || dUserReceiver == null) {
+                    System.out.println("No receiver found in database");
                     return;
-                int result = userHandler.transferMoney(dUserSender, dUserReceiver, points);
+                }
+                int result = userHandler.transferMoney(dUserSender, dUserReceiver, point);
                 if (result == -1)
                     reply(event, "Bạn không có đủ điểm để chuyển", 10);
                 else
-                    reply(event, "Chuyển thành công " + result + " đến " + dUserReceiver.getDisplayName(), 30);
+                    reply(event, "Chuyển thành công " + result + " điểm đến " + dUserReceiver.getDisplayName(), 30);
 
                 // Transfer pvp point
-            } else if (command.equals("transferpvppoint")) {
+            } else if (subcommand.equals("transferpvppoint")) {
                 OptionMapping userOption = event.getOption("user");
                 if (userOption == null)
                     return;
-                OptionMapping pointsOption = event.getOption("points");
-                if (pointsOption == null)
+                OptionMapping pointOption = event.getOption("point");
+                if (pointOption == null)
                     return;
                 User user = userOption.getAsUser();
-                int points = pointsOption.getAsInt();
+                int point = pointOption.getAsInt();
                 Member receiver = guild.getMember(user);
-                if (receiver == null)
+                if (receiver == null) {
+                    System.out.println("No receiver found for user " + user);
                     return;
+                }
                 DiscordUser dUserSender = userHandler.getUser(member);
                 DiscordUser dUserReceiver = userHandler.getUser(receiver);
-                if (dUserSender == null || dUserReceiver == null)
+                if (dUserSender == null || dUserReceiver == null) {
+                    System.out.println("No receiver found in database");
                     return;
-                int result = userHandler.transferPVPPoint(dUserSender, dUserReceiver, points);
+                }
+                int result = userHandler.transferPVPPoint(dUserSender, dUserReceiver, point);
                 if (result == -1)
                     reply(event, "Bạn không có đủ điểm để chuyển", 10);
                 else
-                    reply(event, "Chuyển thành công " + result + " đến " + dUserReceiver.getDisplayName(), 30);
+                    reply(event, "Chuyển thành công " + result + " điểm pvp đến " + dUserReceiver.getDisplayName(), 30);
+            }
+        } else
+            // - Wrong command lol
+            reply(event, "Lệnh sai", 10);
 
-            } else
-                // - Wrong command lol
-                reply(event, "Lệnh sai", 10);
-        }
     }
 
     void replyEmbeds(SlashCommandInteractionEvent event, EmbedBuilder builder, int sec) {
