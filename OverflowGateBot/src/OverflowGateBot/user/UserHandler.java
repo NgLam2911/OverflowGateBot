@@ -211,6 +211,24 @@ public class UserHandler {
         return money;
     }
 
+    // Add status to user
+    public boolean add(Member member, String type, Integer amount) {
+        DiscordUser user = getUser(member);
+        if (user == null)
+            return false;
+        if (type.equals("Point")) {
+            user.addPoint(amount);
+            return true;
+        } else if (type.equals("PVPPoint")) {
+            user.pvpPoint += amount;
+            return true;
+        } else if (type.equals("Money")) {
+            user.addMoney(amount);
+            return true;
+        }
+        return false;
+    }
+
     // Display roles, levels, points, and money
     public EmbedBuilder getUserInfo(Member member) {
         DiscordUser user = getUser(member);
@@ -234,7 +252,8 @@ public class UserHandler {
         builder.addField("**Cấp: **", user.level.toString(), false);
         builder.addField("**Kinh nghiệm: **", user.point + " \\ " + user.getExpCap(), false);
         builder.addField("**Tổng kinh nghiệm: **", user.getTotalPoint().toString(), false);
-        builder.addField("**Điểm: **", user.money + " MM", false);
+        builder.addField("**Tiền: **", user.money + " MM", false);
+        builder.addField("**Điểm pvp: **", user.pvpPoint + " ", false);
 
         return builder;
     }

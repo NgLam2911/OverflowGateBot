@@ -50,6 +50,7 @@ public class CommandHandler extends ListenerAdapter {
         guild.upsertCommand(Commands.slash("shar", "Shar only").addSubcommands(//
                 new SubcommandData("save", "Shar only"), //
                 new SubcommandData("load", "Shar only"), //
+                new SubcommandData("add", "Shar only").addOption(OptionType.STRING, "type", "Shar only", true, true).addOption(OptionType.USER, "user", "Shar only", true).addOption(OptionType.INTEGER, "point", "Shar only", true), //
                 new SubcommandData("event", "Shar only").addOption(OptionType.STRING, "content", "Nội dung"), //
                 new SubcommandData("say", "Shar only").addOption(OptionType.STRING, "content", "Nội dung", true).addOption(OptionType.STRING, "guild", "Máy chủ muốn gửi", false, true).addOption(OptionType.STRING, "channel", "Kênh muốn gửi", false, true))//
         ).queue();
@@ -67,7 +68,8 @@ public class CommandHandler extends ListenerAdapter {
                 new SubcommandData("setmapchannel", "Đưa kênh này trở thành kênh bản đồ (Admin only)"), //
                 new SubcommandData("setuniversechannel", "Đưa kênh này trở thành kênh tin nhắn vũ trụ (Admin only)"), //
                 new SubcommandData("setserverstatus", "Đưa kênh này trở thành kênh thông tin máy chủ (Admin only)"), //
-                new SubcommandData("setadminrole", "Cài đặt vai trò admin cho máy chủ").addOption(OptionType.ROLE, "adminrole", "Vai trò admin", true))//
+                new SubcommandData("setadminrole", "Cài đặt vai trò admin cho máy chủ").addOption(OptionType.ROLE, "adminrole", "Vai trò admin", true), //
+                new SubcommandData("setmemberrole", "Cài đặt vai trò member cho máy chủ").addOption(OptionType.ROLE, "memberrole", "Vai trò member", true))//
         ).queue();
 
         // User commands
@@ -170,6 +172,11 @@ public class CommandHandler extends ListenerAdapter {
                     sendAutoComplete(event, guildConfigHandler.getChannelsName(guildId).keySet());
 
                 }
+            } else if (subcommand.equals("add")) {
+                // Type of point/ stat to add
+                if (focus.equals("type")) {
+                    sendAutoComplete(event, userHandler.sorter.keySet());
+                }
             }
 
             // bot command
@@ -252,12 +259,14 @@ public class CommandHandler extends ListenerAdapter {
             }
 
             // Add guild to registered guilds list
-            guildConfigHandler.addGuild(guild.getId());
-            userHandler.loadGuild(guild.getId());
-            // Remove all commands from guild
+            boolean result = guildConfigHandler.addGuild(guild.getId());
             registerCommand(event.getGuild());
-            guildConfigHandler.save();
-            reply(event, "Đã duyệt máy chủ", 30);
+            if (result) {
+                userHandler.loadGuild(guild.getId());
+                guildConfigHandler.save();
+                reply(event, "Đã duyệt máy chủ", 30);
+            } else
+                reply(event, "Máy chủ đã được duyệt trước đó", 30);
         }
 
         if (command.equals("unregisterguild")) {
@@ -267,12 +276,13 @@ public class CommandHandler extends ListenerAdapter {
                 return;
             }
 
-            // Add guild to registered guilds list
-            guildConfigHandler.guildIds.remove(guild.getId());
-            // Add all command to guild
-            unregisterCommand(event.getGuild());
-            guildConfigHandler.save();
-            reply(event, "Đã gỡ duyệt máy chủ", 30);
+            boolean result = guildConfigHandler.guildIds.remove(guild.getId());
+            if (result) {
+                unregisterCommand(event.getGuild());
+                guildConfigHandler.save();
+                reply(event, "Đã gỡ duyệt máy chủ", 30);
+            }
+            reply(event, "Máy chủ chưa được duyệt trước đó", 30);
         }
 
         // Shar commands
@@ -341,6 +351,30 @@ public class CommandHandler extends ListenerAdapter {
                 // - Send event link to all connected channels
             } else if (subcommand.equals("event")) {
 
+                // Add stat to a user
+            } else if (subcommand.equals("add")) {
+                OptionMapping typeOption = event.getOption("type");
+                if (typeOption == null)
+                    return;
+                OptionMapping userOption = event.getOption("user");
+                if (userOption == null)
+                    return;
+                OptionMapping pointOption = event.getOption("point");
+                if (pointOption == null)
+                    return;
+                String type = typeOption.getAsString();
+                User user = userOption.getAsUser();
+                int point = pointOption.getAsInt();
+                Member receiver = guild.getMember(user);
+                if (receiver == null) {
+                    reply(event, "Không tìm thấy " + user.getName(), 10);
+                    return;
+                }
+                Boolean result = userHandler.add(receiver, type, point);
+                if (result)
+                    reply(event, "Thêm thành công " + point + type + " cho " + receiver.getEffectiveName(), 30);
+                else
+                    reply(event, "Thêm không thành công " + point + " " + type + " cho " + receiver.getEffectiveName(), 30);
             }
 
             // Admin related commands
@@ -368,16 +402,25 @@ public class CommandHandler extends ListenerAdapter {
                 guildConfigHandler.adminRole.put(guild.getId(), adminRole.getId());
                 reply(event, "Thêm thành công vai trò " + adminRole.getName() + " làm admin", 30);
 
+                // - Add role to guild member role
+            } else if (subcommand.equals("setmemberrole")) {
+                OptionMapping memberRoleOption = event.getOption("memberrole");
+                if (memberRoleOption == null)
+                    return;
+                Role memberRole = memberRoleOption.getAsRole();
+                guildConfigHandler.memberRole.put(guild.getId(), memberRole.getId());
+                reply(event, "Thêm thành công vai trò " + memberRole.getName() + " làm member", 30);
+
                 // - Add channel to guild schematic channel
             } else if (subcommand.equals("setschematicchannel")) {
-                guildConfigHandler.addToChannel(event, guildConfigHandler.schematicChannel);
+                guildConfigHandler.setChannel(event, guildConfigHandler.schematicChannel);
                 reply(event, "Thêm thành công kênh " + event.getChannel().getName() + " vào kênh bản thiết kế", 30);
 
 
                 // - Add channel to guild map channel
             } else if (subcommand.equals("setmapchannel")) {
 
-                guildConfigHandler.addToChannel(event, guildConfigHandler.mapChannel);
+                guildConfigHandler.setChannel(event, guildConfigHandler.mapChannel);
                 reply(event, "Thêm thành công kênh " + event.getChannel().getName() + " vào kênh bản đồ", 30);
 
                 // - Set channel to be guild universe chat channel
@@ -392,6 +435,7 @@ public class CommandHandler extends ListenerAdapter {
                 reply(event, "Đặt thành công kênh " + event.getChannel().getName() + " thành kênh thông tin máy chủ", 30);
 
             }
+
         }
 
         // Bot related commands

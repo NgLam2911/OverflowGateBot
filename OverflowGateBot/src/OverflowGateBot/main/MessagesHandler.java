@@ -129,7 +129,7 @@ public class MessagesHandler extends ListenerAdapter {
             });
 
         // Delete in channel that it should not be
-        if (inChannels(message.getGuild(), message.getChannel(), guildConfigHandler.schematicChannel) || inChannels(message.getGuild(), message.getChannel(), guildConfigHandler.mapChannel)) {
+        if (inChannel(message.getChannel(), guildConfigHandler.schematicChannel) || inChannel(message.getChannel(), guildConfigHandler.mapChannel)) {
             replyTempMessage(message, "Vui lòng không gửi tin nhắn vào kênh này!", 30);
             message.delete().queue();
         }
@@ -231,6 +231,10 @@ public class MessagesHandler extends ListenerAdapter {
                 return true;
         }
         return false;
+    }
+
+    public boolean inChannel(Channel channel, HashMap<String, ArchiveChannel> channelIds) {
+        return channelIds.containsKey(channel.getId());
     }
 
     public void sendMapPreview(Attachment attachment, Member member, MessageChannel channel) {

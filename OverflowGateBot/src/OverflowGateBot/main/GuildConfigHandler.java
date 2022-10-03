@@ -46,9 +46,10 @@ public class GuildConfigHandler {
     }
 
     // Channels
-    public HashMap<String, List<ArchiveChannel>> schematicChannel = new HashMap<>();
-    public HashMap<String, List<ArchiveChannel>> mapChannel = new HashMap<>();
+    public HashMap<String, List<ArchiveChannel>> channels = new HashMap<String, List<ArchiveChannel>>();
 
+    public HashMap<String, ArchiveChannel> schematicChannel = new HashMap<>();
+    public HashMap<String, ArchiveChannel> mapChannel = new HashMap<>();
     public HashMap<String, ArchiveChannel> serverStatusChannel = new HashMap<>();
     public HashMap<String, ArchiveChannel> universeChatChannel = new HashMap<>();
 
@@ -92,11 +93,12 @@ public class GuildConfigHandler {
         return false;
     }
 
-    public void addGuild(String guildId) {
+    public boolean addGuild(String guildId) {
         if (guildIds.contains(guildId))
-            return;
+            return false;
         guildIds.add(guildId);
         save();
+        return true;
     }
 
     public HashMap<String, String> getGuildsName() {
@@ -208,10 +210,10 @@ public class GuildConfigHandler {
                 if (!guildIds.contains(guildId))
                     guildIds.add(guildId);
                 JSONData guildData = reader.readJSON(guildId);
-                JSONArray schematicChannels = guildData.readJSONArray("schematicChannel");
-                addToChannel(schematicChannels, guildId, schematicChannel);
-                JSONArray mapChannels = guildData.readJSONArray("mapChannel");
-                addToChannel(mapChannels, guildId, mapChannel);
+                JSONData schematicChannels = guildData.readJSON("schematicChannel");
+                setChannel(schematicChannels, guildId, schematicChannel);
+                JSONData mapChannels = guildData.readJSON("mapChannel");
+                setChannel(mapChannels, guildId, mapChannel);
                 JSONData serverStatusChannelId = guildData.readJSON("serverStatusChannel");
                 setChannel(serverStatusChannelId, guildId, serverStatusChannel);
                 JSONData universeChatChannelId = guildData.readJSON("universeChatChannel");
@@ -238,25 +240,30 @@ public class GuildConfigHandler {
             for (String guildId : guildIds) {
                 HashMap<String, Object> sub = new HashMap<String, Object>();
                 if (schematicChannel.containsKey(guildId))
-                    sub.put("schematicChannel", (schematicChannel.get(guildId).toString()));
+                    sub.put("schematicChannel", (schematicChannel.get(guildId)));
                 else
-                    sub.put("schematicChannel", new JSONArray());
+                    sub.put("schematicChannel", new ArchiveChannel("", ""));
+
                 if (mapChannel.containsKey(guildId))
-                    sub.put("mapChannel", mapChannel.get(guildId).toString());
+                    sub.put("mapChannel", mapChannel.get(guildId));
                 else
-                    sub.put("mapChannel", new JSONArray());
+                    sub.put("mapChannel", new ArchiveChannel("", ""));
+
                 if (serverStatusChannel.containsKey(guildId))
                     sub.put("serverStatusChannel", serverStatusChannel.get(guildId));
                 else
                     sub.put("serverStatusChannel", new ArchiveChannel("", ""));
+
                 if (universeChatChannel.containsKey(guildId))
                     sub.put("universeChatChannel", universeChatChannel.get(guildId));
                 else
                     sub.put("universeChatChannel", new ArchiveChannel("", ""));
+
                 if (adminRole.containsKey(guildId))
                     sub.put("adminRole", adminRole.get(guildId));
                 else
                     sub.put("adminRole", "");
+
                 if (memberRole.containsKey(guildId))
                     sub.put("memberRole", memberRole.get(guildId));
                 else
