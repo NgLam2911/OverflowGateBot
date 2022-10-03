@@ -216,12 +216,16 @@ public class UserHandler {
         DiscordUser user = getUser(member);
         if (user == null)
             return false;
-        if (type.equals("Point")) {
-            user.addPoint(amount);
+
+        if (type.equals("Level")) {
+            if (user.addPoint(amount))
+                setDisplayName(member);
             return true;
+
         } else if (type.equals("PVPPoint")) {
             user.pvpPoint += amount;
             return true;
+
         } else if (type.equals("Money")) {
             user.addMoney(amount);
             return true;

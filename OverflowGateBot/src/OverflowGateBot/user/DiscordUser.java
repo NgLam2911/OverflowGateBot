@@ -60,12 +60,25 @@ public class DiscordUser {
     // Add point for user
     public boolean addPoint(int p) {
         boolean lvUp = false;
-        this.point += p;
-        while (this.point >= this.getExpCap()) {
-            this.point %= this.getExpCap();
-            this.level += 1;
+        int extra;
+        while (p > 0) {
+            extra = p - this.getExpCap();
+            if (extra >= 0) {
+                this.level += 1;
+                this.point += extra;
+                lvUp = true;
+                p -= this.getExpCap();
+                checkMemberRole();
+            } else {
+                this.point += p;
+                p = 0;
+            }
+        }
+
+        while (point >= getExpCap()) {
+            point -= getExpCap();
+            level += 1;
             lvUp = true;
-            checkMemberRole();
         }
         return lvUp;
     }
@@ -79,22 +92,22 @@ public class DiscordUser {
     public void checkMemberRole() {
         if (level >= 3) {
             Guild guild = messagesHandler.jda.getGuildById(guildId);
-            if (guild == null) {
-                System.out.println("Guild not found: " + guildId);
+            if (guild == null)
                 return;
-            }
             Member member = guild.getMemberById(id);
-
-            if (member != null) {
-                String roleId = guildConfigHandler.memberRole.get(guildId);
-                if (roleId == null || roleId.isEmpty())
-                    return;
-                Role memberRole = guild.getRoleById(roleId);
-                if (memberRole != null)
-                    guild.addRoleToMember(member, memberRole).queue();
-
-            } else
+            if (member == null) {
                 System.out.println("Not found " + getName());
+            } else {
+                String roleId = guildConfigHandler.memberRole.get(guildId);
+                if (roleId == null || roleId.isEmpty()) {
+                    return;
+                }
+                Role memberRole = guild.getRoleById(roleId);
+                if (memberRole != null) {
+                    guild.addRoleToMember(member, memberRole).queue();
+                } else
+                    System.out.println("Role not exist: " + roleId);
+            }
         }
     }
 

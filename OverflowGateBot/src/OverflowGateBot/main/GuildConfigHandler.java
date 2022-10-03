@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.TreeMap;
 
 import javax.annotation.Nonnull;
 
@@ -35,8 +36,11 @@ public class GuildConfigHandler {
             this.lastMessageId = lastMessageId;
         }
 
-        public String toString() {
-            return "{\"channelId\":\"" + channelId + "\", \"lastMessageId\":\"" + lastMessageId + "\"}";
+        public TreeMap<String, String> getJsonValue() {
+            TreeMap<String, String> map = new TreeMap<>();
+            map.put("channelId", channelId);
+            map.put("lastMessageId", lastMessageId);
+            return map;
         }
     }
 
@@ -142,40 +146,60 @@ public class GuildConfigHandler {
     }
 
     public void setChannel(JSONData archiveChannel, String guildId, HashMap<String, ArchiveChannel> channelIds) {
-        if (archiveChannel.data == null)
+        if (archiveChannel == null || archiveChannel.data == null)
             return;
+
         String channelId = archiveChannel.readString("channelId");
-        if (channelId.isEmpty())
+        if (channelId.equals("null"))
             return;
+
         String lastMessageId = archiveChannel.readString("lastMessageId");
-        channelIds.put(guildId, new ArchiveChannel(channelId, lastMessageId));
+        if (lastMessageId.equals("null"))
+            return;
+
+        if (guildId == null)
+            return;
+
+        if (messagesHandler.hasChannel(guildId, channelId))
+            channelIds.put(guildId, new ArchiveChannel(channelId, lastMessageId));
     }
 
     public void setChannel(SlashCommandInteractionEvent event, HashMap<String, ArchiveChannel> channelIds) {
         Guild guild = event.getGuild();
         if (guild == null)
             return;
-        channelIds.put(guild.getId(), new ArchiveChannel(event.getChannel().getId(), ""));
+        channelIds.put(guild.getId(), new ArchiveChannel(event.getChannel().getId(), null));
     }
 
     public void addToChannel(JSONData archiveChannel, String guildId, HashMap<String, List<ArchiveChannel>> channelIds) {
+        if (archiveChannel == null || archiveChannel.data == null)
+            return;
         String channelId = archiveChannel.readString("channelId");
         if (channelId.isEmpty())
             return;
         String lastMessageId = archiveChannel.readString("lastMessageId");
-        addToChannel(channelId, lastMessageId, guildId, channelIds);
+        if (guildId == null)
+            return;
+
+        if (messagesHandler.hasChannel(guildId, channelId))
+            addToChannel(channelId, lastMessageId, guildId, channelIds);
     }
 
     public void addToChannel(String channelId, String lastMessageId, String guildId, HashMap<String, List<ArchiveChannel>> channelIds) {
-        if (channelIds.containsKey(guildId)) {
-            if (inChannels(channelId, guildId, channelIds))
-                return;
-            else
+        if (guildId == null || channelId == null)
+            return;
+
+        if (messagesHandler.hasChannel(guildId, channelId))
+
+            if (channelIds.containsKey(guildId)) {
+                if (inChannels(channelId, guildId, channelIds))
+                    return;
+                else
+                    channelIds.get(guildId).add(new ArchiveChannel(channelId, lastMessageId));
+            } else {
+                channelIds.put(guildId, new ArrayList<ArchiveChannel>());
                 channelIds.get(guildId).add(new ArchiveChannel(channelId, lastMessageId));
-        } else {
-            channelIds.put(guildId, new ArrayList<ArchiveChannel>());
-            channelIds.get(guildId).add(new ArchiveChannel(channelId, lastMessageId));
-        }
+            }
     }
 
     public void addToChannel(JSONArray archiveChannels, String guildId, HashMap<String, List<ArchiveChannel>> channelIds) {
@@ -236,38 +260,26 @@ public class GuildConfigHandler {
         try {
             JSONHandler handler = new JSONHandler();
             JSONWriter writer = handler.new JSONWriter(guildFilePath);
-            HashMap<String, Object> data = new HashMap<String, Object>();
+            HashMap<String, HashMap<String, Object>> data = new HashMap<>();
             for (String guildId : guildIds) {
-                HashMap<String, Object> sub = new HashMap<String, Object>();
+                HashMap<String, Object> sub = new HashMap<>();
                 if (schematicChannel.containsKey(guildId))
-                    sub.put("schematicChannel", (schematicChannel.get(guildId)));
-                else
-                    sub.put("schematicChannel", new ArchiveChannel("", ""));
+                    sub.put("schematicChannel", schematicChannel.get(guildId).getJsonValue());
 
                 if (mapChannel.containsKey(guildId))
-                    sub.put("mapChannel", mapChannel.get(guildId));
-                else
-                    sub.put("mapChannel", new ArchiveChannel("", ""));
+                    sub.put("mapChannel", mapChannel.get(guildId).getJsonValue());
 
                 if (serverStatusChannel.containsKey(guildId))
-                    sub.put("serverStatusChannel", serverStatusChannel.get(guildId));
-                else
-                    sub.put("serverStatusChannel", new ArchiveChannel("", ""));
+                    sub.put("serverStatusChannel", serverStatusChannel.get(guildId).getJsonValue());
 
                 if (universeChatChannel.containsKey(guildId))
-                    sub.put("universeChatChannel", universeChatChannel.get(guildId));
-                else
-                    sub.put("universeChatChannel", new ArchiveChannel("", ""));
+                    sub.put("universeChatChannel", universeChatChannel.get(guildId).getJsonValue());
 
                 if (adminRole.containsKey(guildId))
                     sub.put("adminRole", adminRole.get(guildId));
-                else
-                    sub.put("adminRole", "");
 
                 if (memberRole.containsKey(guildId))
                     sub.put("memberRole", memberRole.get(guildId));
-                else
-                    sub.put("memberRole", "");
 
 
                 data.put(guildId, sub);

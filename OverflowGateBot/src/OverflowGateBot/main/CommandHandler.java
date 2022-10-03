@@ -372,7 +372,7 @@ public class CommandHandler extends ListenerAdapter {
                 }
                 Boolean result = userHandler.add(receiver, type, point);
                 if (result)
-                    reply(event, "Thêm thành công " + point + type + " cho " + receiver.getEffectiveName(), 30);
+                    reply(event, "Thêm thành công " + point + " " + type + " cho " + receiver.getEffectiveName(), 30);
                 else
                     reply(event, "Thêm không thành công " + point + " " + type + " cho " + receiver.getEffectiveName(), 30);
             }

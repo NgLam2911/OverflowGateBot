@@ -82,16 +82,22 @@ public class JSONHandler {
         }
 
         public int readInt(String key) {
+            if (!this.data.containsKey(key))
+                return 0;
             Object value = data.get(key);
             return value == null ? 0 : Integer.valueOf((value).toString());
         }
 
         public long readLong(String key) {
+            if (!this.data.containsKey(key))
+                return 0;
             Object value = data.get(key);
             return value == null ? 0 : Long.valueOf((value).toString());
         }
 
         public String readString(String key) {
+            if (!this.data.containsKey(key))
+                return null;
             if (data.containsKey(key)) {
                 Object value = data.get(key);
                 return value == null ? "" : (value).toString();
@@ -100,6 +106,8 @@ public class JSONHandler {
         }
 
         public JSONData readJSON(String key) {
+            if (!this.data.containsKey(key))
+                return null;
             JSONObject newData = (JSONObject) this.data.get(key);
             JSONData newJson = new JSONData();
             newJson.data = newData;

@@ -112,12 +112,10 @@ public class MessagesHandler extends ListenerAdapter {
         if ((isSchematicText(message) && attachments.isEmpty()) || isSchematicFile(attachments)) {
             System.out.println(getMessageSender(message) + ": sent a schematic");
             sendSchematicPreview(message, message.getChannel());
-            return;
         }
 
-        if (isMapFile(attachments)) {
+        else if (isMapFile(attachments)) {
             sendMapPreview(message, message.getChannel());
-            return;
         }
 
         // Log member message/file/image url to terminal
@@ -129,9 +127,10 @@ public class MessagesHandler extends ListenerAdapter {
             });
 
         // Delete in channel that it should not be
-        if (inChannel(message.getChannel(), guildConfigHandler.schematicChannel) || inChannel(message.getChannel(), guildConfigHandler.mapChannel)) {
+        if (inChannel(message.getGuild(), message.getChannel(), guildConfigHandler.schematicChannel) || inChannel(message.getGuild(), message.getChannel(), guildConfigHandler.mapChannel)) {
             replyTempMessage(message, "Vui lòng không gửi tin nhắn vào kênh này!", 30);
             message.delete().queue();
+            return;
         }
 
         // Update exp on message sent
@@ -233,8 +232,23 @@ public class MessagesHandler extends ListenerAdapter {
         return false;
     }
 
-    public boolean inChannel(Channel channel, HashMap<String, ArchiveChannel> channelIds) {
-        return channelIds.containsKey(channel.getId());
+    public boolean inChannel(Guild guild, Channel channel, HashMap<String, ArchiveChannel> channelIds) {
+        if (channelIds.containsKey(guild.getId()))
+            if (channelIds.get(guild.getId()).channelId.equals(channel.getId()))
+                return true;
+        return false;
+    }
+
+    public boolean hasChannel(@Nonnull String guildId, @Nonnull String channelId) {
+        Guild guild = jda.getGuildById(guildId);
+        if (guild == null)
+            return false;
+        List<GuildChannel> channel = guild.getChannels();
+        for (GuildChannel c : channel) {
+            if (c.getId().equals(channelId))
+                return true;
+        }
+        return false;
     }
 
     public void sendMapPreview(Attachment attachment, Member member, MessageChannel channel) {
