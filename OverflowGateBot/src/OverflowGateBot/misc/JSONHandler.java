@@ -81,31 +81,38 @@ public class JSONHandler {
         public JSONData() {
         }
 
-        public int readInt(String key) {
+        public int readInt(String key, int defaultValue) {
+            if (this.data == null)
+                return defaultValue;
             if (!this.data.containsKey(key))
-                return 0;
+                return defaultValue;
             Object value = data.get(key);
-            return value == null ? 0 : Integer.valueOf((value).toString());
+            return value == null ? defaultValue : Integer.valueOf((value).toString());
         }
 
-        public long readLong(String key) {
+        public long readLong(String key, long defaultValue) {
+            if (this.data == null)
+                return defaultValue;
             if (!this.data.containsKey(key))
-                return 0;
+                return defaultValue;
             Object value = data.get(key);
-            return value == null ? 0 : Long.valueOf((value).toString());
+            return value == null ? defaultValue : Long.valueOf((value).toString());
         }
 
-        public String readString(String key) {
+        public String readString(String key, String defaultValue) {
+            if (this.data == null)
+                return defaultValue;
             if (!this.data.containsKey(key))
-                return null;
-            if (data.containsKey(key)) {
-                Object value = data.get(key);
-                return value == null ? "" : (value).toString();
-            }
-            return "";
+                return defaultValue;
+            if (!data.containsKey(key))
+                return defaultValue;
+            Object value = data.get(key);
+            return value == null ? defaultValue : (value).toString();
         }
 
         public JSONData readJSON(String key) {
+            if (this.data == null)
+                return null;
             if (!this.data.containsKey(key))
                 return null;
             JSONObject newData = (JSONObject) this.data.get(key);

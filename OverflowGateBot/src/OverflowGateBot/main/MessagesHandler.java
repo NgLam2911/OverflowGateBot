@@ -58,7 +58,7 @@ public class MessagesHandler extends ListenerAdapter {
             JSONHandler jsonHandler = new JSONHandler();
 
             JSONData reader = (jsonHandler.new JSONReader("token.json")).read();
-            String token = reader.readString("token");
+            String token = reader.readString("token", null);
 
             // Build jda
             jda = JDABuilder.createDefault(token, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_EMOJIS, GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_PRESENCES, GatewayIntent.GUILD_MESSAGE_REACTIONS).setMemberCachePolicy(MemberCachePolicy.ALL).disableCache(CacheFlag.VOICE_STATE).build();

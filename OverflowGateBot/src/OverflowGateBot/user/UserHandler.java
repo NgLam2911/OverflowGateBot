@@ -308,7 +308,7 @@ public class UserHandler {
 
             // Load daily data
             JSONData reader = (jsonHandler.new JSONReader(dailyFilePath)).read();
-            String date = reader.readString("date");
+            String date = reader.readString("date", null);
 
             if (date.equals(getDate())) {
                 JSONArray dailyData = reader.readJSONArray("data");
@@ -341,13 +341,13 @@ public class UserHandler {
                         JSONData userData = guildData.readJSON(id);
                         if (userData.data == null)
                             continue;
-                        String name = userData.readString("NAME");
-                        int point = userData.readInt("POINT");
-                        int level = userData.readInt("LEVEL");
-                        String nickname = userData.readString("NICKNAME");
-                        Boolean hideLv = Boolean.parseBoolean(userData.readString("HIDELV"));
-                        int money = userData.readInt("MONEY");
-                        int pvpPoint = userData.readInt("PVPPOINT");
+                        String name = userData.readString("NAME", null);
+                        int point = userData.readInt("POINT", 0);
+                        int level = userData.readInt("LEVEL", 0);
+                        String nickname = userData.readString("NICKNAME", null);
+                        Boolean hideLv = Boolean.parseBoolean(userData.readString("HIDELV", "false"));
+                        int money = userData.readInt("MONEY", 0);
+                        int pvpPoint = userData.readInt("PVPPOINT", 0);
 
                         Guild guild = messagesHandler.jda.getGuildById(gid);
 
@@ -419,7 +419,7 @@ public class UserHandler {
             JSONHandler jsonHandler = new JSONHandler();
             JSONData reader;
             reader = (jsonHandler.new JSONReader(dailyFilePath)).read();
-            String date = reader.readString("date");
+            String date = reader.readString("date", null);
             JSONWriter writer = jsonHandler.new JSONWriter(dailyFilePath);
             if (date.equals(getDate()))
                 writer.append("data", daily.toString());

@@ -149,12 +149,12 @@ public class GuildConfigHandler {
         if (archiveChannel == null || archiveChannel.data == null)
             return;
 
-        String channelId = archiveChannel.readString("channelId");
-        if (channelId.equals("null"))
+        String channelId = archiveChannel.readString("channelId", null);
+        if (channelId == null || channelId.equals("null"))
             return;
 
-        String lastMessageId = archiveChannel.readString("lastMessageId");
-        if (lastMessageId.equals("null"))
+        String lastMessageId = archiveChannel.readString("lastMessageId", null);
+        if (lastMessageId == null || lastMessageId.equals("null"))
             return;
 
         if (guildId == null)
@@ -174,10 +174,10 @@ public class GuildConfigHandler {
     public void addToChannel(JSONData archiveChannel, String guildId, HashMap<String, List<ArchiveChannel>> channelIds) {
         if (archiveChannel == null || archiveChannel.data == null)
             return;
-        String channelId = archiveChannel.readString("channelId");
-        if (channelId.isEmpty())
+        String channelId = archiveChannel.readString("channelId", null);
+        if (channelId == null || channelId.isEmpty())
             return;
-        String lastMessageId = archiveChannel.readString("lastMessageId");
+        String lastMessageId = archiveChannel.readString("lastMessageId", null);
         if (guildId == null)
             return;
 
@@ -243,9 +243,9 @@ public class GuildConfigHandler {
                 JSONData universeChatChannelId = guildData.readJSON("universeChatChannel");
                 setChannel(universeChatChannelId, guildId, universeChatChannel);
 
-                String adminRoleId = guildData.readString("adminRole");
+                String adminRoleId = guildData.readString("adminRole", null);
                 setRole(guildId, adminRoleId, adminRole);
-                String memberRoleId = guildData.readString("memberRole");
+                String memberRoleId = guildData.readString("memberRole", null);
                 setRole(guildId, memberRoleId, memberRole);
             }
 
