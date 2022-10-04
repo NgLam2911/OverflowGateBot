@@ -253,6 +253,7 @@ public class MessagesHandler extends ListenerAdapter {
 
     public void sendMapPreview(Attachment attachment, Member member, MessageChannel channel) {
         try {
+
             ContentHandler.Map map = contentHandler.readMap(onet.download(attachment.getUrl()));
             new File("cache/").mkdir();
             new File("cache/temp/").mkdir();
@@ -270,6 +271,7 @@ public class MessagesHandler extends ListenerAdapter {
             if (f == null)
                 return;
             channel.sendFile(mapFile).addFile(f).setEmbeds(builder.build()).queue();
+            userHandler.addMoney(member, 300);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -390,6 +392,8 @@ public class MessagesHandler extends ListenerAdapter {
             builder.addField("*Thông tin:*", field.toString(), true);
             // send embed
             channel.sendFile(schemFile).addFile(previewFile).setEmbeds(builder.build()).queue();
+
+            userHandler.addMoney(member, 30);
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -29,14 +29,16 @@ public class OverflowGateBot {
 
     public static void main(String[] args) {
         // TODO Database
-        onet.run(0, saveInterval, () -> {
-            try {
-                userHandler.save();
-                serverStatus.save();
-                guildConfigHandler.save();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
+        onet.run(0, saveInterval, () -> save());
+    }
+
+    public static void save() {
+        try {
+            userHandler.save();
+            serverStatus.save();
+            guildConfigHandler.save();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

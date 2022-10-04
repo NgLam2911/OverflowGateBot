@@ -71,6 +71,7 @@ public class DiscordUser {
                 checkMemberRole();
             } else {
                 this.point += p;
+                checkMemberRole();
                 p = 0;
             }
         }
@@ -79,6 +80,7 @@ public class DiscordUser {
             point -= getExpCap();
             level += 1;
             lvUp = true;
+            checkMemberRole();
         }
         return lvUp;
     }

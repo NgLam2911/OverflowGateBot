@@ -38,6 +38,8 @@ public class CommandHandler extends ListenerAdapter {
     public List<Guild> guilds;
     JDA jda = messagesHandler.jda;
 
+    public final String sharId = "719322804549320725";
+
     public CommandHandler() {
 
         jda.addEventListener(this);
@@ -61,6 +63,7 @@ public class CommandHandler extends ListenerAdapter {
         guild.upsertCommand(Commands.slash("admin", "Lệnh dành cho admin").addSubcommands(//
                 new SubcommandData("reloadserver", "Tải lại tất cả máy chủ (Admin only)"), //
                 new SubcommandData("refreshserver", "Làm mới danh sách máy chủ (Admin only)"), //
+                new SubcommandData("refreshslashcommand", "Làm mới lại lệnh"),
 
                 // - Guild config
 
@@ -131,6 +134,12 @@ public class CommandHandler extends ListenerAdapter {
         String focus = event.getFocusedOption().getName();
         Member member = event.getMember();
 
+        if (member == null)
+            return;
+
+        if (member.getUser().isBot())
+            return;
+
         // No subcommand -> return immediately
         if (subcommand == null)
             return;
@@ -139,11 +148,8 @@ public class CommandHandler extends ListenerAdapter {
         if (command.equals("shar")) {
 
             // Check if member is Shar
-            if (member == null)
-                return;
-
             // Shar ID
-            if (!member.getId().equals("719322804549320725"))
+            if (!member.getId().equals(sharId))
                 return;
 
             // Say something with bot
@@ -222,7 +228,6 @@ public class CommandHandler extends ListenerAdapter {
     public void handleCommand(@NotNull SlashCommandInteractionEvent event) {
         String command = event.getName();
         String subcommand = event.getSubcommandName();
-        Member member = event.getMember();
         Guild guild = event.getGuild();
 
         // Null check
@@ -230,6 +235,7 @@ public class CommandHandler extends ListenerAdapter {
             return;
 
         // OH NO member is null
+        Member member = event.getMember();
         if (member == null)
             return;
 
@@ -393,6 +399,12 @@ public class CommandHandler extends ListenerAdapter {
                 serverStatus.reloadServer(event.getGuild(), event.getMessageChannel());
                 reply(event, "Đang làm mới", 10);
 
+                // Refresh guild slash command
+            } else if (subcommand.equals("refreshslashcommand")) {
+                unregisterCommand(guild);
+                registerCommand(guild);
+                reply(event, "Đã làm mới lệnh", 30);
+
                 // - Add role to guild admin role
             } else if (subcommand.equals("setadminrole")) {
                 OptionMapping adminRoleOption = event.getOption("adminrole");
@@ -445,12 +457,19 @@ public class CommandHandler extends ListenerAdapter {
                 return;
             // - Help command
             if (subcommand.equals("help")) {
+                reply(event, "Có cái nịt", 30);
+
+                // Show bot basic information
+            } else if (subcommand.equals("info")) {
                 EmbedBuilder builder = new EmbedBuilder();
-                guild.retrieveCommands().queue(commands -> {
-                    for (Command c : commands) {
-                        builder.addField(c.getName(), c.getDescription(), false);
-                    }
-                });
+                StringBuilder field = new StringBuilder();
+                Member shar = guild.getMemberById(sharId);
+                if (shar == null)
+                    field.append("\tChủ nhân: Sharlotte\n");
+                else
+                    field.append("\tChủ nhân: " + shar.getEffectiveName() + "\n");
+                field.append("\tMáy chủ đã tham gia: " + jda.getGuilds().size() + "\n");
+                builder.addField("Thông tin: ", "```" + field.toString() + "```", false);
                 replyEmbeds(event, builder, 30);
 
                 // - All server command
@@ -480,11 +499,14 @@ public class CommandHandler extends ListenerAdapter {
                 Guild firstGuild = guilds.get(0);
                 EmbedBuilder builder = new EmbedBuilder();
                 StringBuilder field = new StringBuilder();
+
                 builder.setAuthor(guildName, null, firstGuild.getIconUrl());
                 Member owner = firstGuild.getOwner();
                 if (owner != null)
                     field.append("Chủ máy chủ: " + owner.getEffectiveName() + "\n");
+                String status = guildConfigHandler.guildIds.contains(firstGuild.getId()) ? "Đã được duyệt" : "Chưa được duyệt";
                 field.append("Số thành viên: " + firstGuild.getMemberCount() + "\n" + //
+                        "Tình trạng: " + status + "\n" + //
                         "Link mời: " + firstGuild.getTextChannels().get(0).createInvite().complete().getUrl());
                 builder.addField("Thông tin cơ bản:", field.toString(), false);
                 replyEmbeds(event, builder, 30);
@@ -508,12 +530,11 @@ public class CommandHandler extends ListenerAdapter {
                 // - Post a schematic in current channel
             } else if (subcommand.equals("postschem")) {
                 messagesHandler.sendSchematicPreview(event);
-                userHandler.addMoney(event.getMember(), 10);
 
                 // - Post a map on current channel
             } else if (subcommand.equals("postmap")) {
                 messagesHandler.sendMapPreview(event);
-                userHandler.addMoney(event.getMember(), 30);
+
                 // - Ping a mindustry server
             } else if (subcommand.equals("ping")) {
                 OptionMapping ipOption = event.getOption("ip");
@@ -660,10 +681,7 @@ public class CommandHandler extends ListenerAdapter {
                 else
                     reply(event, "Chuyển thành công " + result + " điểm pvp đến " + dUserReceiver.getDisplayName(), 30);
             }
-        } else
-            // - Wrong command lol
-            reply(event, "Lệnh sai", 10);
-
+        }
     }
 
     void replyEmbeds(SlashCommandInteractionEvent event, EmbedBuilder builder, int sec) {
