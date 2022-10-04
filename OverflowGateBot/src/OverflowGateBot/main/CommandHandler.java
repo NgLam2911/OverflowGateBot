@@ -117,7 +117,7 @@ public class CommandHandler extends ListenerAdapter {
     public void onSlashCommandInteraction(@Nonnull SlashCommandInteractionEvent event) {
         System.out.println(messagesHandler.getMessageSender(event) + ": used " + event.getName() + " " + event.getSubcommandName() + " " + event.getOptions().toString());
 
-        event.deferReply(true);
+        event.deferReply().queue();
         handleCommand(event);
 
         event.getHook().deleteOriginal().queueAfter(messagesHandler.messageAliveTime, TimeUnit.SECONDS);
@@ -667,10 +667,10 @@ public class CommandHandler extends ListenerAdapter {
     }
 
     void replyEmbeds(SlashCommandInteractionEvent event, EmbedBuilder builder, int sec) {
-        event.replyEmbeds(builder.build()).queue(_message -> _message.deleteOriginal().queueAfter(sec, TimeUnit.SECONDS));
+        event.getHook().sendMessageEmbeds(builder.build()).queue(_message -> _message.delete().queueAfter(sec, TimeUnit.SECONDS));
     }
 
     void reply(SlashCommandInteractionEvent event, String content, int sec) {
-        event.reply("```" + content + "```").queue(_message -> _message.deleteOriginal().queueAfter(sec, TimeUnit.SECONDS));
+        event.getHook().sendMessage("```" + content + "```").queue(_message -> _message.delete().queueAfter(sec, TimeUnit.SECONDS));
     }
 }
