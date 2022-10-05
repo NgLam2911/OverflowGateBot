@@ -56,6 +56,7 @@ public class GuildHandler {
     public HashMap<String, ArchiveChannel> mapChannel = new HashMap<>();
     public HashMap<String, ArchiveChannel> serverStatusChannel = new HashMap<>();
     public HashMap<String, ArchiveChannel> universeChatChannel = new HashMap<>();
+    public HashMap<String, ArchiveChannel> botLog = new HashMap<>();
 
     // Roles
     public HashMap<String, String> adminRole = new HashMap<>();
