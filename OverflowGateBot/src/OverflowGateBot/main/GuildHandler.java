@@ -25,7 +25,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 
 import static OverflowGateBot.OverflowGateBot.*;
 
-public class GuildConfigHandler {
+public class GuildHandler {
 
     public class ArchiveChannel {
         String channelId;
@@ -67,7 +67,7 @@ public class GuildConfigHandler {
     public final String adminName = "Sharlotte";
 
 
-    public GuildConfigHandler() {
+    public GuildHandler() {
         new File("cache/").mkdir();
         new File("cache/data").mkdir();
         new File("cache/temp").mkdir();

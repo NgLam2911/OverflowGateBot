@@ -88,7 +88,7 @@ public class UserHandler {
     // Get DiscordUser from Member, return null if not found
     public DiscordUser getUser(Member member) {
         String guildId = member.getGuild().getId();
-        if (guildConfigHandler.guildIds.contains(guildId))
+        if (guildHandler.guildIds.contains(guildId))
             if (users.containsKey(guildId))
                 return users.get(guildId).get(member.getId());
         return null;
@@ -96,7 +96,7 @@ public class UserHandler {
 
     public void addNewMember(Member member) {
         // If guild is not registered the return
-        if (!guildConfigHandler.guildIds.contains(member.getGuild().getId()))
+        if (!guildHandler.guildIds.contains(member.getGuild().getId()))
             return;
         // Not to store bot data
         if (member.getUser().isBot())
@@ -373,7 +373,7 @@ public class UserHandler {
             e.printStackTrace();
         }
 
-        for (String gid : guildConfigHandler.guildIds) {
+        for (String gid : guildHandler.guildIds) {
 
             if (gid == null)
                 break;

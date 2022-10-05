@@ -156,7 +156,7 @@ public class CommandHandler extends ListenerAdapter {
             if (subcommand.equals("say")) {
                 // Show all guilds
                 if (focus.equals("guild"))
-                    sendAutoComplete(event, guildConfigHandler.getGuildsName().keySet());
+                    sendAutoComplete(event, guildHandler.getGuildsName().keySet());
 
                 // Show all channels
                 else if (focus.equals("channel")) {
@@ -164,7 +164,7 @@ public class CommandHandler extends ListenerAdapter {
                     OptionMapping guildIdOption = event.getOption("guild");
                     if (guildIdOption == null)
                         return;
-                    HashMap<String, String> guilds = guildConfigHandler.getGuildsName();
+                    HashMap<String, String> guilds = guildHandler.getGuildsName();
                     String guildName = guildIdOption.getAsString();
 
                     if (!guilds.containsKey(guildName))
@@ -175,7 +175,7 @@ public class CommandHandler extends ListenerAdapter {
                         System.out.println("Not found guild " + guildName);
                         return;
                     }
-                    sendAutoComplete(event, guildConfigHandler.getChannelsName(guildId).keySet());
+                    sendAutoComplete(event, guildHandler.getChannelsName(guildId).keySet());
 
                 }
             } else if (subcommand.equals("add")) {
@@ -251,7 +251,7 @@ public class CommandHandler extends ListenerAdapter {
         }
 
         // Shar permission to use bot
-        if (!guildConfigHandler.guildIds.contains(guild.getId()) && !member.getId().equals("719322804549320725")) {
+        if (!guildHandler.guildIds.contains(guild.getId()) && !member.getId().equals("719322804549320725")) {
             reply(event, "Máy chủ của bạn chưa được duyệt, liên hệ admin Shar để được duyệt", 30);
             return;
         }
@@ -265,11 +265,11 @@ public class CommandHandler extends ListenerAdapter {
             }
 
             // Add guild to registered guilds list
-            boolean result = guildConfigHandler.addGuild(guild.getId());
+            boolean result = guildHandler.addGuild(guild.getId());
             registerCommand(event.getGuild());
             if (result) {
                 userHandler.loadGuild(guild.getId());
-                guildConfigHandler.save();
+                guildHandler.save();
                 reply(event, "Đã duyệt máy chủ", 30);
             } else
                 reply(event, "Máy chủ đã được duyệt trước đó", 30);
@@ -282,10 +282,10 @@ public class CommandHandler extends ListenerAdapter {
                 return;
             }
 
-            boolean result = guildConfigHandler.guildIds.remove(guild.getId());
+            boolean result = guildHandler.guildIds.remove(guild.getId());
             if (result) {
                 unregisterCommand(event.getGuild());
-                guildConfigHandler.save();
+                guildHandler.save();
                 reply(event, "Đã gỡ duyệt máy chủ", 30);
             }
             reply(event, "Máy chủ chưa được duyệt trước đó", 30);
@@ -309,7 +309,7 @@ public class CommandHandler extends ListenerAdapter {
                 try {
                     serverStatus.save();
                     userHandler.save();
-                    guildConfigHandler.save();
+                    guildHandler.save();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -389,7 +389,7 @@ public class CommandHandler extends ListenerAdapter {
             if (subcommand == null)
                 return;
 
-            if (!guildConfigHandler.isAdmin(event.getMember())) {
+            if (!guildHandler.isAdmin(event.getMember())) {
                 reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
                 return;
             }
@@ -411,7 +411,7 @@ public class CommandHandler extends ListenerAdapter {
                 if (adminRoleOption == null)
                     return;
                 Role adminRole = adminRoleOption.getAsRole();
-                guildConfigHandler.adminRole.put(guild.getId(), adminRole.getId());
+                guildHandler.adminRole.put(guild.getId(), adminRole.getId());
                 reply(event, "Thêm thành công vai trò " + adminRole.getName() + " làm admin", 30);
 
                 // - Add role to guild member role
@@ -420,30 +420,30 @@ public class CommandHandler extends ListenerAdapter {
                 if (memberRoleOption == null)
                     return;
                 Role memberRole = memberRoleOption.getAsRole();
-                guildConfigHandler.memberRole.put(guild.getId(), memberRole.getId());
+                guildHandler.memberRole.put(guild.getId(), memberRole.getId());
                 reply(event, "Thêm thành công vai trò " + memberRole.getName() + " làm member", 30);
 
                 // - Add channel to guild schematic channel
             } else if (subcommand.equals("setschematicchannel")) {
-                guildConfigHandler.setChannel(event, guildConfigHandler.schematicChannel);
+                guildHandler.setChannel(event, guildHandler.schematicChannel);
                 reply(event, "Thêm thành công kênh " + event.getChannel().getName() + " vào kênh bản thiết kế", 30);
 
 
                 // - Add channel to guild map channel
             } else if (subcommand.equals("setmapchannel")) {
 
-                guildConfigHandler.setChannel(event, guildConfigHandler.mapChannel);
+                guildHandler.setChannel(event, guildHandler.mapChannel);
                 reply(event, "Thêm thành công kênh " + event.getChannel().getName() + " vào kênh bản đồ", 30);
 
                 // - Set channel to be guild universe chat channel
             } else if (subcommand.equals("setuniversechannel")) {
-                guildConfigHandler.setChannel(event, guildConfigHandler.universeChatChannel);
+                guildHandler.setChannel(event, guildHandler.universeChatChannel);
                 reply(event, "Đặt thành công kênh " + event.getChannel().getName() + " thành kênh tin nhắn vũ trụ", 30);
 
 
                 // - Set channel to be guild server status chat channel
             } else if (subcommand.equals("setserverstatuschannel")) {
-                guildConfigHandler.setChannel(event, guildConfigHandler.serverStatusChannel);
+                guildHandler.setChannel(event, guildHandler.serverStatusChannel);
                 reply(event, "Đặt thành công kênh " + event.getChannel().getName() + " thành kênh thông tin máy chủ", 30);
 
             }
@@ -478,7 +478,7 @@ public class CommandHandler extends ListenerAdapter {
                 EmbedBuilder builder = new EmbedBuilder();
                 StringBuilder field = new StringBuilder();
                 for (Guild g : guilds) {
-                    String registered = guildConfigHandler.guildIds.contains(g.getId()) ? "Đã được duyệt" : "Chưa được duyệt";
+                    String registered = guildHandler.guildIds.contains(g.getId()) ? "Đã được duyệt" : "Chưa được duyệt";
                     field.append("_" + g.getName() + "_: " + registered + "\n");
                 }
                 builder.addField("_Máy chủ_", field.toString(), false);
@@ -504,7 +504,7 @@ public class CommandHandler extends ListenerAdapter {
                 Member owner = firstGuild.getOwner();
                 if (owner != null)
                     field.append("Chủ máy chủ: " + owner.getEffectiveName() + "\n");
-                String status = guildConfigHandler.guildIds.contains(firstGuild.getId()) ? "Đã được duyệt" : "Chưa được duyệt";
+                String status = guildHandler.guildIds.contains(firstGuild.getId()) ? "Đã được duyệt" : "Chưa được duyệt";
                 field.append("Số thành viên: " + firstGuild.getMemberCount() + "\n" + //
                         "Tình trạng: " + status + "\n" + //
                         "Link mời: " + firstGuild.getTextChannels().get(0).createInvite().complete().getUrl());
@@ -594,7 +594,7 @@ public class CommandHandler extends ListenerAdapter {
                     return;
 
                 if (userOption != null) {
-                    if (guildConfigHandler.isAdmin(event.getMember())) {
+                    if (guildHandler.isAdmin(event.getMember())) {
                         User user = userOption.getAsUser();
                         userHandler.setNickName(guild.getMember(user), nicknameOption.getAsString());
                         reply(event, "Đổi biệt danh thành " + nicknameOption.getAsString(), 10);

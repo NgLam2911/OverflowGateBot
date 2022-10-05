@@ -26,7 +26,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import javax.annotation.Nonnull;
 import javax.imageio.*;
 
-import OverflowGateBot.main.GuildConfigHandler.ArchiveChannel;
+import OverflowGateBot.main.GuildHandler.ArchiveChannel;
 import OverflowGateBot.mindustry.ContentHandler;
 import OverflowGateBot.misc.JSONHandler;
 import OverflowGateBot.misc.JSONHandler.JSONData;
@@ -43,7 +43,6 @@ import static OverflowGateBot.OverflowGateBot.*;
 public class MessagesHandler extends ListenerAdapter {
 
     public final JDA jda;
-    public final String prefix = ">";
 
     public final Integer messageAliveTime = 30;
 
@@ -127,7 +126,7 @@ public class MessagesHandler extends ListenerAdapter {
             });
 
         // Delete in channel that it should not be
-        if (inChannel(message.getGuild(), message.getChannel(), guildConfigHandler.schematicChannel) || inChannel(message.getGuild(), message.getChannel(), guildConfigHandler.mapChannel)) {
+        if (inChannel(message.getGuild(), message.getChannel(), guildHandler.schematicChannel) || inChannel(message.getGuild(), message.getChannel(), guildHandler.mapChannel)) {
             replyTempMessage(message, "Vui lòng không gửi tin nhắn vào kênh này!", 30);
             message.delete().queue();
             return;

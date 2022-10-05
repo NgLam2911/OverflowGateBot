@@ -100,7 +100,7 @@ public class DiscordUser {
             if (member == null) {
                 System.out.println("Not found " + getName());
             } else {
-                String roleId = guildConfigHandler.memberRole.get(guildId);
+                String roleId = guildHandler.memberRole.get(guildId);
                 if (roleId == null || roleId.isEmpty()) {
                     return;
                 }
@@ -155,7 +155,7 @@ public class DiscordUser {
         if (member.getUser().isBot())
             return;
 
-        if (guildConfigHandler.isAdmin(member))
+        if (guildHandler.isAdmin(member))
             return;
 
         if (member.getGuild().getSelfMember().canInteract(member)) {
@@ -167,7 +167,7 @@ public class DiscordUser {
                 }
                 member.modifyNickname(name).queue();
             }
-        } else if (!guildConfigHandler.isAdmin(member))
+        } else if (!guildHandler.isAdmin(member))
             System.out.println("Cant interact with " + member.getEffectiveName());
     }
 

@@ -4,7 +4,7 @@ package OverflowGateBot;
 import java.io.IOException;
 
 import OverflowGateBot.main.CommandHandler;
-import OverflowGateBot.main.GuildConfigHandler;
+import OverflowGateBot.main.GuildHandler;
 import OverflowGateBot.main.MessagesHandler;
 import OverflowGateBot.mindustry.ContentHandler;
 import OverflowGateBot.mindustry.ONet;
@@ -20,7 +20,7 @@ public class OverflowGateBot {
     public final static String serverFilePath = "cache/data/server";
 
     public static MessagesHandler messagesHandler = new MessagesHandler();
-    public static GuildConfigHandler guildConfigHandler = new GuildConfigHandler();
+    public static GuildHandler guildHandler = new GuildHandler();
     public static ContentHandler contentHandler = new ContentHandler();
     public static CommandHandler commandHandler = new CommandHandler();
     public static ONet onet = new ONet();
@@ -36,7 +36,7 @@ public class OverflowGateBot {
         try {
             userHandler.save();
             serverStatus.save();
-            guildConfigHandler.save();
+            guildHandler.save();
         } catch (IOException e) {
             e.printStackTrace();
         }
