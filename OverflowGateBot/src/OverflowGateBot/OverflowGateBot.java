@@ -12,7 +12,7 @@ import OverflowGateBot.mindustry.ServerStatus;
 import OverflowGateBot.user.UserHandler;
 
 public class OverflowGateBot {
-    public final static int saveInterval = 5 * 60 * 1000;
+    public final static int saveInterval = 1 * 60 * 1000;
 
     public final static String dailyFilePath = "cache/data/daily";
     public final static String userFilePath = "cache/data/user";
