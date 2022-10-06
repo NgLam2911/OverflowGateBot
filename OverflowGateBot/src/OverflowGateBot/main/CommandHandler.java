@@ -47,6 +47,11 @@ public class CommandHandler extends ListenerAdapter {
         addCommand(new UserCommand());
 
         jda.addEventListener(this);
+        jda.retrieveCommands().queue(commands -> {
+            for (Command command : commands) {
+                command.delete().complete();
+            }
+        });
         jda.upsertCommand(Commands.slash("registerguild", "Shar only")).queue();
         jda.upsertCommand(Commands.slash("unregisterguild", "Shar only")).queue();
     }

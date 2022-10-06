@@ -19,9 +19,9 @@ public class SayCommand extends BotSubcommandClass {
 
     public SayCommand() {
         super("say", "Shar only");
-        this.addOption(OptionType.STRING, "type", "Shar only", true, true).//
-                addOption(OptionType.USER, "user", "Shar only", true).//
-                addOption(OptionType.INTEGER, "point", "Shar only", true);
+        this.addOption(OptionType.STRING, "content", "Shar only", true).//
+                addOption(OptionType.STRING, "guild", "Shar only", false, true).//
+                addOption(OptionType.STRING, "channel", "Shar only", false, true);
     }
 
     @Override
@@ -40,8 +40,7 @@ public class SayCommand extends BotSubcommandClass {
 
         if (guildOption == null && channelOption == null) {
             event.getTextChannel().sendMessage(content).queue();
-            event.deferReply(true).queue();
-            event.getHook().sendMessage("Đã gửi thành công tin nhắn: " + content).queue();
+            event.getHook().deleteOriginal().queue();
 
         } else if (guildOption != null && channelOption != null) {
             List<Guild> guilds = messagesHandler.jda.getGuildsByName(guildOption.getAsString(), false);
@@ -53,8 +52,8 @@ public class SayCommand extends BotSubcommandClass {
                 return;
             TextChannel channel = channels.get(0);
             channel.sendMessage(content).queue();
-            event.deferReply(true).queue();
-            event.getHook().sendMessage("Đã gửi thành công tin nhắn đến: " + content).queue();
+            event.getHook().deleteOriginal().queue();
+
         }
     }
 

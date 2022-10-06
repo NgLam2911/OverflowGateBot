@@ -109,7 +109,7 @@ public class MessagesHandler extends ListenerAdapter {
         List<Attachment> attachments = message.getAttachments();
         // Schematic preview
         if ((isSchematicText(message) && attachments.isEmpty()) || isSchematicFile(attachments)) {
-            System.out.println(getMessageSender(message) + ": sent a schematic");
+            System.out.println(getMessageSender(message) + ": sent a schematic ");
             sendSchematicPreview(message, message.getChannel());
         }
 

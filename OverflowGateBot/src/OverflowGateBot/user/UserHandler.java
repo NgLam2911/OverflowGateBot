@@ -206,7 +206,7 @@ public class UserHandler {
         if (daily.contains(user.id))
             return -1;
         daily.add(user.id);
-        int money = user.getExpCap();
+        int money = user.getLevelCap();
         user.addMoney(money);
         return money;
     }
@@ -254,7 +254,7 @@ public class UserHandler {
         }
 
         builder.addField("**Cấp: **", user.level.toString(), false);
-        builder.addField("**Kinh nghiệm: **", user.point + " \\ " + user.getExpCap(), false);
+        builder.addField("**Kinh nghiệm: **", user.point + " \\ " + user.getLevelCap(), false);
         builder.addField("**Tổng kinh nghiệm: **", user.getTotalPoint().toString(), false);
         builder.addField("**Tiền: **", user.money + " MM", false);
         builder.addField("**Điểm pvp: **", user.pvpPoint + " ", false);

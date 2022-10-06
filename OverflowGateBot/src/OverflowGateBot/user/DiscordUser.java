@@ -53,35 +53,29 @@ public class DiscordUser {
     }
 
     // Get level cap
-    public int getExpCap() {
+    public int getLevelCap() {
         return level * level;
+    }
+
+    // Math!!!
+    public Integer getTotalPoint() {
+        return ((level - 1) * level * (2 * (level - 1) + 1) / 6) + point;
     }
 
     // Add point for user
     public boolean addPoint(int p) {
         boolean lvUp = false;
         int extra;
-        while (p > 0) {
-            extra = p - this.getExpCap();
-            if (extra >= 0) {
-                this.level += 1;
-                this.point += extra;
-                lvUp = true;
-                p -= this.getExpCap();
-                checkMemberRole();
-            } else {
-                this.point += p;
-                checkMemberRole();
-                p = 0;
-            }
-        }
-
-        while (point >= getExpCap()) {
-            point -= getExpCap();
+        while (point + p >= getLevelCap()) {
+            extra = getLevelCap() - point;
+            point = 0;
+            System.out.println(p + "  " + extra + "  " + getLevelCap());
+            p -= extra;
             level += 1;
             lvUp = true;
             checkMemberRole();
         }
+        point += p;
         return lvUp;
     }
 
@@ -174,10 +168,5 @@ public class DiscordUser {
     // Set nickname in database
     public void setNickname(String nickname) {
         this.nickname = nickname;
-    }
-
-    // Math!!!
-    public Integer getTotalPoint() {
-        return (int) ((level + 1) * (2 * level + 1) * level / 6) + point;
     }
 }
