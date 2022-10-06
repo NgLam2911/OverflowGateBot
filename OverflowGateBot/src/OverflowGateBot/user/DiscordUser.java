@@ -69,7 +69,6 @@ public class DiscordUser {
         while (point + p >= getLevelCap()) {
             extra = getLevelCap() - point;
             point = 0;
-            System.out.println(p + "  " + extra + "  " + getLevelCap());
             p -= extra;
             level += 1;
             lvUp = true;

@@ -7,7 +7,9 @@ import OverflowGateBot.BotCommands.Class.BotCommandClass;
 import OverflowGateBot.BotCommands.Commands.AdminCommand;
 import OverflowGateBot.BotCommands.Commands.BotCommand;
 import OverflowGateBot.BotCommands.Commands.MindustryCommand;
+import OverflowGateBot.BotCommands.Commands.RegisterGuildCommand;
 import OverflowGateBot.BotCommands.Commands.SharCommand;
+import OverflowGateBot.BotCommands.Commands.UnregisterGuildCommand;
 import OverflowGateBot.BotCommands.Commands.UserCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -45,13 +47,10 @@ public class CommandHandler extends ListenerAdapter {
         addCommand(new BotCommand());
         addCommand(new MindustryCommand());
         addCommand(new UserCommand());
+        addCommand(new RegisterGuildCommand());
+        addCommand(new UnregisterGuildCommand());
 
         jda.addEventListener(this);
-        jda.retrieveCommands().queue(commands -> {
-            for (Command command : commands) {
-                command.delete().complete();
-            }
-        });
         jda.upsertCommand(Commands.slash("registerguild", "Shar only")).queue();
         jda.upsertCommand(Commands.slash("unregisterguild", "Shar only")).queue();
     }
@@ -116,50 +115,16 @@ public class CommandHandler extends ListenerAdapter {
         }
 
         // Shar permission to use bot
-        if (!guildHandler.guildIds.contains(guild.getId()) && !member.getId().equals("719322804549320725")) {
+        if (!guildHandler.guildIds.contains(guild.getId()) && !member.getId().equals(sharId)) {
             reply(event, "Máy chủ của bạn chưa được duyệt, liên hệ admin Shar để được duyệt", 30);
             return;
         }
 
-        // Global command to register guild
-        if (command.equals("registerguild")) {
+        if (commands.containsKey(command))
+            commands.get(command).onCommand(event);
+        else
+            reply(event, "Lệnh sai rồi kìa baka", 10);
 
-            if (!member.getId().equals("719322804549320725")) {
-                reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
-                return;
-            }
-
-            // Add guild to registered guilds list
-            registerCommand(event.getGuild());
-            boolean result = guildHandler.addGuild(guild.getId());
-            if (result) {
-                userHandler.loadGuild(guild.getId());
-                guildHandler.save();
-                reply(event, "Đã duyệt máy chủ", 30);
-            } else
-                reply(event, "Máy chủ đã được duyệt trước đó", 30);
-        } else if (command.equals("unregisterguild")) {
-
-            if (!member.getId().equals("719322804549320725")) {
-                reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
-                return;
-            }
-
-            unregisterCommand(event.getGuild());
-            boolean result = guildHandler.guildIds.remove(guild.getId());
-            if (result) {
-                guildHandler.save();
-                reply(event, "Đã gỡ duyệt máy chủ", 30);
-            } else
-                reply(event, "Máy chủ chưa được duyệt trước đó", 30);
-        }
-
-        else {
-            if (commands.containsKey(command))
-                commands.get(command).onCommand(event);
-            else
-                reply(event, "Lệnh sai rồi kìa", 10);
-        }
 
     }
 

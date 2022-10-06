@@ -47,7 +47,7 @@ public class BotCommandClass {
         if (subcommands.containsKey(event.getSubcommandName()))
             subcommands.get(event.getSubcommandName()).onCommand(event);
         else
-            reply(event, "Lệnh sai rồi kìa", 10);
+            reply(event, "Lệnh sai rồi kìa baka", 10);
     }
 
     public BotSubcommandClass addSubcommands(BotSubcommandClass subcommand) {
