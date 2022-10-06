@@ -391,7 +391,6 @@ public class UserHandler {
         List<Member> members = guild.getMembers();
         for (Member m : members) {
             addNewMember(m);
-            setDisplayName(m);
         }
     }
 

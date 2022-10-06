@@ -76,7 +76,7 @@ public class CommandHandler extends ListenerAdapter {
         event.deferReply().queue();
         handleCommand(event);
 
-        event.getHook().deleteOriginal().queueAfter(messagesHandler.messageAliveTime, TimeUnit.SECONDS);
+        event.getHook().deleteOriginal().queueAfter(30, TimeUnit.SECONDS);
 
     }
 
@@ -125,34 +125,36 @@ public class CommandHandler extends ListenerAdapter {
             }
 
             // Add guild to registered guilds list
-            boolean result = guildHandler.addGuild(guild.getId());
             registerCommand(event.getGuild());
+            boolean result = guildHandler.addGuild(guild.getId());
             if (result) {
                 userHandler.loadGuild(guild.getId());
                 guildHandler.save();
                 reply(event, "Đã duyệt máy chủ", 30);
             } else
                 reply(event, "Máy chủ đã được duyệt trước đó", 30);
-        }
-
-        if (command.equals("unregisterguild")) {
+        } else if (command.equals("unregisterguild")) {
 
             if (!member.getId().equals("719322804549320725")) {
                 reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
                 return;
             }
 
+            unregisterCommand(event.getGuild());
             boolean result = guildHandler.guildIds.remove(guild.getId());
             if (result) {
-                unregisterCommand(event.getGuild());
                 guildHandler.save();
                 reply(event, "Đã gỡ duyệt máy chủ", 30);
-            }
-            reply(event, "Máy chủ chưa được duyệt trước đó", 30);
+            } else
+                reply(event, "Máy chủ chưa được duyệt trước đó", 30);
         }
 
-        if (commands.containsKey(command))
-            commands.get(command).onCommand(event);
+        else {
+            if (commands.containsKey(command))
+                commands.get(command).onCommand(event);
+            else
+                reply(event, "Lệnh sai rồi kìa", 10);
+        }
 
     }
 

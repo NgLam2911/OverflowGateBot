@@ -8,7 +8,7 @@ import static OverflowGateBot.OverflowGateBot.commandHandler;;
 
 public class RefreshSlashCommand extends BotSubcommandClass {
     public RefreshSlashCommand() {
-        super("refreshslash", "Làm mới lại tất cả các lệnh trong máy chủ");
+        super("refreshslashcommand", "Làm mới lại tất cả các lệnh trong máy chủ");
     }
 
     @Override

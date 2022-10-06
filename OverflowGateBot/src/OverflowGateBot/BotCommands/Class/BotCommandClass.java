@@ -46,10 +46,13 @@ public class BotCommandClass {
     protected void runCommand(SlashCommandInteractionEvent event) {
         if (subcommands.containsKey(event.getSubcommandName()))
             subcommands.get(event.getSubcommandName()).onCommand(event);
+        else
+            reply(event, "Lệnh sai rồi kìa", 10);
     }
 
     public BotSubcommandClass addSubcommands(BotSubcommandClass subcommand) {
         subcommands.put(subcommand.getName(), subcommand);
+        command.addSubcommands(subcommand);
         return subcommand;
     }
 
