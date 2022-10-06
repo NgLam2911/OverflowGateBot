@@ -18,7 +18,7 @@ public class PingCommand extends BotSubcommandClass {
 
     @Override
     public String getHelpString() {
-        return "Ping máy chủ mindustry thông qua ip";
+        return "Ping máy chủ mindustry thông qua ip\n\t<IP>: là ip của máy chủ muốn ping (chỉ chấp nhận ipv4) ";
     }
 
     @Override

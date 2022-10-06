@@ -16,7 +16,7 @@ public class InfoCommand extends BotSubcommandClass {
 
     @Override
     public String getHelpString() {
-        return "";
+        return "Hiển thị thông tin cơ bản của bot";
     }
 
     @Override

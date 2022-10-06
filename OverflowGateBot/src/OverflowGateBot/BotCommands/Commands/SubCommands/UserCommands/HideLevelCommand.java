@@ -16,7 +16,7 @@ public class HideLevelCommand extends BotSubcommandClass {
 
     @Override
     public String getHelpString() {
-        return "Ẩn/ tắt ẩn cấp độ của người dùng";
+        return "Ẩn/ tắt ẩn cấp độ của người dùng\n\t<hide>: true để ẩn cấp, false để hiện cấp";
     }
 
     @Override

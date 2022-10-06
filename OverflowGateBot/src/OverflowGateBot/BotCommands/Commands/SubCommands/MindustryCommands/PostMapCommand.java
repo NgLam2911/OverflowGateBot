@@ -15,7 +15,7 @@ public class PostMapCommand extends BotSubcommandClass {
 
     @Override
     public String getHelpString() {
-        return "Chuyển tập tin bản đồ thành hình ảnh";
+        return "Chuyển tập tin bản đồ thành hình ảnh\n\t<mapfile>: Tập tin chứ bản đồ muốn gửi, tập tin phải có định dạng (đuôi) .msav";
     }
 
     @Override

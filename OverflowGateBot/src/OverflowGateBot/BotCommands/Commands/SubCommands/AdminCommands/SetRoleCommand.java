@@ -14,7 +14,7 @@ public class SetRoleCommand extends BotSubcommandClass {
 
     @Override
     public String getHelpString() {
-        return "";
+        return "Cài đặt các vai trò của máy chủ:\n\t<type>: loại vai trò muốn đặt\n\t<role>: vai trò muốn gán";
     }
 
     // TODO SetRoleCommand

@@ -24,7 +24,7 @@ public class GuildCommand extends BotSubcommandClass {
 
     @Override
     public String getHelpString() {
-        return "";
+        return "Hiển thị thông tin của máy chủ discord mà bot đã gia nhập:\n\t<guild>: Tên máy chủ muốn xem, nếu không nhập guild thì sẽ hiện tất cả các máy chủ, ngược lại sẽ hiện thông tin máy chủ đã nhập";
     }
 
     @Override

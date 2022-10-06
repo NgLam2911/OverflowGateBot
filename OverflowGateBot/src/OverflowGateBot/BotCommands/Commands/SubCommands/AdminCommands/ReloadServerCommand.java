@@ -8,12 +8,12 @@ import static OverflowGateBot.OverflowGateBot.serverStatus;
 
 public class ReloadServerCommand extends BotSubcommandClass {
     public ReloadServerCommand() {
-        super("reloadserver", "Tải lại tất cả máy chủ");
+        super("reloadserver", "Tải lại tất cả máy chủ mindustry");
     }
 
     @Override
     public String getHelpString() {
-        return "";
+        return "Tải lại tất cả máy chủ mindustry";
     }
 
     @Override

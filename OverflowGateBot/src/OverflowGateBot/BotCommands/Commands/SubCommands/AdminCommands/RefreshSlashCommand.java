@@ -13,7 +13,7 @@ public class RefreshSlashCommand extends BotSubcommandClass {
 
     @Override
     public String getHelpString() {
-        return "";
+        return "Làm mới tất cả các lệnh trong máy chủ";
     }
 
     @Override

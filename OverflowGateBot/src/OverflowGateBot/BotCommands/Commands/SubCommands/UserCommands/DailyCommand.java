@@ -13,7 +13,7 @@ public class DailyCommand extends BotSubcommandClass {
 
     @Override
     public String getHelpString() {
-        return "Điểm danh";
+        return "Điểm danh mỗi ngày";
     }
 
     @Override

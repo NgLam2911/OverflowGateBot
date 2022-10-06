@@ -15,7 +15,7 @@ public class PostSchemCommand extends BotSubcommandClass {
 
     @Override
     public String getHelpString() {
-        return "Chuyển tập tin bản thiết kế thành hình ảnh";
+        return "Chuyển tập tin bản thiết kế thành hình ảnh\n\t<schematicfile>: Tập tin chứ bản thiết kế muốn gửi, tập tin phải có định dạng (đuôi) .msch";
     }
 
     @Override

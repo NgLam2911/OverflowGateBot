@@ -18,7 +18,7 @@ public class InfoCommand extends BotSubcommandClass {
 
     @Override
     public String getHelpString() {
-        return "Hiển thi thông tin người dùng";
+        return "Hiển thị thông tin người dùng\n\t<user>: Tên người dùng muốn xem thông tin, nếu không nhập thì hiển thị thông tin bản thân";
     }
 
     @Override

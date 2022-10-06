@@ -31,7 +31,7 @@ import javax.annotation.Nonnull;
 
 public class CommandHandler extends ListenerAdapter {
 
-    HashMap<String, BotCommandClass> commands = new HashMap<>();
+    public HashMap<String, BotCommandClass> commands = new HashMap<>();
 
     public List<Guild> guilds;
     JDA jda = messagesHandler.jda;
@@ -64,7 +64,7 @@ public class CommandHandler extends ListenerAdapter {
     public void unregisterCommand(Guild guild) {
         guild.retrieveCommands().queue(commands -> {
             for (Command command : commands) {
-                command.delete().queue();
+                command.delete().complete();
             }
         });
     }

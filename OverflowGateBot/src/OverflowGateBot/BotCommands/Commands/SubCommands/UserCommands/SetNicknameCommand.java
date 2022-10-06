@@ -19,7 +19,7 @@ public class SetNicknameCommand extends BotSubcommandClass {
 
     @Override
     public String getHelpString() {
-        return "Thay đổi tên của người dùng";
+        return "Thay đổi tên của người dùng\n\t<nickname>: Tên mới\n\t<user>: Tên người dùng muốn đổi tên (chỉ dành cho admin)";
     }
 
     @Override
