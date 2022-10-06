@@ -34,7 +34,7 @@ public class HelpCommand extends BotSubcommandClass {
         String command = commandOption.getAsString();
         String subcommand = subcommandOption.getAsString();
         if (commandHandler.commands.containsKey(command))
-            reply(event, commandHandler.commands.get(command).getHelpString(subcommand), 30);
+            reply(event, "/" + command + " " + subcommand + "\n" + commandHandler.commands.get(command).getHelpString(subcommand), 30);
     }
 
     @Override

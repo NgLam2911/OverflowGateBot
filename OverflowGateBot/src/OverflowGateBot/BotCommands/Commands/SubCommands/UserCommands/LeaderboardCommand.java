@@ -20,7 +20,7 @@ public class LeaderboardCommand extends BotSubcommandClass {
 
     @Override
     public String getHelpString() {
-        return "Hiện thị bản xếp hạng của người dùng\n\t<orderby>: Xếp theo:\n\t\t- MONEY: Xếp theo tiền\n\t\t- LEVEL: Xếp theo cấp\n\t\t- PVPPINT: Xếp theo điểm pvp";
+        return "Hiện thị bản xếp hạng của người dùng:\n\t<orderby>: Xếp theo:\n\t\t- MONEY: Xếp theo tiền\n\t\t- LEVEL: Xếp theo cấp\n\t\t- PVPPINT: Xếp theo điểm pvp";
     }
 
     @Override

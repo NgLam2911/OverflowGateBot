@@ -15,7 +15,7 @@ public class SetChannelCommand extends BotSubcommandClass {
 
     @Override
     public String getHelpString() {
-        return "Cài đặt các kênh của máy chủ\n\t<type>: loại kênh muốn đặt";
+        return "Cài đặt các kênh của máy chủ:\n\t<type>: loại kênh muốn đặt";
     }
 
     // TODO SetChannelCommand
