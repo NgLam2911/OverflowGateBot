@@ -36,7 +36,7 @@ public class GuildCommand extends BotSubcommandClass {
             EmbedBuilder builder = new EmbedBuilder();
             StringBuilder field = new StringBuilder();
             for (Guild g : guilds) {
-                String registered = guildHandler.guildIds.contains(g.getId()) ? "Đã được duyệt" : "Chưa được duyệt";
+                String registered = guildHandler.guildConfig.containsKey(g.getId()) ? "Đã được duyệt" : "Chưa được duyệt";
                 field.append("_" + g.getName() + "_: " + registered + "\n");
             }
             builder.addField("_Máy chủ_", field.toString(), false);
@@ -55,7 +55,7 @@ public class GuildCommand extends BotSubcommandClass {
             Member owner = firstGuild.getOwner();
             if (owner != null)
                 field.append("Chủ máy chủ: " + owner.getEffectiveName() + "\n");
-            String status = guildHandler.guildIds.contains(firstGuild.getId()) ? "Đã được duyệt" : "Chưa được duyệt";
+            String status = guildHandler.guildConfig.containsKey(firstGuild.getId()) ? "Đã được duyệt" : "Chưa được duyệt";
             field.append("Số thành viên: " + firstGuild.getMemberCount() + "\n" + //
                     "Tình trạng: " + status + "\n" + //
                     "Link mời: " + firstGuild.getTextChannels().get(0).createInvite().complete().getUrl());

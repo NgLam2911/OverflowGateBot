@@ -93,7 +93,7 @@ public class DiscordUser {
             if (member == null) {
                 System.out.println("Not found " + getName());
             } else {
-                String roleId = guildHandler.memberRole.get(guildId);
+                String roleId = guildHandler.guildConfig.get(guildId).memberRole;
                 if (roleId == null || roleId.isEmpty()) {
                     return;
                 }

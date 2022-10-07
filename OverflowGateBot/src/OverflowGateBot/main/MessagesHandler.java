@@ -126,7 +126,8 @@ public class MessagesHandler extends ListenerAdapter {
             });
 
         // Delete in channel that it should not be
-        if (inChannel(message.getGuild(), message.getChannel(), guildHandler.schematicChannel) || inChannel(message.getGuild(), message.getChannel(), guildHandler.mapChannel)) {
+        if (guildHandler.inChannels(message.getGuild().getId(), message.getChannel().getId(), guildHandler.guildConfig.get(message.getGuild().getId()).schematicChannel)
+                || guildHandler.inChannels(message.getGuild().getId(), message.getChannel().getId(), guildHandler.guildConfig.get(message.getGuild().getId()).mapChannel)) {
             replyTempMessage(message, "Vui lòng không gửi tin nhắn vào kênh này!", 30);
             message.delete().queue();
             return;
@@ -215,23 +216,7 @@ public class MessagesHandler extends ListenerAdapter {
         return Character.toUpperCase(text.charAt(0)) + text.substring(1);
     }
 
-    public boolean inChannels(Guild guild, Channel channel, HashMap<String, List<ArchiveChannel>> guildChannelIds) {
-        String guildId = guild.getId();
-        if (guildChannelIds.containsKey(guildId))
-            return false;
-
-        String channelId = channel.getId();
-        List<ArchiveChannel> channels = guildChannelIds.get(guildId);
-        if (channels == null)
-            return false;
-        for (ArchiveChannel c : channels) {
-            if (c.channelId == channelId)
-                return true;
-        }
-        return false;
-    }
-
-    public boolean inChannel(Guild guild, Channel channel, HashMap<String, ArchiveChannel> channelIds) {
+    public boolean isChannel(Guild guild, Channel channel, HashMap<String, ArchiveChannel> channelIds) {
         if (channelIds.containsKey(guild.getId()))
             if (channelIds.get(guild.getId()).channelId.equals(channel.getId()))
                 return true;

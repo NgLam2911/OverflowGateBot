@@ -115,7 +115,7 @@ public class CommandHandler extends ListenerAdapter {
         }
 
         // Shar permission to use bot
-        if (!guildHandler.guildIds.contains(guild.getId()) && !member.getId().equals(sharId)) {
+        if (!guildHandler.guildConfig.containsKey(guild.getId()) && !member.getId().equals(sharId)) {
             reply(event, "Máy chủ của bạn chưa được duyệt, liên hệ admin Shar để được duyệt", 30);
             return;
         }

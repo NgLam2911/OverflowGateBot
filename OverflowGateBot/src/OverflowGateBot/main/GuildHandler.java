@@ -36,7 +36,11 @@ public class GuildHandler {
             this.lastMessageId = lastMessageId;
         }
 
-        public TreeMap<String, String> getJsonValue() {
+        public ArchiveChannel() {
+
+        }
+
+        public TreeMap<String, String> toMap() {
             TreeMap<String, String> map = new TreeMap<>();
             map.put("channelId", channelId);
             map.put("lastMessageId", lastMessageId);
@@ -46,24 +50,43 @@ public class GuildHandler {
 
 
     public class GuildConfig {
+        // Channels
+        public List<ArchiveChannel> guildChannel = new ArrayList<ArchiveChannel>();
+        public List<ArchiveChannel> schematicChannel = new ArrayList<ArchiveChannel>();
+        public List<ArchiveChannel> mapChannel = new ArrayList<ArchiveChannel>();
 
+        public ArchiveChannel serverStatusChannel = new ArchiveChannel();
+        public ArchiveChannel universeChatChannel = new ArchiveChannel();
+        public ArchiveChannel botLog = new ArchiveChannel();
+
+        // Roles
+        public String adminRole;
+        public String memberRole;
+
+        public TreeMap<String, Object> toMap() {
+            TreeMap<String, Object> map = new TreeMap<>();
+            ArrayList<Object> list = new ArrayList<>();
+
+            map.put("adminRole", adminRole);
+            map.put("memberRole", memberRole);
+            map.put("botLog", botLog.toMap());
+            map.put("universeChatChannel", universeChatChannel.toMap());
+            map.put("serverStatusChannel", serverStatusChannel.toMap());
+            mapChannel.forEach(c -> list.add(c.toMap()));
+            map.put("mapChannel", list);
+            list.clear();
+            schematicChannel.forEach(c -> list.add(c.toMap()));
+            map.put("schematicChannel", list);
+            list.clear();
+            guildChannel.forEach(c -> list.add(c.toMap()));
+            map.put("guildChannel", list);
+            list.clear();
+            return map;
+        }
     }
 
-    // Channels
-    public HashMap<String, List<ArchiveChannel>> channels = new HashMap<String, List<ArchiveChannel>>();
-
-    public HashMap<String, ArchiveChannel> schematicChannel = new HashMap<>();
-    public HashMap<String, ArchiveChannel> mapChannel = new HashMap<>();
-    public HashMap<String, ArchiveChannel> serverStatusChannel = new HashMap<>();
-    public HashMap<String, ArchiveChannel> universeChatChannel = new HashMap<>();
-    public HashMap<String, ArchiveChannel> botLog = new HashMap<>();
-
-    // Roles
-    public HashMap<String, String> adminRole = new HashMap<>();
-    public HashMap<String, String> memberRole = new HashMap<>();
-
     // Guilds
-    public List<String> guildIds = new ArrayList<>();
+    public HashMap<String, GuildConfig> guildConfig = new HashMap<>();
 
     public final String adminName = "Sharlotte";
 
@@ -93,22 +116,22 @@ public class GuildHandler {
             return true;
 
         for (Role role : member.getRoles())
-            if (role.getId().equals(adminRole.get(member.getGuild().getId())))
+            if (role.getId().equals(guildConfig.get(member.getId()).adminRole))
                 return true;
         return false;
     }
 
     public boolean addGuild(String guildId) {
-        if (guildIds.contains(guildId))
+        if (guildConfig.keySet().contains(guildId))
             return false;
-        guildIds.add(guildId);
+        guildConfig.put(guildId, new GuildConfig());
         save();
         return true;
     }
 
     public HashMap<String, String> getGuildsName() {
         HashMap<String, String> names = new HashMap<>();
-        for (String guildId : guildIds) {
+        for (String guildId : guildConfig.keySet()) {
             if (guildId == null)
                 break;
             Guild guild = messagesHandler.jda.getGuildById(guildId);
@@ -135,10 +158,7 @@ public class GuildHandler {
 
     }
 
-    public boolean inChannels(String channelId, String guildId, HashMap<String, List<ArchiveChannel>> channelIds) {
-        List<ArchiveChannel> channels = channelIds.get(guildId);
-        if (channels == null)
-            return false;
+    public boolean inChannels(String channelId, String guildId, List<ArchiveChannel> channels) {
         for (ArchiveChannel channel : channels) {
             if (channel.channelId == channelId)
                 return true;
@@ -146,7 +166,7 @@ public class GuildHandler {
         return false;
     }
 
-    public void setChannel(JSONData archiveChannel, String guildId, HashMap<String, ArchiveChannel> channelIds) {
+    public void setChannel(JSONData archiveChannel, String guildId, ArchiveChannel channel) {
         if (archiveChannel == null || archiveChannel.data == null)
             return;
 
@@ -162,64 +182,41 @@ public class GuildHandler {
             return;
 
         if (messagesHandler.hasChannel(guildId, channelId))
-            channelIds.put(guildId, new ArchiveChannel(channelId, lastMessageId));
+            channel = new ArchiveChannel(channelId, lastMessageId);
     }
 
-    public void setChannel(SlashCommandInteractionEvent event, HashMap<String, ArchiveChannel> channelIds) {
+    public void setChannel(SlashCommandInteractionEvent event, ArchiveChannel channel) {
         Guild guild = event.getGuild();
         if (guild == null)
             return;
-        channelIds.put(guild.getId(), new ArchiveChannel(event.getChannel().getId(), null));
+        channel = new ArchiveChannel(event.getChannel().getId(), null);
     }
 
-    public void addToChannel(JSONData archiveChannel, String guildId, HashMap<String, List<ArchiveChannel>> channelIds) {
-        if (archiveChannel == null || archiveChannel.data == null)
+    public void addChannel(SlashCommandInteractionEvent event, List<ArchiveChannel> channelList) {
+        Guild guild = event.getGuild();
+        if (guild == null)
             return;
-        String channelId = archiveChannel.readString("channelId", null);
-        if (channelId == null || channelId.isEmpty())
-            return;
-        String lastMessageId = archiveChannel.readString("lastMessageId", null);
-        if (guildId == null)
-            return;
-
-        if (messagesHandler.hasChannel(guildId, channelId))
-            addToChannel(channelId, lastMessageId, guildId, channelIds);
+        addChannel(guild.getId(), event.getChannel().getId(), null, channelList);
     }
 
-    public void addToChannel(String channelId, String lastMessageId, String guildId, HashMap<String, List<ArchiveChannel>> channelIds) {
-        if (guildId == null || channelId == null)
-            return;
-
-        if (messagesHandler.hasChannel(guildId, channelId))
-
-            if (channelIds.containsKey(guildId)) {
-                if (inChannels(channelId, guildId, channelIds))
-                    return;
-                else
-                    channelIds.get(guildId).add(new ArchiveChannel(channelId, lastMessageId));
-            } else {
-                channelIds.put(guildId, new ArrayList<ArchiveChannel>());
-                channelIds.get(guildId).add(new ArchiveChannel(channelId, lastMessageId));
+    public void addChannel(String guildId, JSONArray channelIds, List<ArchiveChannel> channelList) {
+        for (Object channel : channelIds.toArray()) {
+            try {
+                ArchiveChannel c = (ArchiveChannel) channel;
+                addChannel(guildId, c.channelId, c.lastMessageId, channelList);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-    }
-
-    public void addToChannel(JSONArray archiveChannels, String guildId, HashMap<String, List<ArchiveChannel>> channelIds) {
-        if (archiveChannels == null)
-            return;
-        for (Object ac : archiveChannels) {
-            addToChannel((JSONData) ac, guildId, channelIds);
         }
     }
 
-    public void addToChannel(SlashCommandInteractionEvent event, HashMap<String, List<ArchiveChannel>> channelIds) {
-        Guild guild = event.getGuild();
-        if (guild == null)
-            return;
-        addToChannel(event.getChannel().getId(), "", guild.getId(), channelIds);
+    public void addChannel(String guildId, String channelId, String messageId, List<ArchiveChannel> channelList) {
+        if (!inChannels(channelId, guildId, channelList))
+            channelList.add(new ArchiveChannel(channelId, messageId));
     }
 
-    public void setRole(String guildId, String roleId, HashMap<String, String> roleIds) {
-        roleIds.put(guildId, roleId);
+    public void setRole(String guildId, String newRoleId, String roleId) {
+        roleId = newRoleId;
     }
 
     // TODO Database
@@ -232,22 +229,26 @@ public class GuildHandler {
                 return;
             for (Object key : reader.data.keySet()) {
                 String guildId = key.toString();
-                if (!guildIds.contains(guildId))
-                    guildIds.add(guildId);
+                if (!guildConfig.containsKey(guildId))
+                    guildConfig.put(guildId, null);
+                GuildConfig _guildConfig = guildConfig.get(guildId);
+
                 JSONData guildData = reader.readJSON(guildId);
-                JSONData schematicChannels = guildData.readJSON("schematicChannel");
-                setChannel(schematicChannels, guildId, schematicChannel);
-                JSONData mapChannels = guildData.readJSON("mapChannel");
-                setChannel(mapChannels, guildId, mapChannel);
+                JSONArray schematicChannels = guildData.readJSONArray("schematicChannel");
+                addChannel(guildId, schematicChannels, _guildConfig.schematicChannel);
+                JSONArray mapChannels = guildData.readJSONArray("mapChannel");
+                addChannel(guildId, mapChannels, _guildConfig.mapChannel);
+                JSONArray guildChannels = guildData.readJSONArray("guildChannel");
+                addChannel(guildId, guildChannels, _guildConfig.guildChannel);
                 JSONData serverStatusChannelId = guildData.readJSON("serverStatusChannel");
-                setChannel(serverStatusChannelId, guildId, serverStatusChannel);
+                setChannel(serverStatusChannelId, guildId, _guildConfig.serverStatusChannel);
                 JSONData universeChatChannelId = guildData.readJSON("universeChatChannel");
-                setChannel(universeChatChannelId, guildId, universeChatChannel);
+                setChannel(universeChatChannelId, guildId, _guildConfig.universeChatChannel);
 
                 String adminRoleId = guildData.readString("adminRole", null);
-                setRole(guildId, adminRoleId, adminRole);
+                setRole(guildId, adminRoleId, _guildConfig.adminRole);
                 String memberRoleId = guildData.readString("memberRole", null);
-                setRole(guildId, memberRoleId, memberRole);
+                setRole(guildId, memberRoleId, _guildConfig.memberRole);
             }
 
 
@@ -261,29 +262,9 @@ public class GuildHandler {
         try {
             JSONHandler handler = new JSONHandler();
             JSONWriter writer = handler.new JSONWriter(guildFilePath);
-            HashMap<String, HashMap<String, Object>> data = new HashMap<>();
-            for (String guildId : guildIds) {
-                HashMap<String, Object> sub = new HashMap<>();
-                if (schematicChannel.containsKey(guildId))
-                    sub.put("schematicChannel", schematicChannel.get(guildId).getJsonValue());
-
-                if (mapChannel.containsKey(guildId))
-                    sub.put("mapChannel", mapChannel.get(guildId).getJsonValue());
-
-                if (serverStatusChannel.containsKey(guildId))
-                    sub.put("serverStatusChannel", serverStatusChannel.get(guildId).getJsonValue());
-
-                if (universeChatChannel.containsKey(guildId))
-                    sub.put("universeChatChannel", universeChatChannel.get(guildId).getJsonValue());
-
-                if (adminRole.containsKey(guildId))
-                    sub.put("adminRole", adminRole.get(guildId));
-
-                if (memberRole.containsKey(guildId))
-                    sub.put("memberRole", memberRole.get(guildId));
-
-
-                data.put(guildId, sub);
+            HashMap<String, Object> data = new HashMap<>();
+            for (String guildId : guildConfig.keySet()) {
+                data.put(guildId, guildConfig.get(guildId).toMap());
             }
             writer.write((new JSONObject(data)).toJSONString());
 

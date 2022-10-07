@@ -21,6 +21,7 @@ public class SetChannelCommand extends BotSubcommandClass {
     // TODO SetChannelCommand
     @Override
     public void onCommand(SlashCommandInteractionEvent event) {
+
     }
 
 }

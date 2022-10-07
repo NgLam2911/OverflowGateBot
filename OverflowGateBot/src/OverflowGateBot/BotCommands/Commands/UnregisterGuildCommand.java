@@ -35,7 +35,7 @@ public class UnregisterGuildCommand extends BotCommandClass {
         }
 
         commandHandler.unregisterCommand(event.getGuild());
-        boolean result = guildHandler.guildIds.remove(guild.getId());
+        boolean result = guildHandler.guildConfig.remove(guild.getId()) != null;
         if (result) {
             guildHandler.save();
             reply(event, "Đã gỡ duyệt máy chủ", 30);
