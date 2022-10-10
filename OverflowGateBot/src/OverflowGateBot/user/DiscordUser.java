@@ -1,6 +1,7 @@
 package OverflowGateBot.user;
 
 
+import java.util.HashMap;
 import java.util.TreeMap;
 
 import javax.annotation.Nonnull;
@@ -16,16 +17,18 @@ import static OverflowGateBot.OverflowGateBot.*;
 
 public class DiscordUser {
     @Nonnull
+    public
     String id;
     @Nonnull
+    public
     String guildId;
-    String name;
+    public String name;
     String nickname = "";
-    Integer point;
-    Integer level;
+    public Integer point;
+    public Integer level;
     public Integer money = 0;
-    Integer pvpPoint;
-    Boolean hideLv = false;
+    public Integer pvpPoint;
+    public Boolean hideLv = false;
 
     public DiscordUser(@Nonnull String guildId, @Nonnull String id, String name, Integer point, Integer level, Integer money, Integer pvpPoint, Boolean hideLv) {
         this.id = id;
@@ -93,11 +96,17 @@ public class DiscordUser {
             if (member == null) {
                 System.out.println("Not found " + getName());
             } else {
-                String roleId = guildHandler.guildConfig.get(guildId).memberRole;
-                if (roleId == null || roleId.isEmpty()) {
+                HashMap<String, Object> guildInfo = guildHandler.guildConfigs.get(guildId);
+                if (guildInfo == null)
+                    return;
+                Object roleId = guildInfo.get("memberRole");
+                if (roleId == null)
+                    return;
+                String _roleId = roleId.toString();
+                if (_roleId == null || _roleId.isEmpty()) {
                     return;
                 }
-                Role memberRole = guild.getRoleById(roleId);
+                Role memberRole = guild.getRoleById(_roleId);
                 if (memberRole != null) {
                     guild.addRoleToMember(member, memberRole).queue();
                 } else

@@ -21,7 +21,7 @@ public class LoadCommand extends BotSubcommandClass {
 
     @Override
     public void onCommand(SlashCommandInteractionEvent event) {
-        reply(event, "Đang tải...", 10);
+        reply(event, "Đã tải", 2);
         try {
             serverStatus.load();
             userHandler.load();

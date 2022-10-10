@@ -2,11 +2,10 @@ package OverflowGateBot.main;
 
 
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.TreeMap;
+import java.util.Set;
 
 import javax.annotation.Nonnull;
 
@@ -21,87 +20,56 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 import static OverflowGateBot.OverflowGateBot.*;
 
 public class GuildHandler {
 
-    public class ArchiveChannel {
-        String channelId;
-        String lastMessageId;
+    // Guild config
+    /*
+     * public HashMap<String, String> guildChannel = new HashMap<>(); public
+     * HashMap<String, String> schematicChannel = new HashMap<>(); public
+     * HashMap<String, String> mapChannel = new HashMap<>(); public HashMap<String,
+     * String> serverStatusChannel = new HashMap<>(); public HashMap<String, String>
+     * universeChatChannel = new HashMap<>(); public HashMap<String, String> botLog
+     * = new HashMap<>();
+     */
 
-        public ArchiveChannel(String channelId, String lastMessageId) {
-            this.channelId = channelId;
-            this.lastMessageId = lastMessageId;
-        }
+    // Roles
+    /*
+     * public String adminRole; public String memberRole;
+     */
 
-        public ArchiveChannel() {
-
-        }
-
-        public TreeMap<String, String> toMap() {
-            TreeMap<String, String> map = new TreeMap<>();
-            map.put("channelId", channelId);
-            map.put("lastMessageId", lastMessageId);
-            return map;
-        }
-    }
-
-
-    public class GuildConfig {
-        // Channels
-        public List<ArchiveChannel> guildChannel = new ArrayList<ArchiveChannel>();
-        public List<ArchiveChannel> schematicChannel = new ArrayList<ArchiveChannel>();
-        public List<ArchiveChannel> mapChannel = new ArrayList<ArchiveChannel>();
-
-        public ArchiveChannel serverStatusChannel = new ArchiveChannel();
-        public ArchiveChannel universeChatChannel = new ArchiveChannel();
-        public ArchiveChannel botLog = new ArchiveChannel();
-
-        // Roles
-        public String adminRole;
-        public String memberRole;
-
-        public TreeMap<String, Object> toMap() {
-            TreeMap<String, Object> map = new TreeMap<>();
-            ArrayList<Object> list = new ArrayList<>();
-
-            map.put("adminRole", adminRole);
-            map.put("memberRole", memberRole);
-            map.put("botLog", botLog.toMap());
-            map.put("universeChatChannel", universeChatChannel.toMap());
-            map.put("serverStatusChannel", serverStatusChannel.toMap());
-            mapChannel.forEach(c -> list.add(c.toMap()));
-            map.put("mapChannel", list);
-            list.clear();
-            schematicChannel.forEach(c -> list.add(c.toMap()));
-            map.put("schematicChannel", list);
-            list.clear();
-            guildChannel.forEach(c -> list.add(c.toMap()));
-            map.put("guildChannel", list);
-            list.clear();
-            return map;
-        }
-    }
 
     // Guilds
-    public HashMap<String, GuildConfig> guildConfig = new HashMap<>();
+    public final String adminId = "719322804549320725";
+    public HashMap<String, HashMap<String, Object>> guildConfigs = new HashMap<>();
+    public Set<String> guildIds = new HashSet<>();
 
-    public final String adminName = "Sharlotte";
-
+    // For auto complete
+    public Set<String> guildRoles = new HashSet<>();
+    public Set<String> guildChannels = new HashSet<>();
 
     public GuildHandler() {
         new File("cache/").mkdir();
-        new File("cache/data").mkdir();
         new File("cache/temp").mkdir();
+        new File("cache/temp/map").mkdir();
+        new File("cache/temp/schem").mkdir();
+        new File("cache/data").mkdir();
+        new File("cache/data/guild").mkdir();
+        new File("cache/data/user").mkdir();
 
-        try {
-            load();
-            save();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        guildRoles.add("adminRole");
+        guildRoles.add("memberRole");
+
+        guildChannels.add("channels");
+        guildChannels.add("schematicChannel");
+        guildChannels.add("mapChannel");
+        guildChannels.add("botLog");
+        guildChannels.add("universeChatChannel");
+        guildChannels.add("serverStatusChannel");
+
+        load();
     }
 
     public boolean isAdmin(Message message) {
@@ -112,26 +80,31 @@ public class GuildHandler {
         if (member.isOwner())
             return true;
 
-        if (member.getUser().getName().equals(adminName))
+        if (member.getUser().getId().equals(adminId))
             return true;
 
+        HashMap<String, Object> guildConfig = guildConfigs.get(member.getGuild().getId());
+        if (guildConfig == null) return false;
+
         for (Role role : member.getRoles())
-            if (role.getId().equals(guildConfig.get(member.getId()).adminRole))
+            if (role.getId().equals(guildConfig.get("adminRole")))
                 return true;
         return false;
     }
 
     public boolean addGuild(String guildId) {
-        if (guildConfig.keySet().contains(guildId))
+        if (guildIds.contains(guildId)) {
             return false;
-        guildConfig.put(guildId, new GuildConfig());
+        }
+        guildIds.add(guildId);
         save();
+        load();
         return true;
     }
 
-    public HashMap<String, String> getGuildsName() {
+    public HashMap<String, String> getAllGuildName() {
         HashMap<String, String> names = new HashMap<>();
-        for (String guildId : guildConfig.keySet()) {
+        for (String guildId : guildIds) {
             if (guildId == null)
                 break;
             Guild guild = messagesHandler.jda.getGuildById(guildId);
@@ -142,7 +115,29 @@ public class GuildHandler {
         return names;
     }
 
-    public HashMap<String, String> getChannelsName(@Nonnull String guildId) {
+    public String getChannelName(@Nonnull Guild guild, HashMap<String, String> channels) {
+        String result = "";
+        for (String channelId : channels.keySet()) {
+            if (channelId == null)
+                continue;
+            TextChannel channel = guild.getTextChannelById(channelId);
+            if (channel == null)
+                continue;
+            result += channel.getName();
+        }
+        return result;
+    }
+
+    public String getRoleName(@Nonnull Guild guild, String roleId) {
+        if (roleId == null)
+            return "";
+        Role role = guild.getRoleById(roleId);
+        if (role == null)
+            return "";
+        return role.getName();
+    }
+
+    public HashMap<String, String> getAllGuildChannelName(@Nonnull String guildId) {
         HashMap<String, String> names = new HashMap<>();
         Guild guild = messagesHandler.jda.getGuildById(guildId);
         if (guild == null) {
@@ -158,117 +153,109 @@ public class GuildHandler {
 
     }
 
-    public boolean inChannels(String channelId, String guildId, List<ArchiveChannel> channels) {
-        for (ArchiveChannel channel : channels) {
-            if (channel.channelId == channelId)
-                return true;
-        }
+    public boolean inChannels(@Nonnull String guildId, @Nonnull String channelId, String channelName) {
+        if (guildConfigs.containsKey(guildId))
+            if (guildConfigs.get(guildId).containsKey(channelName)) {
+                Object channelList = guildConfigs.get(guildId).get(channelName);
+                if (channelList instanceof HashMap<?, ?>) {
+                    HashMap<?, ?> hashChannelList = (HashMap<?, ?>) channelList;
+                    for (Object _channelId : hashChannelList.keySet()) {
+                        if (channelId == _channelId.toString())
+                            return true;
+                    }
+                }
+            }
         return false;
     }
 
-    public void setChannel(JSONData archiveChannel, String guildId, ArchiveChannel channel) {
-        if (archiveChannel == null || archiveChannel.data == null)
-            return;
-
-        String channelId = archiveChannel.readString("channelId", null);
-        if (channelId == null || channelId.equals("null"))
-            return;
-
-        String lastMessageId = archiveChannel.readString("lastMessageId", null);
-        if (lastMessageId == null || lastMessageId.equals("null"))
-            return;
-
-        if (guildId == null)
-            return;
-
-        if (messagesHandler.hasChannel(guildId, channelId))
-            channel = new ArchiveChannel(channelId, lastMessageId);
-    }
-
-    public void setChannel(SlashCommandInteractionEvent event, ArchiveChannel channel) {
-        Guild guild = event.getGuild();
-        if (guild == null)
-            return;
-        channel = new ArchiveChannel(event.getChannel().getId(), null);
-    }
-
-    public void addChannel(SlashCommandInteractionEvent event, List<ArchiveChannel> channelList) {
-        Guild guild = event.getGuild();
-        if (guild == null)
-            return;
-        addChannel(guild.getId(), event.getChannel().getId(), null, channelList);
-    }
-
-    public void addChannel(String guildId, JSONArray channelIds, List<ArchiveChannel> channelList) {
-        for (Object channel : channelIds.toArray()) {
-            try {
-                ArchiveChannel c = (ArchiveChannel) channel;
-                addChannel(guildId, c.channelId, c.lastMessageId, channelList);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public void addChannel(String guildId, String channelId, String messageId, List<ArchiveChannel> channelList) {
-        if (!inChannels(channelId, guildId, channelList))
-            channelList.add(new ArchiveChannel(channelId, messageId));
-    }
-
-    public void setRole(String guildId, String newRoleId, String roleId) {
-        roleId = newRoleId;
-    }
-
     // TODO Database
-    public void load() throws IOException {
+    @SuppressWarnings("unchecked")
+    public void load() {
 
         try {
+            // Read all the guild id
             JSONHandler handler = new JSONHandler();
             JSONData reader = (handler.new JSONReader(guildFilePath)).read();
             if (reader.data == null)
                 return;
-            for (Object key : reader.data.keySet()) {
-                String guildId = key.toString();
-                if (!guildConfig.containsKey(guildId))
-                    guildConfig.put(guildId, null);
-                GuildConfig _guildConfig = guildConfig.get(guildId);
+            JSONArray _guildIds = reader.readJSONArray("guildIds");
+            if (guildIds == null)
+                return;
+            for (Object _guildId : _guildIds) {
+                guildIds.add(_guildId.toString());
+            }
 
-                JSONData guildData = reader.readJSON(guildId);
-                JSONArray schematicChannels = guildData.readJSONArray("schematicChannel");
-                addChannel(guildId, schematicChannels, _guildConfig.schematicChannel);
-                JSONArray mapChannels = guildData.readJSONArray("mapChannel");
-                addChannel(guildId, mapChannels, _guildConfig.mapChannel);
-                JSONArray guildChannels = guildData.readJSONArray("guildChannel");
-                addChannel(guildId, guildChannels, _guildConfig.guildChannel);
-                JSONData serverStatusChannelId = guildData.readJSON("serverStatusChannel");
-                setChannel(serverStatusChannelId, guildId, _guildConfig.serverStatusChannel);
-                JSONData universeChatChannelId = guildData.readJSON("universeChatChannel");
-                setChannel(universeChatChannelId, guildId, _guildConfig.universeChatChannel);
+            HashMap<String, String> _temp = new HashMap<>();
+            for (String _guildId : guildIds) {
+                reader = (handler.new JSONReader(guildFilePath + _guildId)).read();
+                // Continue if guild not registered yet
+                if (!guildConfigs.containsKey(_guildId) || _guildId == null) {
+                    guildConfigs.put(_guildId, new HashMap<String, Object>());
+                    continue;
+                }
+                // Read all archive channels
+                for (String channelType : guildChannels) {
+                    if (reader.data.containsKey(channelType)) {
+                        JSONData channels = reader.readJSON(channelType);
+                        for (Object _channelId : channels.data.keySet()) {
+                            String _channelLastMessage = channels.readString("messageId", null);
+                            _temp.put(_channelId.toString(), _channelLastMessage);
+                        }
+                        guildConfigs.get(_guildId).put(channelType, _temp);
+                        _temp.clear();
+                    }
+                }
+                Guild guild = messagesHandler.jda.getGuildById(_guildId);
+                if (guild == null)
+                    continue;
+                if (guildConfigs.get(_guildId).get("channels") == null)
+                    guildConfigs.get(_guildId).put("channels", new HashMap<String, String>());
+                for (TextChannel _channel : guild.getTextChannels()) {
+                    if (!((HashMap<String, String>) guildConfigs.get(_guildId).get("channels")).containsKey(_channel.getId()))
+                        ((HashMap<String, String>) guildConfigs.get(_guildId).get("channels")).put(_channel.getId(), null);
+                }
 
-                String adminRoleId = guildData.readString("adminRole", null);
-                setRole(guildId, adminRoleId, _guildConfig.adminRole);
-                String memberRoleId = guildData.readString("memberRole", null);
-                setRole(guildId, memberRoleId, _guildConfig.memberRole);
+
+                // Read all roles
+                for (String roleType : guildRoles) {
+                    if (!guildConfigs.containsKey(_guildId))
+                        continue;
+                    if (reader.data.containsKey(roleType)) {
+                        String _roleId = reader.readString(roleType, null);
+                        guildConfigs.get(_guildId).put(roleType, _roleId);
+                    }
+                }
             }
 
 
-        } catch (Exception e) {
+        } catch (
+
+        Exception e) {
             e.printStackTrace();
         }
     }
 
     // TODO Database
+    @SuppressWarnings("unchecked")
     public void save() {
         try {
             JSONHandler handler = new JSONHandler();
+            // Save all guild ids
             JSONWriter writer = handler.new JSONWriter(guildFilePath);
-            HashMap<String, Object> data = new HashMap<>();
-            for (String guildId : guildConfig.keySet()) {
-                data.put(guildId, guildConfig.get(guildId).toMap());
+            JSONArray array = new JSONArray();
+            for (String _guildId : guildIds) {
+                array.add(_guildId);
             }
-            writer.write((new JSONObject(data)).toJSONString());
+            JSONObject data = new JSONObject();
+            data.put("guildIds", array);
+            writer.write(data.toJSONString());
 
-
+            // Write guild config into multiple file with name = guildId + guildData.json
+            for (String _guildId : guildIds) {
+                writer = handler.new JSONWriter(guildFilePath + _guildId);
+                if (guildConfigs.get(_guildId) != null)
+                    writer.write((new JSONObject(guildConfigs.get(_guildId))).toJSONString());
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

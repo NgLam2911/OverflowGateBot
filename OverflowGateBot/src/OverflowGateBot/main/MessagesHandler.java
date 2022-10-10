@@ -1,6 +1,5 @@
 package OverflowGateBot.main;
 
-
 import arc.files.*;
 import arc.util.*;
 import arc.util.io.Streams;
@@ -26,7 +25,6 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import javax.annotation.Nonnull;
 import javax.imageio.*;
 
-import OverflowGateBot.main.GuildHandler.ArchiveChannel;
 import OverflowGateBot.mindustry.ContentHandler;
 import OverflowGateBot.misc.JSONHandler;
 import OverflowGateBot.misc.JSONHandler.JSONData;
@@ -60,7 +58,9 @@ public class MessagesHandler extends ListenerAdapter {
             String token = reader.readString("token", null);
 
             // Build jda
-            jda = JDABuilder.createDefault(token, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_EMOJIS, GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_PRESENCES, GatewayIntent.GUILD_MESSAGE_REACTIONS).setMemberCachePolicy(MemberCachePolicy.ALL).disableCache(CacheFlag.VOICE_STATE).build();
+            jda = JDABuilder.createDefault(token, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_EMOJIS,
+                    GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_PRESENCES, GatewayIntent.GUILD_MESSAGE_REACTIONS)
+                    .setMemberCachePolicy(MemberCachePolicy.ALL).disableCache(CacheFlag.VOICE_STATE).build();
             jda.awaitReady();
 
             jda.addEventListener(this);
@@ -78,7 +78,8 @@ public class MessagesHandler extends ListenerAdapter {
         Member member = message.getMember();
         if (member == null)
             return "[" + message.getGuild().getName() + "] " + " <" + message.getChannel().getName() + "> " + "Unknown";
-        return "[" + message.getGuild().getName() + "] " + " <" + message.getChannel().getName() + "> " + member.getEffectiveName();
+        return "[" + message.getGuild().getName() + "] " + " <" + message.getChannel().getName() + "> "
+                + member.getEffectiveName();
     }
 
     public String getMessageSender(@Nonnull SlashCommandInteractionEvent event) {
@@ -126,8 +127,8 @@ public class MessagesHandler extends ListenerAdapter {
             });
 
         // Delete in channel that it should not be
-        if (guildHandler.inChannels(message.getGuild().getId(), message.getChannel().getId(), guildHandler.guildConfig.get(message.getGuild().getId()).schematicChannel)
-                || guildHandler.inChannels(message.getGuild().getId(), message.getChannel().getId(), guildHandler.guildConfig.get(message.getGuild().getId()).mapChannel)) {
+        if (guildHandler.inChannels(message.getGuild().getId(), message.getChannel().getId(), "schematicChannel")
+                || guildHandler.inChannels(message.getGuild().getId(), message.getChannel().getId(), "mapChannel")) {
             replyTempMessage(message, "Vui lòng không gửi tin nhắn vào kênh này!", 30);
             message.delete().queue();
             return;
@@ -136,12 +137,13 @@ public class MessagesHandler extends ListenerAdapter {
         // Update exp on message sent
         userHandler.onMessage(message);
 
-
         // Send message to all needed channels
         if (!message.getContentRaw().isBlank()) {
             for (TextChannel c : serverChatChannel.values()) {
                 if (!message.getChannel().getName().equals(c.getName()))
-                    c.sendMessage(getMessageSender(message) + ": " + message.getContentRaw() + message.getContentDisplay()).queue();
+                    c.sendMessage(
+                            getMessageSender(message) + ": " + message.getContentRaw() + message.getContentDisplay())
+                            .queue();
             }
         }
 
@@ -216,10 +218,11 @@ public class MessagesHandler extends ListenerAdapter {
         return Character.toUpperCase(text.charAt(0)) + text.substring(1);
     }
 
-    public boolean isChannel(Guild guild, Channel channel, HashMap<String, ArchiveChannel> channelIds) {
-        if (channelIds.containsKey(guild.getId()))
-            if (channelIds.get(guild.getId()).channelId.equals(channel.getId()))
+    public boolean isChannel(Guild guild, Channel channel, HashMap<String, HashMap<String, String>> guildChannelIds) {
+        if (guildChannelIds.containsKey(guild.getId())) {
+            if (guildChannelIds.get(guild.getId()).containsKey(channel.getId()))
                 return true;
+        }
         return false;
     }
 
@@ -246,7 +249,10 @@ public class MessagesHandler extends ListenerAdapter {
             Streams.copy(onet.download(attachment.getUrl()), new FileOutputStream(mapFile));
             ImageIO.write(map.image, "png", imageFile.file());
 
-            EmbedBuilder builder = new EmbedBuilder().setImage("attachment://" + imageFile.name()).setAuthor(member.getEffectiveName(), member.getEffectiveAvatarUrl(), member.getEffectiveAvatarUrl()).setTitle(map.name == null ? attachment.getFileName().replace(".msav", "") : map.name);
+            EmbedBuilder builder = new EmbedBuilder().setImage("attachment://" + imageFile.name())
+                    .setAuthor(member.getEffectiveName(), member.getEffectiveAvatarUrl(),
+                            member.getEffectiveAvatarUrl())
+                    .setTitle(map.name == null ? attachment.getFileName().replace(".msav", "") : map.name);
             builder.addField("Size: ", map.image.getWidth() + "x" + map.image.getHeight(), false);
             if (map.description != null)
                 builder.setFooter(map.description);
@@ -309,12 +315,14 @@ public class MessagesHandler extends ListenerAdapter {
     public void sendSchematicPreview(Message message, MessageChannel channel) {
         try {
             if (isSchematicText(message)) {
-                sendSchematicPreview(contentHandler.parseSchematic(message.getContentRaw()), message.getMember(), channel);
+                sendSchematicPreview(contentHandler.parseSchematic(message.getContentRaw()), message.getMember(),
+                        channel);
             } else {
                 for (int i = 0; i < message.getAttachments().size(); i++) {
                     Attachment attachment = message.getAttachments().get(i);
                     if (isSchematicFile(attachment)) {
-                        sendSchematicPreview(contentHandler.parseSchematicURL(attachment.getUrl()), message.getMember(), channel);
+                        sendSchematicPreview(contentHandler.parseSchematicURL(attachment.getUrl()), message.getMember(),
+                                channel);
                     }
                 }
             }
@@ -343,7 +351,10 @@ public class MessagesHandler extends ListenerAdapter {
             Schematics.write(schem, new Fi(schemFile));
             ImageIO.write(preview, "png", previewFile);
 
-            EmbedBuilder builder = new EmbedBuilder().setImage("attachment://" + previewFile.getName()).setAuthor(member.getEffectiveName(), member.getEffectiveAvatarUrl(), member.getEffectiveAvatarUrl()).setTitle(schem.name());
+            EmbedBuilder builder = new EmbedBuilder().setImage("attachment://" + previewFile.getName())
+                    .setAuthor(member.getEffectiveName(), member.getEffectiveAvatarUrl(),
+                            member.getEffectiveAvatarUrl())
+                    .setTitle(schem.name());
 
             if (!schem.description().isEmpty())
                 builder.setFooter(schem.description());

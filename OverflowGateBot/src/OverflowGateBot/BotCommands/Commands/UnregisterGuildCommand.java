@@ -1,6 +1,5 @@
 package OverflowGateBot.BotCommands.Commands;
 
-
 import OverflowGateBot.BotCommands.Class.BotCommandClass;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -35,7 +34,7 @@ public class UnregisterGuildCommand extends BotCommandClass {
         }
 
         commandHandler.unregisterCommand(event.getGuild());
-        boolean result = guildHandler.guildConfig.remove(guild.getId()) != null;
+        boolean result = guildHandler.guildIds.remove(guild.getId());
         if (result) {
             guildHandler.save();
             reply(event, "Đã gỡ duyệt máy chủ", 30);

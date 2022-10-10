@@ -1,23 +1,24 @@
 package OverflowGateBot;
 
-
 import java.io.IOException;
 
+import OverflowGateBot.MiniGame.GuessTheNumberHandler;
 import OverflowGateBot.main.CommandHandler;
 import OverflowGateBot.main.GuildHandler;
 import OverflowGateBot.main.MessagesHandler;
+import OverflowGateBot.main.UserHandler;
 import OverflowGateBot.mindustry.ContentHandler;
 import OverflowGateBot.mindustry.ONet;
 import OverflowGateBot.mindustry.ServerStatus;
-import OverflowGateBot.user.UserHandler;
 
 public class OverflowGateBot {
     public final static int saveInterval = 1 * 60 * 1000;
 
     public final static String dailyFilePath = "cache/data/daily";
-    public final static String userFilePath = "cache/data/user";
-    public final static String guildFilePath = "cache/data/guild";
+    public final static String userFilePath = "cache/data/user/user";
+    public final static String guildFilePath = "cache/data/guild/guild";
     public final static String serverFilePath = "cache/data/server";
+    public final static String guessTheNumberPath = "cache/data/guessTheNumber";
 
     public static MessagesHandler messagesHandler = new MessagesHandler();
     public static GuildHandler guildHandler = new GuildHandler();
@@ -26,6 +27,8 @@ public class OverflowGateBot {
     public static ONet onet = new ONet();
     public static UserHandler userHandler = new UserHandler();
     public static ServerStatus serverStatus = new ServerStatus();
+
+    public static GuessTheNumberHandler guessTheNumberHandler = new GuessTheNumberHandler();
 
     public static void main(String[] args) {
         // TODO Database
@@ -37,6 +40,7 @@ public class OverflowGateBot {
             userHandler.save();
             serverStatus.save();
             guildHandler.save();
+            guessTheNumberHandler.save();
         } catch (IOException e) {
             e.printStackTrace();
         }

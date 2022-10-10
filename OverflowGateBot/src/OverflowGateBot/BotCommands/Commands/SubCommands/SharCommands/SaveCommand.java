@@ -22,7 +22,7 @@ public class SaveCommand extends BotSubcommandClass {
 
     @Override
     public void onCommand(SlashCommandInteractionEvent event) {
-        reply(event, "Đang lưu...", 10);
+        reply(event, "Đã lưu", 2);
         try {
             serverStatus.save();
             userHandler.save();

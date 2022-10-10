@@ -19,6 +19,6 @@ public class ReloadServerCommand extends BotSubcommandClass {
     @Override
     public void onCommand(SlashCommandInteractionEvent event) {
         serverStatus.reloadServer(event.getGuild(), event.getMessageChannel());
-        reply(event, "Đang làm mới...", 10);
+        reply(event, "Đã làm mới máy chủ", 10);
     }
 }

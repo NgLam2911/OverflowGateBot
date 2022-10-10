@@ -1,4 +1,4 @@
-package OverflowGateBot.user;
+package OverflowGateBot.main;
 
 
 import java.io.DataInputStream;
@@ -20,6 +20,7 @@ import org.json.simple.parser.ParseException;
 import OverflowGateBot.misc.JSONHandler;
 import OverflowGateBot.misc.JSONHandler.JSONData;
 import OverflowGateBot.misc.JSONHandler.JSONWriter;
+import OverflowGateBot.user.DiscordUser;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -52,7 +53,6 @@ public class UserHandler {
 
         try {
             load();
-            save();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -88,7 +88,7 @@ public class UserHandler {
     // Get DiscordUser from Member, return null if not found
     public DiscordUser getUser(Member member) {
         String guildId = member.getGuild().getId();
-        if (guildHandler.guildConfig.containsKey(guildId))
+        if (guildHandler.guildConfigs.containsKey(guildId))
             if (users.containsKey(guildId))
                 return users.get(guildId).get(member.getId());
         return null;
@@ -96,7 +96,7 @@ public class UserHandler {
 
     public void addNewMember(Member member) {
         // If guild is not registered the return
-        if (!guildHandler.guildConfig.containsKey(member.getGuild().getId()))
+        if (!guildHandler.guildConfigs.containsKey(member.getGuild().getId()))
             return;
         // Not to store bot data
         if (member.getUser().isBot())
@@ -350,7 +350,6 @@ public class UserHandler {
                         int pvpPoint = userData.readInt("PVPPOINT", 0);
 
                         Guild guild = messagesHandler.jda.getGuildById(gid);
-
                         if (guild == null)
                             continue;
 
@@ -360,25 +359,15 @@ public class UserHandler {
                                 continue;
                             name = member.getUser().getName();
                         }
-
                         DiscordUser user = addNewMember(gid, id, name, point, level, money, pvpPoint, hideLv);
-                        if (level == 0)
-                            System.out.println("\tUser error " + user.name);
                         user.setNickname(nickname);
+                        user.setDisplayName();
                         user.checkMemberRole();
                     }
                 }
             }
         } catch (org.json.simple.parser.ParseException e) {
             e.printStackTrace();
-        }
-
-        for (String gid : guildHandler.guildConfig.keySet()) {
-
-            if (gid == null)
-                break;
-
-            loadGuild(gid);
         }
     }
 

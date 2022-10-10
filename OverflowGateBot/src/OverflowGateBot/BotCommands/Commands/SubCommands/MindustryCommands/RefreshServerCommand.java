@@ -19,7 +19,7 @@ public class RefreshServerCommand extends BotSubcommandClass {
     @Override
     public void onCommand(SlashCommandInteractionEvent event) {
         serverStatus.refreshServerStat(event.getGuild(), event.getMessageChannel());
-        reply(event, "Đang làm mới...", 10);
+        reply(event, "Đã làm mới máy chủ", 10);
     }
 
 }

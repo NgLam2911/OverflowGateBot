@@ -1,6 +1,5 @@
 package OverflowGateBot.BotCommands.Commands.SubCommands.SharCommands;
 
-
 import OverflowGateBot.BotCommands.Class.BotSubcommandClass;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -51,8 +50,8 @@ public class SayCommand extends BotSubcommandClass {
             if (channels.isEmpty())
                 return;
             TextChannel channel = channels.get(0);
+            event.getHook().deleteOriginal().complete();
             channel.sendMessage(content).queue();
-            event.getHook().deleteOriginal().queue();
 
         }
     }
@@ -61,7 +60,7 @@ public class SayCommand extends BotSubcommandClass {
     public void onAutoComplete(CommandAutoCompleteInteractionEvent event) {
         String focus = event.getFocusedOption().getName();
         if (focus.equals("guild"))
-            sendAutoComplete(event, guildHandler.getGuildsName().keySet());
+            sendAutoComplete(event, guildHandler.getAllGuildName().keySet());
 
         // Show all channels
         else if (focus.equals("channel")) {
@@ -69,7 +68,7 @@ public class SayCommand extends BotSubcommandClass {
             OptionMapping guildIdOption = event.getOption("guild");
             if (guildIdOption == null)
                 return;
-            HashMap<String, String> guilds = guildHandler.getGuildsName();
+            HashMap<String, String> guilds = guildHandler.getAllGuildName();
             String guildName = guildIdOption.getAsString();
 
             if (!guilds.containsKey(guildName))
@@ -80,7 +79,7 @@ public class SayCommand extends BotSubcommandClass {
                 System.out.println("Not found guild " + guildName);
                 return;
             }
-            sendAutoComplete(event, guildHandler.getChannelsName(guildId).keySet());
+            sendAutoComplete(event, guildHandler.getAllGuildChannelName(guildId).keySet());
 
         }
     }

@@ -1,8 +1,9 @@
 package OverflowGateBot.BotCommands.Commands;
 
-
 import OverflowGateBot.BotCommands.Class.BotCommandClass;
+import OverflowGateBot.BotCommands.Commands.SubCommands.UserCommands.AvatarCommand;
 import OverflowGateBot.BotCommands.Commands.SubCommands.UserCommands.DailyCommand;
+import OverflowGateBot.BotCommands.Commands.SubCommands.UserCommands.GuessTheNumberCommand;
 import OverflowGateBot.BotCommands.Commands.SubCommands.UserCommands.HideLevelCommand;
 import OverflowGateBot.BotCommands.Commands.SubCommands.UserCommands.InfoCommand;
 import OverflowGateBot.BotCommands.Commands.SubCommands.UserCommands.LeaderboardCommand;
@@ -18,6 +19,8 @@ public class UserCommand extends BotCommandClass {
         addSubcommands(new LeaderboardCommand());
         addSubcommands(new SetNicknameCommand());
         addSubcommands(new TransferCommand());
+        addSubcommands(new AvatarCommand());
+        addSubcommands(new GuessTheNumberCommand());
     }
 
 }
