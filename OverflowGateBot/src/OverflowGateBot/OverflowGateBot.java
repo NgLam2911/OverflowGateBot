@@ -27,7 +27,6 @@ public class OverflowGateBot {
     public static ONet onet = new ONet();
     public static UserHandler userHandler = new UserHandler();
     public static ServerStatus serverStatus = new ServerStatus();
-
     public static GuessTheNumberHandler guessTheNumberHandler = new GuessTheNumberHandler();
 
     public static void main(String[] args) {
@@ -46,3 +45,4 @@ public class OverflowGateBot {
         }
     }
 }
+

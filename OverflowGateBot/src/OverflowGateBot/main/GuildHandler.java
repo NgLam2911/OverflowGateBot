@@ -1,6 +1,5 @@
 package OverflowGateBot.main;
 
-
 import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,7 +39,6 @@ public class GuildHandler {
      * public String adminRole; public String memberRole;
      */
 
-
     // Guilds
     public final String adminId = "719322804549320725";
     public HashMap<String, HashMap<String, Object>> guildConfigs = new HashMap<>();
@@ -49,6 +47,8 @@ public class GuildHandler {
     // For auto complete
     public Set<String> guildRoles = new HashSet<>();
     public Set<String> guildChannels = new HashSet<>();
+
+    public HashMap<String, String> botLogChannels = new HashMap<>();
 
     public GuildHandler() {
         new File("cache/").mkdir();
@@ -69,6 +69,8 @@ public class GuildHandler {
         guildChannels.add("universeChatChannel");
         guildChannels.add("serverStatusChannel");
 
+        botLogChannels.put("1010373870395596830", "1010412857541799997");
+
         load();
     }
 
@@ -84,7 +86,8 @@ public class GuildHandler {
             return true;
 
         HashMap<String, Object> guildConfig = guildConfigs.get(member.getGuild().getId());
-        if (guildConfig == null) return false;
+        if (guildConfig == null)
+            return false;
 
         for (Role role : member.getRoles())
             if (role.getId().equals(guildConfig.get("adminRole")))
@@ -211,10 +214,11 @@ public class GuildHandler {
                 if (guildConfigs.get(_guildId).get("channels") == null)
                     guildConfigs.get(_guildId).put("channels", new HashMap<String, String>());
                 for (TextChannel _channel : guild.getTextChannels()) {
-                    if (!((HashMap<String, String>) guildConfigs.get(_guildId).get("channels")).containsKey(_channel.getId()))
-                        ((HashMap<String, String>) guildConfigs.get(_guildId).get("channels")).put(_channel.getId(), null);
+                    if (!((HashMap<String, String>) guildConfigs.get(_guildId).get("channels"))
+                            .containsKey(_channel.getId()))
+                        ((HashMap<String, String>) guildConfigs.get(_guildId).get("channels")).put(_channel.getId(),
+                                null);
                 }
-
 
                 // Read all roles
                 for (String roleType : guildRoles) {
@@ -226,7 +230,6 @@ public class GuildHandler {
                     }
                 }
             }
-
 
         } catch (
 
@@ -261,4 +264,3 @@ public class GuildHandler {
         }
     }
 }
-

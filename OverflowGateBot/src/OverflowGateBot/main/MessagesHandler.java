@@ -48,6 +48,7 @@ public class MessagesHandler extends ListenerAdapter {
 
     public MessagesHandler() {
         try {
+
             File file = new File("token.json");
             if (!file.exists()) {
                 file.createNewFile();
@@ -161,17 +162,42 @@ public class MessagesHandler extends ListenerAdapter {
     public void onGuildMemberRemove(@Nonnull GuildMemberRemoveEvent event) {
         // Send invite link to member who left the guild
         User user = event.getUser();
-        List<NewsChannel> inviteChannels = event.getGuild().getNewsChannels();
-        if (inviteChannels.isEmpty())
+        List<TextChannel> inviteChannels = event.getGuild().getTextChannels();
+        if (!inviteChannels.isEmpty()) {
+            Invite invite = inviteChannels.get(0).createInvite().complete();
+            user.openPrivateChannel().queue(channel -> channel.sendMessage(invite.getUrl()).queue());
+        }
+        String botLogChannelId = guildHandler.botLogChannels.get(event.getGuild().getId());
+        if (botLogChannelId == null) {
+            System.out.println("Bot log channel for guild " + event.getGuild().getName() + " not exists");
             return;
-        Invite invite = inviteChannels.get(0).createInvite().complete();
-        user.openPrivateChannel().flatMap(channel -> channel.sendMessage(invite.getUrl())).queue();
-        return;
+        }
+        TextChannel botLogChannel = event.getGuild().getTextChannelById(botLogChannelId);
+        if (botLogChannel == null) {
+            System.out.println("Bot log channel for guild " + event.getGuild().getName() + " with id" + botLogChannelId
+                    + " not exists");
+            return;
+        }
+        botLogChannel.sendMessage("```" + user.getName() + " rời máy chủ```").queue();
     }
 
     @Override
     public void onGuildMemberJoin(@Nonnull GuildMemberJoinEvent event) {
         userHandler.addNewMember(event.getMember());
+
+        String botLogChannelId = guildHandler.botLogChannels.get(event.getGuild().getId());
+        if (botLogChannelId == null) {
+            System.out.println("Bot log channel for guild " + event.getGuild().getName() + " not exists");
+            return;
+        }
+        TextChannel botLogChannel = event.getGuild().getTextChannelById(botLogChannelId);
+        if (botLogChannel == null) {
+            System.out.println("Bot log channel for guild " + event.getGuild().getName() + " with id" + botLogChannelId
+                    + " not exists");
+            return;
+        }
+
+        botLogChannel.sendMessage("```" + event.getMember().getEffectiveName() + " tham gia máy chủ```").queue();
     }
 
     public boolean isSchematicText(Message message) {

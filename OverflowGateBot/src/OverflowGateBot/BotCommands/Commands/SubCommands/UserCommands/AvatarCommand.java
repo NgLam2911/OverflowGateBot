@@ -1,7 +1,8 @@
 package OverflowGateBot.BotCommands.Commands.SubCommands.UserCommands;
 
+import java.util.concurrent.TimeUnit;
+
 import OverflowGateBot.BotCommands.Class.BotSubcommandClass;
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -24,8 +25,8 @@ public class AvatarCommand extends BotSubcommandClass {
         if (userOption == null)
             return;
         User user = userOption.getAsUser();
-        EmbedBuilder builder = new EmbedBuilder();
-        builder.setImage(user.getAvatarUrl());
-        replyEmbeds(event, builder, 30);
+        event.getHook().sendMessage("\n" + user.getAvatarUrl())
+                .queue(_message -> _message.delete().queueAfter(30, TimeUnit.SECONDS));
     }
+
 }
