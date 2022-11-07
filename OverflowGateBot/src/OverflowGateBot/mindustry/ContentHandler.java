@@ -224,7 +224,7 @@ public class ContentHandler {
                 }
             }
 
-            return new Schematic(tiles, map, width, height);
+            return new Schematic(tiles, map, width, height); 
         }
     }
 

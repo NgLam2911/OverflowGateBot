@@ -1,6 +1,5 @@
 package OverflowGateBot.main;
 
-
 import org.jetbrains.annotations.NotNull;
 
 import OverflowGateBot.BotCommands.Class.BotCommandClass;
@@ -29,7 +28,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
-
 
 public class CommandHandler extends ListenerAdapter {
 
@@ -75,7 +73,8 @@ public class CommandHandler extends ListenerAdapter {
 
     @Override
     public void onSlashCommandInteraction(@Nonnull SlashCommandInteractionEvent event) {
-        System.out.println(messagesHandler.getMessageSender(event) + ": used " + event.getName() + " " + event.getSubcommandName() + " " + event.getOptions().toString());
+        System.out.println(messagesHandler.getMessageSender(event) + ": used " + event.getName() + " "
+                + event.getSubcommandName() + " " + event.getOptions().toString());
 
         event.deferReply().queue();
         handleCommand(event);
@@ -90,7 +89,6 @@ public class CommandHandler extends ListenerAdapter {
         if (commands.containsKey(command))
             commands.get(command).onAutoComplete(event);
     }
-
 
     public void handleCommand(@NotNull SlashCommandInteractionEvent event) {
         String command = event.getName();
@@ -107,7 +105,6 @@ public class CommandHandler extends ListenerAdapter {
         if (member == null)
             return;
 
-
         // If bot don't have manager server permission then return
         if (!botMember.hasPermission(Permission.ADMINISTRATOR)) {
             reply(event, "Vui lòng cho bot vai trò người quản lí để sử dụng bot", 30);
@@ -120,19 +117,25 @@ public class CommandHandler extends ListenerAdapter {
             return;
         }
 
-        if (commands.containsKey(command))
+        if (commands.containsKey(command)) {
             commands.get(command).onCommand(event);
-        else
+            if (!command.equals("shar")) {
+                messagesHandler.log("```" +
+                        member.getEffectiveName() + " đã sử dụng " + command + " " + event.getSubcommandName() + "```",
+                        guild);
+            }
+        } else
             reply(event, "Lệnh sai rồi kìa baka", 10);
-
 
     }
 
     void replyEmbeds(SlashCommandInteractionEvent event, EmbedBuilder builder, int sec) {
-        event.getHook().sendMessageEmbeds(builder.build()).queue(_message -> _message.delete().queueAfter(sec, TimeUnit.SECONDS));
+        event.getHook().sendMessageEmbeds(builder.build())
+                .queue(_message -> _message.delete().queueAfter(sec, TimeUnit.SECONDS));
     }
 
     void reply(SlashCommandInteractionEvent event, String content, int sec) {
-        event.getHook().sendMessage("```" + content + "```").queue(_message -> _message.delete().queueAfter(sec, TimeUnit.SECONDS));
+        event.getHook().sendMessage("```" + content + "```")
+                .queue(_message -> _message.delete().queueAfter(sec, TimeUnit.SECONDS));
     }
 }

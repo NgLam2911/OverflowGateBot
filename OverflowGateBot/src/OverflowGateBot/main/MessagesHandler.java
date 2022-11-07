@@ -167,37 +167,15 @@ public class MessagesHandler extends ListenerAdapter {
             Invite invite = inviteChannels.get(0).createInvite().complete();
             user.openPrivateChannel().queue(channel -> channel.sendMessage(invite.getUrl()).queue());
         }
-        String botLogChannelId = guildHandler.botLogChannels.get(event.getGuild().getId());
-        if (botLogChannelId == null) {
-            System.out.println("Bot log channel for guild " + event.getGuild().getName() + " not exists");
-            return;
-        }
-        TextChannel botLogChannel = event.getGuild().getTextChannelById(botLogChannelId);
-        if (botLogChannel == null) {
-            System.out.println("Bot log channel for guild " + event.getGuild().getName() + " with id" + botLogChannelId
-                    + " not exists");
-            return;
-        }
-        botLogChannel.sendMessage("```" + user.getName() + " rời máy chủ```").queue();
+
+        log("```" + user.getName() + " rời máy chủ```", event.getGuild());
     }
 
     @Override
     public void onGuildMemberJoin(@Nonnull GuildMemberJoinEvent event) {
         userHandler.addNewMember(event.getMember());
 
-        String botLogChannelId = guildHandler.botLogChannels.get(event.getGuild().getId());
-        if (botLogChannelId == null) {
-            System.out.println("Bot log channel for guild " + event.getGuild().getName() + " not exists");
-            return;
-        }
-        TextChannel botLogChannel = event.getGuild().getTextChannelById(botLogChannelId);
-        if (botLogChannel == null) {
-            System.out.println("Bot log channel for guild " + event.getGuild().getName() + " with id" + botLogChannelId
-                    + " not exists");
-            return;
-        }
-
-        botLogChannel.sendMessage("```" + event.getMember().getEffectiveName() + " tham gia máy chủ```").queue();
+        log("```" + event.getMember().getEffectiveName() + " tham gia máy chủ```", event.getGuild());
     }
 
     public boolean isSchematicText(Message message) {
@@ -237,6 +215,21 @@ public class MessagesHandler extends ListenerAdapter {
                 return true;
         }
         return false;
+    }
+
+    public void log(@Nonnull String content, Guild guild) {
+        String botLogChannelId = guildHandler.botLogChannels.get(guild.getId());
+        if (botLogChannelId == null) {
+            System.out.println("Bot log channel for guild " + guild.getName() + " not exists");
+            return;
+        }
+        TextChannel botLogChannel = guild.getTextChannelById(botLogChannelId);
+        if (botLogChannel == null) {
+            System.out.println("Bot log channel for guild " + guild.getName() + " with id" + botLogChannelId
+                    + " not exists");
+            return;
+        }
+        botLogChannel.sendMessage(content).queue();
     }
 
     // Its bad lol
