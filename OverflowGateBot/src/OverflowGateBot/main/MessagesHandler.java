@@ -148,7 +148,7 @@ public class MessagesHandler extends ListenerAdapter {
             }
         }
 
-    }
+    }d
 
     @Override
     public void onGuildMemberUpdateNickname(@Nonnull GuildMemberUpdateNicknameEvent event) {
@@ -435,5 +435,4 @@ public class MessagesHandler extends ListenerAdapter {
             m.delete().queueAfter(sec, TimeUnit.SECONDS);
         });
     }
-
 }

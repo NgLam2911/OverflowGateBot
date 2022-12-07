@@ -1,4 +1,4 @@
-package OverflowGateBot.MiniGame;
+package OverflowGateBot.minigame;
 
 import static OverflowGateBot.OverflowGateBot.*;
 

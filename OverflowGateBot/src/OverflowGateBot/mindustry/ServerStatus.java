@@ -1,13 +1,11 @@
 package OverflowGateBot.mindustry;
 
-
 import java.awt.Color;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -177,12 +175,19 @@ public class ServerStatus {
         builder.setColor(Color.CYAN);
 
         if (result.name != null || result.mapname != null) {
-            field.append("Tên máy chủ: " + Strings.stripColors(result.name) + "\nNgười chơi: " + result.players + (result.playerLimit == 0 ? "" : " \\ " + result.playerLimit) + "\nBản đồ: " + Strings.stripColors(result.mapname) + "\nChế độ: "
-                    + (result.modeName == null ? messagesHandler.capitalize(result.mode.name()) : messagesHandler.capitalize(result.modeName)) + "\nĐợt: " + result.wave + (result.description.length() == 0 ? "" : "\nMô tả: " + Strings.stripColors(result.description)) + "\nPhiên bản: "
+            field.append("Tên máy chủ: " + Strings.stripColors(result.name) + "\nNgười chơi: " + result.players
+                    + (result.playerLimit == 0 ? "" : " \\ " + result.playerLimit) + "\nBản đồ: "
+                    + Strings.stripColors(result.mapname) + "\nChế độ: "
+                    + (result.modeName == null ? messagesHandler.capitalize(result.mode.name())
+                            : messagesHandler.capitalize(result.modeName))
+                    + "\nĐợt: " + result.wave
+                    + (result.description.length() == 0 ? "" : "\nMô tả: " + Strings.stripColors(result.description))
+                    + "\nPhiên bản: "
                     + result.version + "\nPing: " + result.ping + "ms\n");
 
             String mapName = Strings.stripColors(result.mapname);
-            if ((result.modeName != null && result.modeName.equals("Survival")) || (result.mode.name().equals("survival"))) {
+            if ((result.modeName != null && result.modeName.equals("Survival"))
+                    || (result.mode.name().equals("survival"))) {
                 if (!survivalMap.containsKey(mapName))
                     survivalMap.put(mapName, result.wave);
                 else {
@@ -196,7 +201,8 @@ public class ServerStatus {
 
         }
         builder.addField("Thông tin: ", field.toString(), true);
-        builder.setFooter("Lần cập nhật cuối: " + new SimpleDateFormat("dd-MM-yyyy HH:mm:ss").format(Calendar.getInstance().getTime()));
+        builder.setFooter("Lần cập nhật cuối: "
+                + Calendar.getInstance().getTime());
         return builder;
     }
 
@@ -210,7 +216,9 @@ public class ServerStatus {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setTitle("**Danh sách bản đồ:**");
         StringBuilder field = new StringBuilder();
-        Map<String, Integer> mapSortedByKey = survivalMap.entrySet().stream().sorted((e1, e2) -> e1.getKey().compareTo(e2.getKey())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+        Map<String, Integer> mapSortedByKey = survivalMap.entrySet().stream()
+                .sorted((e1, e2) -> e1.getKey().compareTo(e2.getKey()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
 
         for (String m : mapSortedByKey.keySet()) {
             field.append(m + ": " + survivalMap.get(m).toString() + "\n");

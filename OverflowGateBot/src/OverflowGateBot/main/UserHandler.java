@@ -1,9 +1,7 @@
 package OverflowGateBot.main;
 
-
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -105,7 +103,8 @@ public class UserHandler {
         setDisplayName(member);
     }
 
-    public DiscordUser addNewMember(@Nonnull String guildId, @Nonnull String id, String name, int point, int level, int money, int pvpPoint, Boolean hideLv) {
+    public DiscordUser addNewMember(@Nonnull String guildId, @Nonnull String id, String name, int point, int level,
+            int money, int pvpPoint, Boolean hideLv) {
         DiscordUser user = new DiscordUser(guildId, id, name, point, level, money, pvpPoint, hideLv);
         if (users.containsKey(guildId)) {
             // Already have guild id
@@ -139,7 +138,7 @@ public class UserHandler {
 
     // Get date for daily command
     public String getDate() {
-        return (new SimpleDateFormat("dd-MM-yyyy").format(Calendar.getInstance().getTime())).toString();
+        return (Calendar.getInstance().getTime()).toString();
     }
 
     // Update point, money, level on massage sent
@@ -270,12 +269,12 @@ public class UserHandler {
 
         String displayedStat = "Cấp: " + user.level + "\nKinh nghiệm: " + user.getTotalPoint();
         switch (stat) {
-        case "Money":
-            displayedStat = "Điểm: " + user.money;
-            break;
-        case "PVPPoint":
-            displayedStat = "Điểm PVP: " + user.pvpPoint;
-            break;
+            case "Money":
+                displayedStat = "Điểm: " + user.money;
+                break;
+            case "PVPPoint":
+                displayedStat = "Điểm PVP: " + user.pvpPoint;
+                break;
         }
 
         return "Tên: " + (user.getName()) + "\n" + displayedStat + "\nMáy chủ: " + guildName;

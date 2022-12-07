@@ -2,14 +2,15 @@ package OverflowGateBot;
 
 import java.io.IOException;
 
-import OverflowGateBot.MiniGame.GuessTheNumberHandler;
 import OverflowGateBot.main.CommandHandler;
+import OverflowGateBot.main.ContextMenuHandler;
 import OverflowGateBot.main.GuildHandler;
 import OverflowGateBot.main.MessagesHandler;
 import OverflowGateBot.main.UserHandler;
 import OverflowGateBot.mindustry.ContentHandler;
 import OverflowGateBot.mindustry.ONet;
 import OverflowGateBot.mindustry.ServerStatus;
+import OverflowGateBot.minigame.GuessTheNumberHandler;
 
 public class OverflowGateBot {
     public final static int saveInterval = 1 * 60 * 1000;
@@ -20,10 +21,13 @@ public class OverflowGateBot {
     public final static String serverFilePath = "cache/data/server";
     public final static String guessTheNumberPath = "cache/data/guessTheNumber";
 
+    public final static String sharId = "719322804549320725";
+
     public static MessagesHandler messagesHandler = new MessagesHandler();
     public static GuildHandler guildHandler = new GuildHandler();
     public static ContentHandler contentHandler = new ContentHandler();
     public static CommandHandler commandHandler = new CommandHandler();
+    public static ContextMenuHandler contextMenuHandler = new ContextMenuHandler();
     public static ONet onet = new ONet();
     public static UserHandler userHandler = new UserHandler();
     public static ServerStatus serverStatus = new ServerStatus();
@@ -45,4 +49,3 @@ public class OverflowGateBot {
         }
     }
 }
-

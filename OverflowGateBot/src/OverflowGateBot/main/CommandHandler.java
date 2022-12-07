@@ -2,14 +2,14 @@ package OverflowGateBot.main;
 
 import org.jetbrains.annotations.NotNull;
 
-import OverflowGateBot.BotCommands.Class.BotCommandClass;
-import OverflowGateBot.BotCommands.Commands.AdminCommand;
-import OverflowGateBot.BotCommands.Commands.BotCommand;
-import OverflowGateBot.BotCommands.Commands.MindustryCommand;
-import OverflowGateBot.BotCommands.Commands.RegisterGuildCommand;
-import OverflowGateBot.BotCommands.Commands.SharCommand;
-import OverflowGateBot.BotCommands.Commands.UnregisterGuildCommand;
-import OverflowGateBot.BotCommands.Commands.UserCommand;
+import OverflowGateBot.command.BotCommandClass;
+import OverflowGateBot.command.commands.AdminCommand;
+import OverflowGateBot.command.commands.BotCommand;
+import OverflowGateBot.command.commands.MindustryCommand;
+import OverflowGateBot.command.commands.RegisterGuildCommand;
+import OverflowGateBot.command.commands.SharCommand;
+import OverflowGateBot.command.commands.UnregisterGuildCommand;
+import OverflowGateBot.command.commands.UserCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
@@ -36,11 +36,10 @@ public class CommandHandler extends ListenerAdapter {
     public List<Guild> guilds;
     JDA jda = messagesHandler.jda;
 
-    public final String sharId = "719322804549320725";
-
     public CommandHandler() {
 
-        addCommand(new SharCommand());
+        SharCommand sharCommand = new SharCommand();
+        addCommand(sharCommand);
         addCommand(new AdminCommand());
         addCommand(new BotCommand());
         addCommand(new MindustryCommand());
@@ -49,6 +48,7 @@ public class CommandHandler extends ListenerAdapter {
         addCommand(new UnregisterGuildCommand());
 
         jda.addEventListener(this);
+        jda.upsertCommand(sharCommand.command);
         jda.upsertCommand(Commands.slash("registerguild", "Shar only")).queue();
         jda.upsertCommand(Commands.slash("unregisterguild", "Shar only")).queue();
     }
