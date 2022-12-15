@@ -3,7 +3,6 @@ package OverflowGateBot.command.commands;
 import OverflowGateBot.command.BotCommandClass;
 import OverflowGateBot.command.commands.subcommands.UserCommands.AvatarCommand;
 import OverflowGateBot.command.commands.subcommands.UserCommands.DailyCommand;
-import OverflowGateBot.command.commands.subcommands.UserCommands.GuessTheNumberCommand;
 import OverflowGateBot.command.commands.subcommands.UserCommands.HideLevelCommand;
 import OverflowGateBot.command.commands.subcommands.UserCommands.InfoCommand;
 import OverflowGateBot.command.commands.subcommands.UserCommands.LeaderboardCommand;
@@ -20,7 +19,6 @@ public class UserCommand extends BotCommandClass {
         addSubcommands(new SetNicknameCommand());
         addSubcommands(new TransferCommand());
         addSubcommands(new AvatarCommand());
-        addSubcommands(new GuessTheNumberCommand());
     }
 
 }

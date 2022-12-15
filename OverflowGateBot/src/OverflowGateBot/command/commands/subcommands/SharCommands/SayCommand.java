@@ -7,8 +7,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 
-import static OverflowGateBot.OverflowGateBot.messagesHandler;
-import static OverflowGateBot.OverflowGateBot.guildHandler;
+import static OverflowGateBot.OverflowGateBot.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -43,7 +42,7 @@ public class SayCommand extends BotSubcommandClass {
             event.getHook().deleteOriginal().queue();
 
         } else if (guildOption != null && channelOption != null) {
-            List<Guild> guilds = messagesHandler.jda.getGuildsByName(guildOption.getAsString(), false);
+            List<Guild> guilds = jda.getGuildsByName(guildOption.getAsString(), false);
             if (guilds.isEmpty())
                 return;
             Guild firstGuild = guilds.get(0);

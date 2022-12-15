@@ -10,18 +10,14 @@ import OverflowGateBot.command.commands.RegisterGuildCommand;
 import OverflowGateBot.command.commands.SharCommand;
 import OverflowGateBot.command.commands.UnregisterGuildCommand;
 import OverflowGateBot.command.commands.UserCommand;
+
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.commands.Command;
-import net.dv8tion.jda.api.interactions.commands.build.Commands;
-
-import static OverflowGateBot.OverflowGateBot.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -29,28 +25,35 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
 
+import static OverflowGateBot.OverflowGateBot.*;
+
 public class CommandHandler extends ListenerAdapter {
 
     public HashMap<String, BotCommandClass> commands = new HashMap<>();
 
     public List<Guild> guilds;
-    JDA jda = messagesHandler.jda;
 
     public CommandHandler() {
 
         SharCommand sharCommand = new SharCommand();
-        addCommand(sharCommand);
+        RegisterGuildCommand registerGuildCommand = new RegisterGuildCommand();
+        UnregisterGuildCommand unregisterGuildCommand = new UnregisterGuildCommand();
+
         addCommand(new AdminCommand());
         addCommand(new BotCommand());
         addCommand(new MindustryCommand());
         addCommand(new UserCommand());
-        addCommand(new RegisterGuildCommand());
-        addCommand(new UnregisterGuildCommand());
+        addCommand(sharCommand);
+        addCommand(registerGuildCommand);
+        addCommand(unregisterGuildCommand);
 
         jda.addEventListener(this);
-        jda.upsertCommand(sharCommand.command);
-        jda.upsertCommand(Commands.slash("registerguild", "Shar only")).queue();
-        jda.upsertCommand(Commands.slash("unregisterguild", "Shar only")).queue();
+        jda.upsertCommand(sharCommand.command).queue();
+        jda.upsertCommand(registerGuildCommand.command).queue();
+        jda.upsertCommand(unregisterGuildCommand.command).queue();
+
+        for (Guild guild : jda.getGuilds())
+            registerCommand(guild);
     }
 
     public void addCommand(BotCommandClass command) {
@@ -61,14 +64,6 @@ public class CommandHandler extends ListenerAdapter {
         for (BotCommandClass command : commands.values()) {
             guild.upsertCommand(command.command).queue();
         }
-    }
-
-    public void unregisterCommand(Guild guild) {
-        guild.retrieveCommands().queue(commands -> {
-            for (Command command : commands) {
-                command.delete().complete();
-            }
-        });
     }
 
     @Override

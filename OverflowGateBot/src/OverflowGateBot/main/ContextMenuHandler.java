@@ -1,7 +1,6 @@
 package OverflowGateBot.main;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -22,12 +21,9 @@ import static OverflowGateBot.OverflowGateBot.*;
 
 public class ContextMenuHandler extends ListenerAdapter {
 
-    JDA jda;
-
     public HashMap<String, BotContextMenuClass> commands = new HashMap<>();
 
     public ContextMenuHandler() {
-        jda = messagesHandler.jda;
 
         jda.addEventListener(this);
 
@@ -37,6 +33,9 @@ public class ContextMenuHandler extends ListenerAdapter {
         for (BotContextMenuClass command : commands.values()) {
             jda.updateCommands().addCommands(command.command).complete();
         }
+
+        for (Guild guild : jda.getGuilds())
+            registerCommand(guild);
     }
 
     public void addCommand(BotContextMenuClass command) {

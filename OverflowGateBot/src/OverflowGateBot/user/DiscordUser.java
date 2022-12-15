@@ -1,6 +1,5 @@
 package OverflowGateBot.user;
 
-
 import java.util.HashMap;
 import java.util.TreeMap;
 
@@ -17,11 +16,9 @@ import static OverflowGateBot.OverflowGateBot.*;
 
 public class DiscordUser {
     @Nonnull
-    public
-    String id;
+    public String id;
     @Nonnull
-    public
-    String guildId;
+    public String guildId;
     public String name;
     String nickname = "";
     public Integer point;
@@ -30,7 +27,8 @@ public class DiscordUser {
     public Integer pvpPoint;
     public Boolean hideLv = false;
 
-    public DiscordUser(@Nonnull String guildId, @Nonnull String id, String name, Integer point, Integer level, Integer money, Integer pvpPoint, Boolean hideLv) {
+    public DiscordUser(@Nonnull String guildId, @Nonnull String id, String name, Integer point, Integer level,
+            Integer money, Integer pvpPoint, Boolean hideLv) {
         this.id = id;
         this.guildId = guildId;
         this.name = name;
@@ -89,12 +87,11 @@ public class DiscordUser {
     // Give player member role if all requirements satisfied
     public void checkMemberRole() {
         if (level >= 3) {
-            Guild guild = messagesHandler.jda.getGuildById(guildId);
+            Guild guild = jda.getGuildById(guildId);
             if (guild == null)
                 return;
             Member member = guild.getMemberById(id);
             if (member == null) {
-                System.out.println("Not found " + getName());
             } else {
                 HashMap<String, Object> guildInfo = guildHandler.guildConfigs.get(guildId);
                 if (guildInfo == null)
@@ -125,14 +122,12 @@ public class DiscordUser {
 
     // Name with [Lv<Level>] <Nickname>
     public String getDisplayName() {
-        Guild guild = messagesHandler.jda.getGuildById(guildId);
+        Guild guild = jda.getGuildById(guildId);
         if (guild == null) {
-            System.out.println("Guild with id " + guildId + " not found");
             return "";
         }
         Member member = guild.getMemberById(id);
         if (member == null) {
-            System.out.println("Member with id " + id + " not found");
             return "";
         }
         User user = member.getUser();
@@ -144,14 +139,12 @@ public class DiscordUser {
 
     // Change user nickname to [Lv<Level>] <Nickname>
     public void setDisplayName() {
-        Guild guild = messagesHandler.jda.getGuildById(guildId);
+        Guild guild = jda.getGuildById(guildId);
         if (guild == null) {
-            System.out.println("Guild with id " + guildId + " not found");
             return;
         }
         Member member = guild.getMemberById(id);
         if (member == null) {
-            System.out.println("Member with id " + id + " not found");
             return;
         }
         if (member.getUser().isBot())
@@ -164,13 +157,12 @@ public class DiscordUser {
             if (!member.getUser().isBot()) {
                 String name = getDisplayName();
                 if (name.length() == 0) {
-                    System.out.println("Cant modify name of " + member.getEffectiveName());
+
                     return;
                 }
                 member.modifyNickname(name).queue();
             }
-        } else if (!guildHandler.isAdmin(member))
-            System.out.println("Cant interact with " + member.getEffectiveName());
+        }
     }
 
     // Set nickname in database

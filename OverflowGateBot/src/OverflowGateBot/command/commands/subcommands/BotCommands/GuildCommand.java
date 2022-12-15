@@ -32,7 +32,7 @@ public class GuildCommand extends BotSubcommandClass {
         OptionMapping guildOption = event.getOption("guild");
         if (guildOption == null) {
             // Show all guild
-            List<Guild> guilds = messagesHandler.jda.getGuilds();
+            List<Guild> guilds = jda.getGuilds();
             EmbedBuilder builder = new EmbedBuilder();
             StringBuilder field = new StringBuilder();
             for (Guild g : guilds) {
@@ -44,7 +44,7 @@ public class GuildCommand extends BotSubcommandClass {
         } else {
             // Get the guild base on name
             String guildName = guildOption.getAsString();
-            List<Guild> guilds = messagesHandler.jda.getGuildsByName(guildOption.getAsString(), false);
+            List<Guild> guilds = jda.getGuildsByName(guildOption.getAsString(), false);
             if (guilds.isEmpty())
                 return;
             Guild firstGuild = guilds.get(0);
@@ -77,7 +77,7 @@ public class GuildCommand extends BotSubcommandClass {
         String focus = event.getFocusedOption().getName();
         if (focus.equals("guild")) {
             Set<String> guildNames = new HashSet<String>();
-            for (Guild g : messagesHandler.jda.getGuilds())
+            for (Guild g : jda.getGuilds())
                 guildNames.add(g.getName());
             sendAutoComplete(event, guildNames);
         }

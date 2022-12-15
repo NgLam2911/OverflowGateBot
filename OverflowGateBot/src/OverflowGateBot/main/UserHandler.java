@@ -99,7 +99,7 @@ public class UserHandler {
         // Not to store bot data
         if (member.getUser().isBot())
             return;
-        addNewMember(member.getGuild().getId(), member.getId(), member.getUser().getName(), 0, 1, 0, 0, false);
+        addNewMember(member.getGuild().getId(), member.getId(), member.getUser().getName(), 0, 1, 0, 0, true);
         setDisplayName(member);
     }
 
@@ -174,8 +174,6 @@ public class UserHandler {
         DiscordUser user = getUser(member);
         if (user != null)
             user.setDisplayName();
-        else
-            System.out.println("Not found " + member.getEffectiveName());
 
     }
 
@@ -262,7 +260,7 @@ public class UserHandler {
     }
 
     public String getUserStat(DiscordUser user, String stat) {
-        Guild guild = messagesHandler.jda.getGuildById(user.guildId);
+        Guild guild = jda.getGuildById(user.guildId);
         String guildName = "Unknown guild";
         if (guild != null)
             guildName = guild.getName();
@@ -348,7 +346,7 @@ public class UserHandler {
                         int money = userData.readInt("MONEY", 0);
                         int pvpPoint = userData.readInt("PVPPOINT", 0);
 
-                        Guild guild = messagesHandler.jda.getGuildById(gid);
+                        Guild guild = jda.getGuildById(gid);
                         if (guild == null)
                             continue;
 
@@ -371,10 +369,8 @@ public class UserHandler {
     }
 
     public void loadGuild(@Nonnull String guildId) {
-        Guild guild = messagesHandler.jda.getGuildById(guildId);
-        if (guild == null) {
-            System.out.println("Guild not found with id: " + guildId);
-            return;
+        Guild guild = jda.getGuildById(guildId);
+        if (guild == null) {            return;
         }
         List<Member> members = guild.getMembers();
         for (Member m : members) {

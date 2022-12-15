@@ -8,9 +8,6 @@ import static OverflowGateBot.OverflowGateBot.guildHandler;
 
 import OverflowGateBot.command.BotCommandClass;
 
-import static OverflowGateBot.OverflowGateBot.commandHandler;
-import static OverflowGateBot.OverflowGateBot.contextMenuHandler;
-
 public class UnregisterGuildCommand extends BotCommandClass {
     public UnregisterGuildCommand() {
         super("unregisterguild", "Gỡ duyệt máy chủ (Shar only)");
@@ -36,9 +33,6 @@ public class UnregisterGuildCommand extends BotCommandClass {
             return;
         }
 
-        commandHandler.unregisterCommand(guild);
-        contextMenuHandler.unregisterCommand(guild);
-        
         boolean result = guildHandler.guildIds.remove(guild.getId());
         if (result) {
             guildHandler.save();

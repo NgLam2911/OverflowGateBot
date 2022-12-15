@@ -65,7 +65,7 @@ public class ServerStatus {
         for (String guildId : serverStatusChannels.keySet()) {
             if (guildId == null)
                 break;
-            Guild guild = messagesHandler.jda.getGuildById(guildId);
+            Guild guild = jda.getGuildById(guildId);
             if (guild == null)
                 continue;
             String channelId = serverStatusChannels.get(guildId);
@@ -168,7 +168,7 @@ public class ServerStatus {
         builder.setTitle("__" + ip.toString() + "__");
         String owner = servers.get(ip);
         if (owner != null) {
-            User user = messagesHandler.jda.getUserById(owner);
+            User user = jda.getUserById(owner);
             if (user != null)
                 builder.setAuthor(user.getName(), user.getEffectiveAvatarUrl(), user.getEffectiveAvatarUrl());
         }

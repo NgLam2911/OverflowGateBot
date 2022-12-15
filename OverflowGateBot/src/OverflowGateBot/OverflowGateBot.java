@@ -1,5 +1,6 @@
 package OverflowGateBot;
 
+import java.io.File;
 import java.io.IOException;
 
 import OverflowGateBot.main.CommandHandler;
@@ -10,7 +11,16 @@ import OverflowGateBot.main.UserHandler;
 import OverflowGateBot.mindustry.ContentHandler;
 import OverflowGateBot.mindustry.ONet;
 import OverflowGateBot.mindustry.ServerStatus;
-import OverflowGateBot.minigame.GuessTheNumberHandler;
+import OverflowGateBot.misc.JSONHandler;
+import OverflowGateBot.misc.JSONHandler.JSONData;
+
+import arc.util.Log;
+
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.utils.MemberCachePolicy;
+import net.dv8tion.jda.api.utils.cache.CacheFlag;
 
 public class OverflowGateBot {
     public final static int saveInterval = 1 * 60 * 1000;
@@ -20,20 +30,52 @@ public class OverflowGateBot {
     public final static String guildFilePath = "cache/data/guild/guild";
     public final static String serverFilePath = "cache/data/server";
     public final static String guessTheNumberPath = "cache/data/guessTheNumber";
+    public static final String sharId = "719322804549320725";
 
-    public final static String sharId = "719322804549320725";
+    public static JDA jda = null;
 
-    public static MessagesHandler messagesHandler = new MessagesHandler();
-    public static GuildHandler guildHandler = new GuildHandler();
-    public static ContentHandler contentHandler = new ContentHandler();
-    public static CommandHandler commandHandler = new CommandHandler();
-    public static ContextMenuHandler contextMenuHandler = new ContextMenuHandler();
-    public static ONet onet = new ONet();
-    public static UserHandler userHandler = new UserHandler();
-    public static ServerStatus serverStatus = new ServerStatus();
-    public static GuessTheNumberHandler guessTheNumberHandler = new GuessTheNumberHandler();
+    public static MessagesHandler messagesHandler;
+    public static GuildHandler guildHandler;
+    public static ContentHandler contentHandler;
+    public static CommandHandler commandHandler;
+    public static ContextMenuHandler contextMenuHandler;
+    public static ONet onet;
+    public static UserHandler userHandler;
+    public static ServerStatus serverStatus;
 
     public static void main(String[] args) {
+        try {
+
+            File file = new File("token.json");
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            JSONHandler jsonHandler = new JSONHandler();
+
+            JSONData reader = (jsonHandler.new JSONReader("token.json")).read();
+            String token = reader.readString("token", null);
+
+            // Build jda
+            jda = JDABuilder.createDefault(token, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_EMOJIS,
+                    GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_PRESENCES, GatewayIntent.GUILD_MESSAGE_REACTIONS)
+                    .setMemberCachePolicy(MemberCachePolicy.ALL).disableCache(CacheFlag.VOICE_STATE).build();
+
+            jda.awaitReady();
+
+            messagesHandler = new MessagesHandler();
+            guildHandler = new GuildHandler();
+            contentHandler = new ContentHandler();
+            commandHandler = new CommandHandler();
+            contextMenuHandler = new ContextMenuHandler();
+            onet = new ONet();
+            userHandler = new UserHandler();
+            serverStatus = new ServerStatus();
+
+            Log.info("Setup done");
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         // TODO Database
         onet.run(0, saveInterval, () -> save());
     }
@@ -43,7 +85,6 @@ public class OverflowGateBot {
             userHandler.save();
             serverStatus.save();
             guildHandler.save();
-            guessTheNumberHandler.save();
         } catch (IOException e) {
             e.printStackTrace();
         }

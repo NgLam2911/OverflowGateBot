@@ -110,7 +110,7 @@ public class GuildHandler {
         for (String guildId : guildIds) {
             if (guildId == null)
                 break;
-            Guild guild = messagesHandler.jda.getGuildById(guildId);
+            Guild guild = jda.getGuildById(guildId);
             if (guild == null)
                 continue;
             names.put(guild.getName(), guildId);
@@ -142,7 +142,7 @@ public class GuildHandler {
 
     public HashMap<String, String> getAllGuildChannelName(@Nonnull String guildId) {
         HashMap<String, String> names = new HashMap<>();
-        Guild guild = messagesHandler.jda.getGuildById(guildId);
+        Guild guild = jda.getGuildById(guildId);
         if (guild == null) {
             System.out.println("Not found guild " + guildId);
             return names;
@@ -208,7 +208,7 @@ public class GuildHandler {
                         _temp.clear();
                     }
                 }
-                Guild guild = messagesHandler.jda.getGuildById(_guildId);
+                Guild guild = jda.getGuildById(_guildId);
                 if (guild == null)
                     continue;
                 if (guildConfigs.get(_guildId).get("channels") == null)

@@ -9,14 +9,10 @@ import mindustry.game.*;
 
 import net.dv8tion.jda.api.*;
 import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.entities.Activity.ActivityType;
 import net.dv8tion.jda.api.entities.Message.Attachment;
 import net.dv8tion.jda.api.events.message.*;
 import net.dv8tion.jda.api.hooks.*;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.requests.GatewayIntent;
-import net.dv8tion.jda.api.utils.MemberCachePolicy;
-import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.events.guild.member.update.GuildMemberUpdateNicknameEvent;
@@ -26,8 +22,6 @@ import javax.annotation.Nonnull;
 import javax.imageio.*;
 
 import OverflowGateBot.mindustry.ContentHandler;
-import OverflowGateBot.misc.JSONHandler;
-import OverflowGateBot.misc.JSONHandler.JSONData;
 
 import java.awt.image.*;
 import java.io.*;
@@ -40,36 +34,13 @@ import static OverflowGateBot.OverflowGateBot.*;
 
 public class MessagesHandler extends ListenerAdapter {
 
-    public final JDA jda;
-
     public final Integer messageAliveTime = 30;
 
     public HashMap<String, TextChannel> serverChatChannel = new HashMap<String, TextChannel>();
 
     public MessagesHandler() {
         try {
-
-            File file = new File("token.json");
-            if (!file.exists()) {
-                file.createNewFile();
-            }
-            JSONHandler jsonHandler = new JSONHandler();
-
-            JSONData reader = (jsonHandler.new JSONReader("token.json")).read();
-            String token = reader.readString("token", null);
-
-            // Build jda
-            jda = JDABuilder.createDefault(token, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_EMOJIS,
-                    GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_PRESENCES, GatewayIntent.GUILD_MESSAGE_REACTIONS)
-                    .setMemberCachePolicy(MemberCachePolicy.ALL).disableCache(CacheFlag.VOICE_STATE).build();
-            jda.awaitReady();
-
             jda.addEventListener(this);
-
-            jda.getPresence().setActivity(Activity.of(ActivityType.PLAYING, " /bot help để bắt đầu"));
-
-            Log.info("Bot online.");
-
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -148,7 +119,7 @@ public class MessagesHandler extends ListenerAdapter {
             }
         }
 
-    }d
+    }
 
     @Override
     public void onGuildMemberUpdateNickname(@Nonnull GuildMemberUpdateNicknameEvent event) {
@@ -185,7 +156,7 @@ public class MessagesHandler extends ListenerAdapter {
     public boolean isSchematicFile(Attachment attachment) {
         String fileExtension = attachment.getFileExtension();
         if (fileExtension == null)
-            return false;
+            return true;
         return fileExtension.equals(Vars.schematicExtension);
     }
 
@@ -198,7 +169,7 @@ public class MessagesHandler extends ListenerAdapter {
     }
 
     public boolean isMapFile(Attachment attachment) {
-        return attachment.getFileName().endsWith(".msav");
+        return attachment.getFileName().endsWith(".msav") || attachment.getFileExtension() == null;
     }
 
     public boolean isMapFile(Message message) {
