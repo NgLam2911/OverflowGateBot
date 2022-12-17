@@ -7,12 +7,12 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 
-import static OverflowGateBot.OverflowGateBot.*;
-
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import OverflowGateBot.command.BotSubcommandClass;
+
+import static OverflowGateBot.OverflowGateBot.*;
 
 public class SayCommand extends BotSubcommandClass {
 
@@ -43,12 +43,16 @@ public class SayCommand extends BotSubcommandClass {
 
         } else if (guildOption != null && channelOption != null) {
             List<Guild> guilds = jda.getGuildsByName(guildOption.getAsString(), false);
-            if (guilds.isEmpty())
+            if (guilds.isEmpty()) {
+                event.getHook().deleteOriginal().queue();
                 return;
+            }
             Guild firstGuild = guilds.get(0);
             List<TextChannel> channels = firstGuild.getTextChannelsByName(channelOption.getAsString(), false);
-            if (channels.isEmpty())
+            if (channels.isEmpty()) {
+                event.getHook().deleteOriginal().queue();
                 return;
+            }
             TextChannel channel = channels.get(0);
             event.getHook().deleteOriginal().complete();
             channel.sendMessage(content).queue();
@@ -59,27 +63,33 @@ public class SayCommand extends BotSubcommandClass {
     @Override
     public void onAutoComplete(CommandAutoCompleteInteractionEvent event) {
         String focus = event.getFocusedOption().getName();
-        if (focus.equals("guild"))
-            sendAutoComplete(event, guildHandler.getAllGuildName().keySet());
+        if (focus.equals("guild")) {
+            HashSet<String> guildNames = new HashSet<>();
+            jda.getGuilds().forEach(s -> guildNames.add(s.getName()));
+            sendAutoComplete(event, guildNames);
+        }
 
         // Show all channels
         else if (focus.equals("channel")) {
             // Get all channel form selected guild
-            OptionMapping guildIdOption = event.getOption("guild");
-            if (guildIdOption == null)
-                return;
-            HashMap<String, String> guilds = guildHandler.getAllGuildName();
-            String guildName = guildIdOption.getAsString();
-
-            if (!guilds.containsKey(guildName))
-                return;
-
-            String guildId = guilds.get(guildName);
-            if (guildId == null) {
-                System.out.println("Not found guild " + guildName);
+            OptionMapping guildNameOption = event.getOption("guild");
+            if (guildNameOption == null) {
+                sendAutoComplete(event, "No guild name specified");
                 return;
             }
-            sendAutoComplete(event, guildHandler.getAllGuildChannelName(guildId).keySet());
+
+            String guildName = guildNameOption.getAsString();
+            List<Guild> guilds = jda.getGuildsByName(guildName, false);
+            if (guilds.isEmpty()) {
+                sendAutoComplete(event, "No guild found with name " + guildName);
+                return;
+            }
+
+            Guild guild = guilds.get(0);
+            List<TextChannel> channels = guild.getTextChannels();
+            HashSet<String> channelNames = new HashSet<>();
+            channels.forEach(c -> channelNames.add(c.getName()));
+            sendAutoComplete(event, channelNames);
 
         }
     }

@@ -6,8 +6,9 @@ import OverflowGateBot.command.commands.subcommands.SharCommands.LoadCommand;
 import OverflowGateBot.command.commands.subcommands.SharCommands.SaveCommand;
 import OverflowGateBot.command.commands.subcommands.SharCommands.SayCommand;
 import OverflowGateBot.command.commands.subcommands.SharCommands.SetRoleCommand;
-import net.dv8tion.jda.api.entities.Guild;
+
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 import static OverflowGateBot.OverflowGateBot.sharId;
@@ -25,10 +26,6 @@ public class SharCommand extends BotCommandClass {
 
     @Override
     public void onCommand(SlashCommandInteractionEvent event) {
-        Guild guild = event.getGuild();
-        if (guild == null)
-            return;
-
         Member member = event.getMember();
         if (member == null)
             return;
@@ -38,5 +35,20 @@ public class SharCommand extends BotCommandClass {
             return;
         }
         runCommand(event);
+    }
+
+    @Override
+    public void onAutoComplete(CommandAutoCompleteInteractionEvent event) {
+        Member member = event.getMember();
+        if (member == null)
+            return;
+
+        if (!member.getId().equals(sharId)) {
+            sendAutoComplete(event, "Bạn không có quyền để sử dụng lệnh này");
+            return;
+        }
+        if (subcommands.containsKey(event.getSubcommandName())) {
+            subcommands.get(event.getSubcommandName()).onAutoComplete(event);
+        }
     }
 }

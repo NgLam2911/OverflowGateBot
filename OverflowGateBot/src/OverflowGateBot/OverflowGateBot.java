@@ -62,13 +62,13 @@ public class OverflowGateBot {
 
             jda.awaitReady();
 
+            onet = new ONet();
             messagesHandler = new MessagesHandler();
             guildHandler = new GuildHandler();
+            userHandler = new UserHandler();
             contentHandler = new ContentHandler();
             commandHandler = new CommandHandler();
             contextMenuHandler = new ContextMenuHandler();
-            onet = new ONet();
-            userHandler = new UserHandler();
             serverStatus = new ServerStatus();
 
             Log.info("Setup done");

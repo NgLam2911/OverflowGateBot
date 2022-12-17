@@ -1,6 +1,7 @@
 package OverflowGateBot.command;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -14,6 +15,9 @@ import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 
 public class BotSubcommandClass extends SubcommandData {
+
+    private final int MAX_OPTIONS = 10;
+    private final String characterFilter = "[^\\p{L}\\p{M}\\p{N}\\p{P}\\p{Z}\\p{Cf}\\p{Cs}\\s]";
 
     public BotSubcommandClass(@Nonnull String name, @Nonnull String description) {
         super(name, description);
@@ -49,21 +53,38 @@ public class BotSubcommandClass extends SubcommandData {
     }
 
     // Auto complete handler
-    public void sendAutoComplete(@Nonnull CommandAutoCompleteInteractionEvent event, Set<String> list) {
-        if (list == null || list.isEmpty())
-            return;
+    public void sendAutoComplete(@Nonnull CommandAutoCompleteInteractionEvent event, Set<String> input) {
         List<Command.Choice> options = new ArrayList<Command.Choice>();
+        Set<String> list = new HashSet<String>();
+        input.forEach(v -> list.add(v.replace(characterFilter, "")));
+
+        if (list.isEmpty()) {
+            sendAutoComplete(event, "Không tìm thấy kết quả khớp");
+            return;
+        }
         String focusString = event.getFocusedOption().getValue().toLowerCase();
 
+        int count = 0;
         for (String value : list) {
-            if (value.toLowerCase().startsWith(focusString))
+            if (count > MAX_OPTIONS)
+                break;
+            if (value.toLowerCase().contains(focusString)) {
                 options.add(new Command.Choice(value, value));
+                count++;
+            }
         }
 
         if (options.isEmpty()) {
-            System.out.println("No options available for " + event.getFocusedOption().toString());
+            sendAutoComplete(event, "Không tìm thấy kết quả khớp");
             return;
         }
         event.replyChoices(options).queue();
+    }
+
+    public void sendAutoComplete(@Nonnull CommandAutoCompleteInteractionEvent event, String value) {
+        if (value == null)
+            event.replyChoice("Không tìm thấy kết quả khớp", "Không tìm thấy kết quả khớp").queue();
+        else
+            event.replyChoice(value, value).queue();
     }
 }

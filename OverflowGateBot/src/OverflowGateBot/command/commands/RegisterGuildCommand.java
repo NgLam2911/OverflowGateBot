@@ -8,9 +8,7 @@ import static OverflowGateBot.OverflowGateBot.userHandler;
 
 import OverflowGateBot.command.BotCommandClass;
 
-import static OverflowGateBot.OverflowGateBot.guildHandler;
-import static OverflowGateBot.OverflowGateBot.commandHandler;
-import static OverflowGateBot.OverflowGateBot.contextMenuHandler;
+import static OverflowGateBot.OverflowGateBot.*;
 
 public class RegisterGuildCommand extends BotCommandClass {
     public RegisterGuildCommand() {
@@ -32,7 +30,7 @@ public class RegisterGuildCommand extends BotCommandClass {
         if (member == null)
             return;
 
-        if (!member.getId().equals("719322804549320725")) {
+        if (!member.getId().equals(sharId)) {
             reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
             return;
         }

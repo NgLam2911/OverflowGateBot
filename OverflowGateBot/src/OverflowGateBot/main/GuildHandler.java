@@ -72,6 +72,7 @@ public class GuildHandler {
         botLogChannels.put("1010373870395596830", "1010412857541799997");
 
         load();
+        System.out.println("Guild handler up");
     }
 
     public boolean isAdmin(Message message) {

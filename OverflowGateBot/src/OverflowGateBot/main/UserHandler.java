@@ -54,6 +54,8 @@ public class UserHandler {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        System.out.println("User handler up");
     }
 
     // Transfer points from one user to another user
@@ -370,7 +372,8 @@ public class UserHandler {
 
     public void loadGuild(@Nonnull String guildId) {
         Guild guild = jda.getGuildById(guildId);
-        if (guild == null) {            return;
+        if (guild == null) {
+            return;
         }
         List<Member> members = guild.getMembers();
         for (Member m : members) {

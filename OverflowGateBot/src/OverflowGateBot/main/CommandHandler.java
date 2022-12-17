@@ -52,8 +52,12 @@ public class CommandHandler extends ListenerAdapter {
         jda.upsertCommand(registerGuildCommand.command).queue();
         jda.upsertCommand(unregisterGuildCommand.command).queue();
 
-        for (Guild guild : jda.getGuilds())
-            registerCommand(guild);
+        for (BotCommandClass command : commands.values()) {
+            jda.upsertCommand(command.command).queue();
+        }
+
+        System.out.println("Command handler up");
+
     }
 
     public void addCommand(BotCommandClass command) {

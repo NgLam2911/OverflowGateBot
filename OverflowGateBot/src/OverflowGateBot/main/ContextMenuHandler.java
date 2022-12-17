@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 
 import OverflowGateBot.context.BotContextMenuClass;
+import OverflowGateBot.context.contexts.DeleteMessageContextMenu;
 import OverflowGateBot.context.contexts.PostMapContextMenu;
 import OverflowGateBot.context.contexts.PostSchematicContextMenu;
 
@@ -29,13 +30,13 @@ public class ContextMenuHandler extends ListenerAdapter {
 
         addCommand(new PostMapContextMenu());
         addCommand(new PostSchematicContextMenu());
+        addCommand(new DeleteMessageContextMenu());
 
         for (BotContextMenuClass command : commands.values()) {
-            jda.updateCommands().addCommands(command.command).complete();
+            jda.upsertCommand(command.command).queue();
         }
 
-        for (Guild guild : jda.getGuilds())
-            registerCommand(guild);
+        System.out.println("Context menu handler up");
     }
 
     public void addCommand(BotContextMenuClass command) {
@@ -62,7 +63,7 @@ public class ContextMenuHandler extends ListenerAdapter {
         System.out.println(messagesHandler.getMessageSender(event.getTarget()) + ": used " + event.getName());
         handleCommand(event);
 
-        event.getHook().deleteOriginal().queueAfter(30, TimeUnit.SECONDS);
+        event.getHook().deleteOriginal().queue();
     }
 
     public void handleCommand(MessageContextInteractionEvent event) {

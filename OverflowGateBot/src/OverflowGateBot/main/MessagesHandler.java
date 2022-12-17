@@ -39,11 +39,9 @@ public class MessagesHandler extends ListenerAdapter {
     public HashMap<String, TextChannel> serverChatChannel = new HashMap<String, TextChannel>();
 
     public MessagesHandler() {
-        try {
-            jda.addEventListener(this);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+
+        jda.addEventListener(this);
+        System.out.println("Message handler up");
     }
 
     public String getMessageSender(Message message) {

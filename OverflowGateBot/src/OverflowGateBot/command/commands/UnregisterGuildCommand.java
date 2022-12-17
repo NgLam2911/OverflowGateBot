@@ -4,7 +4,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
-import static OverflowGateBot.OverflowGateBot.guildHandler;
+import static OverflowGateBot.OverflowGateBot.*;
 
 import OverflowGateBot.command.BotCommandClass;
 
@@ -28,7 +28,7 @@ public class UnregisterGuildCommand extends BotCommandClass {
         if (member == null)
             return;
 
-        if (!member.getId().equals("719322804549320725")) {
+        if (!member.getId().equals(sharId)) {
             reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
             return;
         }

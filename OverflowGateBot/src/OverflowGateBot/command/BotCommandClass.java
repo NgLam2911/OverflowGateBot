@@ -1,6 +1,10 @@
 package OverflowGateBot.command;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
@@ -8,6 +12,7 @@ import javax.annotation.Nonnull;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
@@ -18,6 +23,9 @@ public class BotCommandClass {
     @Nonnull
     public SlashCommandData command;
     public HashMap<String, BotSubcommandClass> subcommands = new HashMap<>();
+
+    private final int MAX_OPTIONS = 10;
+    private final String characterFilter = "[^\\p{L}\\p{M}\\p{N}\\p{P}\\p{Z}\\p{Cf}\\p{Cs}\\s]";
 
     public BotCommandClass(@Nonnull String name, @Nonnull String description) {
         this.name = name;
@@ -53,6 +61,42 @@ public class BotCommandClass {
         subcommands.put(subcommand.getName(), subcommand);
         command.addSubcommands(subcommand);
         return subcommand;
+    }
+
+    // Auto complete handler
+    public void sendAutoComplete(@Nonnull CommandAutoCompleteInteractionEvent event, Set<String> input) {
+        List<Command.Choice> options = new ArrayList<Command.Choice>();
+        Set<String> list = new HashSet<String>();
+        input.forEach(v -> list.add(v.replace(characterFilter, "")));
+
+        if (list.isEmpty()) {
+            sendAutoComplete(event, "Không tìm thấy kết quả khớp");
+            return;
+        }
+        String focusString = event.getFocusedOption().getValue().toLowerCase();
+
+        int count = 0;
+        for (String value : list) {
+            if (count > MAX_OPTIONS)
+                break;
+            if (value.toLowerCase().contains(focusString)) {
+                options.add(new Command.Choice(value, value));
+                count++;
+            }
+        }
+
+        if (options.isEmpty()) {
+            sendAutoComplete(event, "Không tìm thấy kết quả khớp");
+            return;
+        }
+        event.replyChoices(options).queue();
+    }
+
+    public void sendAutoComplete(@Nonnull CommandAutoCompleteInteractionEvent event, String value) {
+        if (value == null)
+            event.replyChoice("Không tìm thấy kết quả khớp", "Không tìm thấy kết quả khớp").queue();
+        else
+            event.replyChoice(value, value).queue();
     }
 
     // Can be overridden
