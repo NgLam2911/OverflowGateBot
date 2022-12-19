@@ -45,7 +45,8 @@ task dist(type: Jar){
 
 
 dependencies{
-    implementation("net.dv8tion:JDA:5.0.0-alpha.10")
+    implementation 'org.mongodb:mongodb-driver-sync:4.3.4'
+    implementation ("net.dv8tion:JDA:5.0.0-alpha.10")
     implementation "org.jsoup:jsoup:1.7.2"
     implementation "com.github.Anuken.Mindustry:core:$mindustryVersion"
     implementation "com.github.Anuken.Arc:arc-core:dfcb21ce56"

@@ -1,7 +1,7 @@
 package OverflowGateBot.command.commands.subcommands.UserCommands;
 
 import OverflowGateBot.command.BotSubcommandClass;
-import OverflowGateBot.user.DiscordUser;
+import OverflowGateBot.user.AlphaUser;
 
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -58,8 +58,8 @@ public class TransferCommand extends BotSubcommandClass {
             System.out.println("No receiver found for user " + user);
             return;
         }
-        DiscordUser dUserSender = userHandler.getUser(event.getMember());
-        DiscordUser dUserReceiver = userHandler.getUser(receiver);
+        AlphaUser dUserSender = userHandler.getUser(event.getMember());
+        AlphaUser dUserReceiver = userHandler.getUser(receiver);
         if (dUserSender == null || dUserReceiver == null) {
             System.out.println("No receiver found in database");
             return;

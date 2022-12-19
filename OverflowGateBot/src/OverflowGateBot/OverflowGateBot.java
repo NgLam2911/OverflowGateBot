@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import OverflowGateBot.main.CommandHandler;
 import OverflowGateBot.main.ContextMenuHandler;
+import OverflowGateBot.main.DatabaseHandler;
 import OverflowGateBot.main.GuildHandler;
 import OverflowGateBot.main.MessagesHandler;
 import OverflowGateBot.main.UserHandler;
@@ -13,8 +14,6 @@ import OverflowGateBot.mindustry.ONet;
 import OverflowGateBot.mindustry.ServerStatus;
 import OverflowGateBot.misc.JSONHandler;
 import OverflowGateBot.misc.JSONHandler.JSONData;
-
-import arc.util.Log;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -42,6 +41,7 @@ public class OverflowGateBot {
     public static ONet onet;
     public static UserHandler userHandler;
     public static ServerStatus serverStatus;
+    public static DatabaseHandler databaseHandler;
 
     public static void main(String[] args) {
         try {
@@ -70,6 +70,7 @@ public class OverflowGateBot {
             commandHandler = new CommandHandler();
             contextMenuHandler = new ContextMenuHandler();
             serverStatus = new ServerStatus();
+            databaseHandler = new DatabaseHandler();
 
             System.out.println("Setup done");
 
@@ -82,7 +83,6 @@ public class OverflowGateBot {
 
     public static void save() {
         try {
-            userHandler.save();
             serverStatus.save();
             guildHandler.save();
         } catch (IOException e) {

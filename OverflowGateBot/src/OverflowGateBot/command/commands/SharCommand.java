@@ -2,8 +2,6 @@ package OverflowGateBot.command.commands;
 
 import OverflowGateBot.command.BotCommandClass;
 import OverflowGateBot.command.commands.subcommands.SharCommands.AddCommand;
-import OverflowGateBot.command.commands.subcommands.SharCommands.LoadCommand;
-import OverflowGateBot.command.commands.subcommands.SharCommands.SaveCommand;
 import OverflowGateBot.command.commands.subcommands.SharCommands.SayCommand;
 import OverflowGateBot.command.commands.subcommands.SharCommands.SetRoleCommand;
 
@@ -18,8 +16,6 @@ public class SharCommand extends BotCommandClass {
     public SharCommand() {
         super("shar", "Shar only");
         addSubcommands(new AddCommand());
-        addSubcommands(new SaveCommand());
-        addSubcommands(new LoadCommand());
         addSubcommands(new SayCommand());
         addSubcommands(new SetRoleCommand());
     }

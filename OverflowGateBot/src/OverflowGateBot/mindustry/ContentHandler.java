@@ -45,7 +45,6 @@ public class ContentHandler {
     ObjectMap<String, BufferedImage> regions = new ObjectMap<>();
 
     public ContentHandler() {
-        // clear cache
 
         Version.enabled = false;
         Vars.content = new ContentLoader();

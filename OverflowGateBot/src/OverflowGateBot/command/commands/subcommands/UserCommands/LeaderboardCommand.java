@@ -1,7 +1,7 @@
 package OverflowGateBot.command.commands.subcommands.UserCommands;
 
 
-import OverflowGateBot.user.DiscordUser;
+import OverflowGateBot.user.AlphaUser;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
@@ -39,7 +39,7 @@ public class LeaderboardCommand extends BotSubcommandClass {
             orderBy = orderOption.getAsString();
 
         EmbedBuilder builder = userHandler.getLeaderBoard(orderBy);
-        DiscordUser user = userHandler.getUser(member);
+        AlphaUser user = userHandler.getUser(member);
         int position = userHandler.getPosition(user, orderBy);
 
         // Display sender position if its not contained in the leaderboard

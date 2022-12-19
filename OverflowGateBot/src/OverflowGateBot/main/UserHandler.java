@@ -18,7 +18,7 @@ import org.json.simple.parser.ParseException;
 import OverflowGateBot.misc.JSONHandler;
 import OverflowGateBot.misc.JSONHandler.JSONData;
 import OverflowGateBot.misc.JSONHandler.JSONWriter;
-import OverflowGateBot.user.DiscordUser;
+import OverflowGateBot.user.AlphaUser;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -29,20 +29,20 @@ import static OverflowGateBot.OverflowGateBot.*;
 
 public class UserHandler {
 
-    private HashMap<String, HashMap<String, DiscordUser>> users = new HashMap<>();
+    private HashMap<String, HashMap<String, AlphaUser>> users = new HashMap<>();
     private List<String> daily = new ArrayList<>();
 
-    List<DiscordUser> board = new ArrayList<>();
+    List<AlphaUser> board = new ArrayList<>();
 
     DataInputStream data;
 
     Clock clock = Clock.systemDefaultZone();
 
-    Comparator<DiscordUser> sortByPoint = (o1, o2) -> o2.getTotalPoint().compareTo(o1.getTotalPoint());
-    Comparator<DiscordUser> sortByMoney = (o1, o2) -> o2.money.compareTo(o1.money);
-    Comparator<DiscordUser> sortByPVPPoint = (o1, o2) -> o2.pvpPoint.compareTo(o1.pvpPoint);
+    Comparator<AlphaUser> sortByPoint = (o1, o2) -> o2.getTotalPoint().compareTo(o1.getTotalPoint());
+    Comparator<AlphaUser> sortByMoney = (o1, o2) -> o2.money.compareTo(o1.money);
+    Comparator<AlphaUser> sortByPVPPoint = (o1, o2) -> o2.pvpPoint.compareTo(o1.pvpPoint);
 
-    public HashMap<String, Comparator<DiscordUser>> sorter = new HashMap<>();
+    public HashMap<String, Comparator<AlphaUser>> sorter = new HashMap<>();
 
     public UserHandler() {
         sorter.put("Money", sortByMoney);
@@ -59,7 +59,7 @@ public class UserHandler {
     }
 
     // Transfer points from one user to another user
-    public int transferMoney(DiscordUser sender, DiscordUser receiver, int amount) {
+    public int transferMoney(AlphaUser sender, AlphaUser receiver, int amount) {
         if (sender.money < amount)
             return -1;
         sender.money -= amount;
@@ -67,7 +67,7 @@ public class UserHandler {
         return amount;
     }
 
-    public int transferPVPPoint(DiscordUser sender, DiscordUser receiver, int amount) {
+    public int transferPVPPoint(AlphaUser sender, AlphaUser receiver, int amount) {
         if (sender.pvpPoint < amount)
             return -1;
         sender.pvpPoint -= amount;
@@ -76,8 +76,8 @@ public class UserHandler {
     }
 
     // Get user rank base on <orderBy>
-    public int getPosition(DiscordUser user, String orderBy) {
-        Comparator<DiscordUser> comparator = sorter.get(orderBy);
+    public int getPosition(AlphaUser user, String orderBy) {
+        Comparator<AlphaUser> comparator = sorter.get(orderBy);
         if (comparator == null) {
             comparator = sortByPoint;
         }
@@ -86,7 +86,7 @@ public class UserHandler {
     }
 
     // Get DiscordUser from Member, return null if not found
-    public DiscordUser getUser(Member member) {
+    public AlphaUser getUser(Member member) {
         String guildId = member.getGuild().getId();
         if (guildHandler.guildConfigs.containsKey(guildId))
             if (users.containsKey(guildId))
@@ -105,9 +105,9 @@ public class UserHandler {
         setDisplayName(member);
     }
 
-    public DiscordUser addNewMember(@Nonnull String guildId, @Nonnull String id, String name, int point, int level,
+    public AlphaUser addNewMember(@Nonnull String guildId, @Nonnull String id, String name, int point, int level,
             int money, int pvpPoint, Boolean hideLv) {
-        DiscordUser user = new DiscordUser(guildId, id, name, point, level, money, pvpPoint, hideLv);
+        AlphaUser user = new AlphaUser(guildId, id, name, point, level, money, pvpPoint, hideLv);
         if (users.containsKey(guildId)) {
             // Already have guild id
             if (!users.get(guildId).containsKey(id)) {
@@ -148,7 +148,7 @@ public class UserHandler {
         Member member = message.getMember();
         if (member == null)
             return;
-        DiscordUser user = getUser(member);
+        AlphaUser user = getUser(member);
         if (user == null) {
             addNewMember(member);
             return;
@@ -161,7 +161,7 @@ public class UserHandler {
 
     // Add money for member
     public void addMoney(Member member, int money) {
-        DiscordUser user = getUser(member);
+        AlphaUser user = getUser(member);
         if (user == null) {
             addNewMember(member);
             return;
@@ -173,7 +173,7 @@ public class UserHandler {
     public void setDisplayName(Member member) {
         if (member.getUser().isBot())
             return;
-        DiscordUser user = getUser(member);
+        AlphaUser user = getUser(member);
         if (user != null)
             user.setDisplayName();
 
@@ -181,7 +181,7 @@ public class UserHandler {
 
     // Set user nickname and save it
     public void setNickName(Member member, String nickname) {
-        DiscordUser user = getUser(member);
+        AlphaUser user = getUser(member);
         if (user == null)
             return;
         user.setNickname(nickname);
@@ -190,16 +190,16 @@ public class UserHandler {
 
     // Hide member level, affect setDisplayName
     public void hidelv(Member member, Boolean hide) {
-        DiscordUser user = getUser(member);
+        AlphaUser user = getUser(member);
         if (user == null)
             return;
-        user.hideLv = hide;
+        user.hideLevel = hide;
         setDisplayName(member);
     }
 
     // Get daily reward
     public int getDaily(Member member) {
-        DiscordUser user = getUser(member);
+        AlphaUser user = getUser(member);
         if (user == null)
             return -1;
         if (daily.contains(user.id))
@@ -212,7 +212,7 @@ public class UserHandler {
 
     // Add status to user
     public boolean add(Member member, String type, Integer amount) {
-        DiscordUser user = getUser(member);
+        AlphaUser user = getUser(member);
         if (user == null)
             return false;
 
@@ -234,7 +234,7 @@ public class UserHandler {
 
     // Display roles, levels, points, and money
     public EmbedBuilder getUserInfo(Member member) {
-        DiscordUser user = getUser(member);
+        AlphaUser user = getUser(member);
 
         EmbedBuilder builder = new EmbedBuilder();
         if (user == null) {
@@ -261,7 +261,7 @@ public class UserHandler {
         return builder;
     }
 
-    public String getUserStat(DiscordUser user, String stat) {
+    public String getUserStat(AlphaUser user, String stat) {
         Guild guild = jda.getGuildById(user.guildId);
         String guildName = "Unknown guild";
         if (guild != null)
@@ -282,7 +282,7 @@ public class UserHandler {
 
     // Leaderboard base on <orderBy>
     public EmbedBuilder getLeaderBoard(String orderBy) {
-        Comparator<DiscordUser> comparator = sorter.get(orderBy);
+        Comparator<AlphaUser> comparator = sorter.get(orderBy);
         if (comparator == null) {
             comparator = sortByPoint;
         }
@@ -292,7 +292,7 @@ public class UserHandler {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setTitle("Bảng xếp hạng");
         for (int i = 0; i < (board.size() < 10 ? board.size() : 10); i++) {
-            DiscordUser user = board.get(i);
+            AlphaUser user = board.get(i);
             builder.addField("Hạng " + (i + 1), getUserStat(user, orderBy), false);
         }
 
@@ -358,7 +358,7 @@ public class UserHandler {
                                 continue;
                             name = member.getUser().getName();
                         }
-                        DiscordUser user = addNewMember(gid, id, name, point, level, money, pvpPoint, hideLv);
+                        AlphaUser user = addNewMember(gid, id, name, point, level, money, pvpPoint, hideLv);
                         user.setNickname(nickname);
                         user.setDisplayName();
                         user.checkMemberRole();
@@ -379,53 +379,5 @@ public class UserHandler {
         for (Member m : members) {
             addNewMember(m);
         }
-    }
-
-    // Save and load
-    // TODO Database
-    public void save() throws IOException {
-
-        try {
-
-            // Save daily data
-            saveDailyData();
-
-            // Save user data
-            saveUserData();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("Error when saving user data");
-        }
-    }
-
-    // TODO Database
-    public void saveDailyData() throws IOException {
-        try {
-            JSONHandler jsonHandler = new JSONHandler();
-            JSONData reader;
-            reader = (jsonHandler.new JSONReader(dailyFilePath)).read();
-            String date = reader.readString("date", null);
-            JSONWriter writer = jsonHandler.new JSONWriter(dailyFilePath);
-            if (date.equals(getDate()))
-                writer.append("data", daily.toString());
-            else
-                writer.append("data", (new ArrayList<String>()).toString());
-            writer.append("date", "\"" + getDate() + "\"");
-            writer.write();
-
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-    }
-
-    // TODO Database
-    public void saveUserData() throws IOException {
-        JSONHandler jsonHandler = new JSONHandler();
-        JSONWriter writer = jsonHandler.new JSONWriter(userFilePath);
-        for (String gid : users.keySet()) {
-            writer.append(gid, new JSONObject(users.get(gid)).toJSONString());
-        }
-        writer.write();
     }
 }
