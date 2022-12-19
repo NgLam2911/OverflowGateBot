@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
 
 import OverflowGateBot.command.BotSubcommandClass;
@@ -20,7 +20,9 @@ public class SayCommand extends BotSubcommandClass {
         super("say", "Shar only");
         this.addOption(OptionType.STRING, "content", "Shar only", true).//
                 addOption(OptionType.STRING, "guild", "Shar only", false, true).//
-                addOption(OptionType.STRING, "channel", "Shar only", false, true);
+                addOption(OptionType.STRING, "channel", "Shar only", false, true).//
+                addOption(OptionType.STRING, "reply", "Shar only", false, true);
+
     }
 
     @Override
@@ -30,67 +32,92 @@ public class SayCommand extends BotSubcommandClass {
 
     @Override
     public void onCommand(SlashCommandInteractionEvent event) {
-        OptionMapping guildOption = event.getOption("guild");
-        OptionMapping channelOption = event.getOption("channel");
+        OptionMapping guildIdOption = event.getOption("guild");
+        OptionMapping channelIdOption = event.getOption("channel");
         OptionMapping contentOption = event.getOption("content");
+        OptionMapping replyIdOption = event.getOption("reply");
+        event.getHook().deleteOriginal().complete();
+
         if (contentOption == null)
             return;
+
         String content = contentOption.getAsString();
+        Guild guild;
+        TextChannel channel;
+        if (guildIdOption == null)
+            guild = event.getGuild();
+        else
+            guild = jda.getGuildById(guildIdOption.getAsString());
 
-        if (guildOption == null && channelOption == null) {
-            event.getTextChannel().sendMessage(content).queue();
-            event.getHook().deleteOriginal().queue();
+        if (guild == null || channelIdOption == null)
+            channel = event.getTextChannel();
+        else
+            channel = guild.getTextChannelById(channelIdOption.getAsString());
 
-        } else if (guildOption != null && channelOption != null) {
-            List<Guild> guilds = jda.getGuildsByName(guildOption.getAsString(), false);
-            if (guilds.isEmpty()) {
-                event.getHook().deleteOriginal().queue();
-                return;
-            }
-            Guild firstGuild = guilds.get(0);
-            List<TextChannel> channels = firstGuild.getTextChannelsByName(channelOption.getAsString(), false);
-            if (channels.isEmpty()) {
-                event.getHook().deleteOriginal().queue();
-                return;
-            }
-            TextChannel channel = channels.get(0);
-            event.getHook().deleteOriginal().complete();
+        if (channel == null)
+            channel = event.getTextChannel();
+
+        if (replyIdOption == null)
             channel.sendMessage(content).queue();
-
+        else {
+            channel.retrieveMessageById(replyIdOption.getAsString())
+                    .queue((message) -> message.reply(content));
         }
+
     }
 
     @Override
     public void onAutoComplete(CommandAutoCompleteInteractionEvent event) {
         String focus = event.getFocusedOption().getName();
         if (focus.equals("guild")) {
-            HashSet<String> guildNames = new HashSet<>();
-            jda.getGuilds().forEach(s -> guildNames.add(s.getName()));
+            HashMap<String, String> guildNames = new HashMap<>();
+            jda.getGuilds().forEach(s -> guildNames.put(s.getName(), s.getId()));
             sendAutoComplete(event, guildNames);
-        }
 
-        // Show all channels
-        else if (focus.equals("channel")) {
+            // Show all channels
+        } else if (focus.equals("channel")) {
             // Get all channel form selected guild
-            OptionMapping guildNameOption = event.getOption("guild");
-            if (guildNameOption == null) {
-                sendAutoComplete(event, "No guild name specified");
+            Guild guild;
+            OptionMapping guildIdOption = event.getOption("guild");
+            if (guildIdOption == null)
+                guild = event.getGuild();
+            else
+                guild = jda.getGuildById(guildIdOption.getAsString());
+
+            if (guild == null) {
+                sendAutoComplete(event, "No guild found");
                 return;
             }
 
-            String guildName = guildNameOption.getAsString();
-            List<Guild> guilds = jda.getGuildsByName(guildName, false);
-            if (guilds.isEmpty()) {
-                sendAutoComplete(event, "No guild found with name " + guildName);
-                return;
-            }
-
-            Guild guild = guilds.get(0);
             List<TextChannel> channels = guild.getTextChannels();
-            HashSet<String> channelNames = new HashSet<>();
-            channels.forEach(c -> channelNames.add(c.getName()));
+            HashMap<String, String> channelNames = new HashMap<>();
+            channels.forEach(c -> channelNames.put(c.getName(), c.getId()));
             sendAutoComplete(event, channelNames);
 
+        } else if (focus.equals("reply")) {
+            OptionMapping guildIdOption = event.getOption("guild");
+            OptionMapping channelIdOption = event.getOption("channel");
+
+            Guild guild;
+            TextChannel channel;
+            if (guildIdOption == null)
+                guild = event.getGuild();
+            else
+                guild = jda.getGuildById(guildIdOption.getAsString());
+
+            if (guild == null || channelIdOption == null)
+                channel = event.getTextChannel();
+            else
+                channel = guild.getTextChannelById(channelIdOption.getAsString());
+
+            if (channel == null)
+                channel = event.getTextChannel();
+
+            channel.getHistory().retrieveFuture(10).queue(messages -> {
+                HashMap<String, String> messageContents = new HashMap<>();
+                messages.forEach(m -> messageContents.put(m.getContentDisplay(), m.getId()));
+                sendAutoComplete(event, messageContents);
+            });
         }
     }
 }

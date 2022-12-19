@@ -1,6 +1,5 @@
 package OverflowGateBot.command.commands.subcommands.SharCommands;
 
-
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
@@ -10,6 +9,8 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 
 import static OverflowGateBot.OverflowGateBot.userHandler;
+
+import java.util.HashMap;
 
 import OverflowGateBot.command.BotSubcommandClass;;
 
@@ -62,7 +63,9 @@ public class AddCommand extends BotSubcommandClass {
     public void onAutoComplete(CommandAutoCompleteInteractionEvent event) {
         String focus = event.getFocusedOption().getName();
         if (focus.equals("type")) {
-            sendAutoComplete(event, userHandler.sorter.keySet());
+            HashMap<String, String> options = new HashMap<String, String>();
+            userHandler.sorter.keySet().forEach(t -> options.put(t, t));
+            sendAutoComplete(event, options);
         }
     }
 }

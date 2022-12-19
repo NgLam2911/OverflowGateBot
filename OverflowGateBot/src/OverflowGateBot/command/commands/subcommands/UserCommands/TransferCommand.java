@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 
 import static OverflowGateBot.OverflowGateBot.userHandler;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -79,7 +80,9 @@ public class TransferCommand extends BotSubcommandClass {
     public void onAutoComplete(CommandAutoCompleteInteractionEvent event) {
         String focus = event.getFocusedOption().getName();
         if (focus.equals("type")) {
-            sendAutoComplete(event, typeOption);
+            HashMap<String, String> options = new HashMap<String, String>();
+            typeOption.forEach(t -> options.put(t, t));
+            sendAutoComplete(event, options);
         }
     }
 }

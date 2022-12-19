@@ -1,6 +1,5 @@
 package OverflowGateBot.command.commands.subcommands.AdminCommands;
 
-
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -60,7 +59,9 @@ public class SetRoleCommand extends BotSubcommandClass {
     public void onAutoComplete(CommandAutoCompleteInteractionEvent event) {
         String focus = event.getFocusedOption().getName();
         if (focus.equals("type")) {
-            sendAutoComplete(event, guildHandler.guildRoles);
+            HashMap<String, String> options = new HashMap<String, String>();
+            guildHandler.guildRoles.forEach(t -> options.put(t, t));
+            sendAutoComplete(event, options);
         }
     }
 

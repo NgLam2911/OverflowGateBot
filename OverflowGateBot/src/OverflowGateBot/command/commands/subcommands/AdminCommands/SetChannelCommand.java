@@ -1,6 +1,5 @@
 package OverflowGateBot.command.commands.subcommands.AdminCommands;
 
-
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
@@ -20,7 +19,6 @@ public class SetChannelCommand extends BotSubcommandClass {
         super("setchannel", "Cài đặt các kênh của máy chủ");
         this.addOption(OptionType.STRING, "type", "Loại kênh muốn đặt", true, true);
     }
-
 
     @Override
     public String getHelpString() {
@@ -45,17 +43,19 @@ public class SetChannelCommand extends BotSubcommandClass {
                 reply(event, "Không tìm thấy kênh " + type, 10);
                 return;
 
-
             } else {
                 if (guildHandler.guildConfigs.get(channel.getGuild().getId()) == null)
                     return;
-                HashMap<String, String> channels = (HashMap<String, String>) guildHandler.guildConfigs.get(channel.getGuild().getId()).get(type);
+                HashMap<String, String> channels = (HashMap<String, String>) guildHandler.guildConfigs
+                        .get(channel.getGuild().getId()).get(type);
                 if (channels != null && !channels.containsKey(channel.getId())) {
-                    ((HashMap<String, String>) guildHandler.guildConfigs.get(channel.getGuild().getId()).get(type)).put(channel.getId(), null);
+                    ((HashMap<String, String>) guildHandler.guildConfigs.get(channel.getGuild().getId()).get(type))
+                            .put(channel.getId(), null);
                     reply(event, "Đã thêm " + channel.getName() + " vào danh sách kênh " + type, 10);
                     guildHandler.save();
                 } else if (channels != null && channels.containsKey(channel.getId())) {
-                    ((HashMap<String, String>) guildHandler.guildConfigs.get(channel.getGuild().getId()).get(type)).remove(channel.getId());
+                    ((HashMap<String, String>) guildHandler.guildConfigs.get(channel.getGuild().getId()).get(type))
+                            .remove(channel.getId());
                     reply(event, "Đã xóa " + channel.getName() + " khỏi danh sách kênh " + type, 10);
                     guildHandler.save();
                 }
@@ -69,7 +69,9 @@ public class SetChannelCommand extends BotSubcommandClass {
     public void onAutoComplete(CommandAutoCompleteInteractionEvent event) {
         String focus = event.getFocusedOption().getName();
         if (focus.equals("type")) {
-            sendAutoComplete(event, guildHandler.guildChannels);
+            HashMap<String, String> options = new HashMap<String, String>();
+            guildHandler.guildChannels.forEach(t -> options.put(t, t));
+            sendAutoComplete(event, options);
         }
     }
 }

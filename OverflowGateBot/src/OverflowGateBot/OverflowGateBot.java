@@ -45,7 +45,7 @@ public class OverflowGateBot {
 
     public static void main(String[] args) {
         try {
-
+            System.out.println("Starting");
             File file = new File("token.json");
             if (!file.exists()) {
                 file.createNewFile();
@@ -71,7 +71,7 @@ public class OverflowGateBot {
             contextMenuHandler = new ContextMenuHandler();
             serverStatus = new ServerStatus();
 
-            Log.info("Setup done");
+            System.out.println("Setup done");
 
         } catch (Exception e) {
             throw new RuntimeException(e);

@@ -1,9 +1,7 @@
 package OverflowGateBot.command.commands.subcommands.BotCommands;
 
-
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 import OverflowGateBot.command.BotSubcommandClass;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -43,30 +41,30 @@ public class GuildCommand extends BotSubcommandClass {
             replyEmbeds(event, builder, 30);
         } else {
             // Get the guild base on name
-            String guildName = guildOption.getAsString();
-            List<Guild> guilds = jda.getGuildsByName(guildOption.getAsString(), false);
-            if (guilds.isEmpty())
+            String guildId = guildOption.getAsString();
+            Guild guild = jda.getGuildById(guildId);
+            if (guild == null)
                 return;
-            Guild firstGuild = guilds.get(0);
+
             EmbedBuilder builder = new EmbedBuilder();
             StringBuilder field = new StringBuilder();
 
-            builder.setAuthor(guildName, null, firstGuild.getIconUrl());
-            Member owner = firstGuild.getOwner();
+            builder.setAuthor(guild.getName(), null, guild.getIconUrl());
+            Member owner = guild.getOwner();
             if (owner != null)
                 field.append("```Chủ máy chủ: " + owner.getEffectiveName() + "\n");
 
             String status;
-            if (guildHandler.guildIds.contains(firstGuild.getId())) {
+            if (guildHandler.guildIds.contains(guild.getId())) {
                 status = "Đã được duyệt";
                 // TODO Extra info here
             } else {
                 status = "Chưa được duyệt";
             }
-            field.append("Số thành viên: " + firstGuild.getMemberCount() + "\n" + //
+            field.append("Số thành viên: " + guild.getMemberCount() + "\n" + //
                     "Tình trạng: " + status + "\n" + //
                     "```");
-            builder.setDescription("Link: " + firstGuild.getTextChannels().get(0).createInvite().complete().getUrl());
+            builder.setDescription("Link: " + guild.getTextChannels().get(0).createInvite().complete().getUrl());
             builder.addField("Thông tin cơ bản:", field.toString(), false);
             replyEmbeds(event, builder, 30);
         }
@@ -76,10 +74,10 @@ public class GuildCommand extends BotSubcommandClass {
     public void onAutoComplete(CommandAutoCompleteInteractionEvent event) {
         String focus = event.getFocusedOption().getName();
         if (focus.equals("guild")) {
-            Set<String> guildNames = new HashSet<String>();
-            for (Guild g : jda.getGuilds())
-                guildNames.add(g.getName());
-            sendAutoComplete(event, guildNames);
+            HashMap<String, String> options = new HashMap<String, String>();
+            jda.getGuilds().forEach(t -> options.put(t.getName(), t.getId()));
+            sendAutoComplete(event, options);
+
         }
     }
 }

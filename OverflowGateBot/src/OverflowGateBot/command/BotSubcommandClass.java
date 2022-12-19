@@ -1,9 +1,8 @@
 package OverflowGateBot.command;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
@@ -17,7 +16,6 @@ import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 public class BotSubcommandClass extends SubcommandData {
 
     private final int MAX_OPTIONS = 10;
-    private final String characterFilter = "[^\\p{L}\\p{M}\\p{N}\\p{P}\\p{Z}\\p{Cf}\\p{Cs}\\s]";
 
     public BotSubcommandClass(@Nonnull String name, @Nonnull String description) {
         super(name, description);
@@ -53,23 +51,23 @@ public class BotSubcommandClass extends SubcommandData {
     }
 
     // Auto complete handler
-    public void sendAutoComplete(@Nonnull CommandAutoCompleteInteractionEvent event, Set<String> input) {
-        List<Command.Choice> options = new ArrayList<Command.Choice>();
-        Set<String> list = new HashSet<String>();
-        input.forEach(v -> list.add(v.replace(characterFilter, "")));
-
+    public void sendAutoComplete(@Nonnull CommandAutoCompleteInteractionEvent event, HashMap<String, String> list) {
         if (list.isEmpty()) {
             sendAutoComplete(event, "Không tìm thấy kết quả khớp");
             return;
         }
         String focusString = event.getFocusedOption().getValue().toLowerCase();
+        List<Command.Choice> options = new ArrayList<Command.Choice>();
 
         int count = 0;
-        for (String value : list) {
+        for (String name : list.keySet()) {
             if (count > MAX_OPTIONS)
                 break;
-            if (value.toLowerCase().contains(focusString)) {
-                options.add(new Command.Choice(value, value));
+            if (name.toLowerCase().contains(focusString)) {
+                String value = list.get(name);
+                if (value == null)
+                    return;
+                options.add(new Command.Choice(name, value));
                 count++;
             }
         }
@@ -81,10 +79,15 @@ public class BotSubcommandClass extends SubcommandData {
         event.replyChoices(options).queue();
     }
 
-    public void sendAutoComplete(@Nonnull CommandAutoCompleteInteractionEvent event, String value) {
-        if (value == null)
+    public void sendAutoComplete(@Nonnull CommandAutoCompleteInteractionEvent event, @Nonnull String value) {
+        sendAutoComplete(event, value, value);
+    }
+
+    public void sendAutoComplete(@Nonnull CommandAutoCompleteInteractionEvent event, @Nonnull String name,
+            @Nonnull String value) {
+        if (value.isBlank())
             event.replyChoice("Không tìm thấy kết quả khớp", "Không tìm thấy kết quả khớp").queue();
         else
-            event.replyChoice(value, value).queue();
+            event.replyChoice(name, value).queue();
     }
 }

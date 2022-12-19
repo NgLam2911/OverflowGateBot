@@ -11,6 +11,8 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 
 import static OverflowGateBot.OverflowGateBot.userHandler;
 
+import java.util.HashMap;
+
 import OverflowGateBot.command.BotSubcommandClass;
 
 public class LeaderboardCommand extends BotSubcommandClass {
@@ -50,7 +52,9 @@ public class LeaderboardCommand extends BotSubcommandClass {
     public void onAutoComplete(CommandAutoCompleteInteractionEvent event) {
         String focus = event.getFocusedOption().getName();
         if (focus.equals("orderby")) {
-            sendAutoComplete(event, userHandler.sorter.keySet());
+            HashMap<String, String> options = new HashMap<String, String>();
+            userHandler.sorter.keySet().forEach(t -> options.put(t, t));
+            sendAutoComplete(event, options);
         }
     }
 }
