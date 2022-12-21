@@ -3,18 +3,17 @@ package OverflowGateBot;
 import java.io.File;
 import java.io.IOException;
 
+import OverflowGateBot.lib.data.misc.JSONHandler;
+import OverflowGateBot.lib.data.misc.JSONHandler.JSONData;
+import OverflowGateBot.lib.mindustry.ContentHandler;
+import OverflowGateBot.lib.mindustry.ServerStatus;
 import OverflowGateBot.main.CommandHandler;
 import OverflowGateBot.main.ContextMenuHandler;
 import OverflowGateBot.main.DatabaseHandler;
 import OverflowGateBot.main.GuildHandler;
 import OverflowGateBot.main.MessagesHandler;
+import OverflowGateBot.main.NetworkHandler;
 import OverflowGateBot.main.UserHandler;
-import OverflowGateBot.mindustry.ContentHandler;
-import OverflowGateBot.mindustry.ONet;
-import OverflowGateBot.mindustry.ServerStatus;
-import OverflowGateBot.misc.JSONHandler;
-import OverflowGateBot.misc.JSONHandler.JSONData;
-
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.requests.GatewayIntent;
@@ -22,14 +21,8 @@ import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 
 public class OverflowGateBot {
-    public final static int saveInterval = 1 * 60 * 1000;
 
-    public final static String dailyFilePath = "cache/data/daily";
-    public final static String userFilePath = "cache/data/user/user";
-    public final static String guildFilePath = "cache/data/guild/guild";
-    public final static String serverFilePath = "cache/data/server";
-    public final static String guessTheNumberPath = "cache/data/guessTheNumber";
-    public static final String sharId = "719322804549320725";
+    public static final String SHAR_ID = "719322804549320725";
 
     public static JDA jda = null;
 
@@ -38,7 +31,7 @@ public class OverflowGateBot {
     public static ContentHandler contentHandler;
     public static CommandHandler commandHandler;
     public static ContextMenuHandler contextMenuHandler;
-    public static ONet onet;
+    public static NetworkHandler networkHandler;
     public static UserHandler userHandler;
     public static ServerStatus serverStatus;
     public static DatabaseHandler databaseHandler;
@@ -62,7 +55,8 @@ public class OverflowGateBot {
 
             jda.awaitReady();
 
-            onet = new ONet();
+            databaseHandler = new DatabaseHandler();
+            networkHandler = new NetworkHandler();
             messagesHandler = new MessagesHandler();
             guildHandler = new GuildHandler();
             userHandler = new UserHandler();
@@ -70,23 +64,11 @@ public class OverflowGateBot {
             commandHandler = new CommandHandler();
             contextMenuHandler = new ContextMenuHandler();
             serverStatus = new ServerStatus();
-            databaseHandler = new DatabaseHandler();
 
             System.out.println("Setup done");
 
         } catch (Exception e) {
             throw new RuntimeException(e);
-        }
-        // TODO Database
-        onet.run(0, saveInterval, () -> save());
-    }
-
-    public static void save() {
-        try {
-            serverStatus.save();
-            guildHandler.save();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 }

@@ -2,15 +2,14 @@ package OverflowGateBot.main;
 
 import org.jetbrains.annotations.NotNull;
 
-import OverflowGateBot.command.BotCommandClass;
-import OverflowGateBot.command.commands.AdminCommand;
-import OverflowGateBot.command.commands.BotCommand;
-import OverflowGateBot.command.commands.MindustryCommand;
-import OverflowGateBot.command.commands.RegisterGuildCommand;
-import OverflowGateBot.command.commands.SharCommand;
-import OverflowGateBot.command.commands.UnregisterGuildCommand;
-import OverflowGateBot.command.commands.UserCommand;
-
+import OverflowGateBot.lib.discord.command.BotCommandClass;
+import OverflowGateBot.lib.discord.command.commands.AdminCommand;
+import OverflowGateBot.lib.discord.command.commands.BotCommand;
+import OverflowGateBot.lib.discord.command.commands.MindustryCommand;
+import OverflowGateBot.lib.discord.command.commands.RegisterGuildCommand;
+import OverflowGateBot.lib.discord.command.commands.SharCommand;
+import OverflowGateBot.lib.discord.command.commands.UnregisterGuildCommand;
+import OverflowGateBot.lib.discord.command.commands.UserCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
@@ -111,7 +110,7 @@ public class CommandHandler extends ListenerAdapter {
         }
 
         // Shar permission to use bot
-        if (!guildHandler.guildConfigs.containsKey(guild.getId()) && !member.getId().equals(sharId)) {
+        if (!guildHandler.guildConfigs.containsKey(guild.getId()) && !member.getId().equals(SHAR_ID)) {
             reply(event, "Máy chủ của bạn chưa được duyệt, liên hệ admin Shar để được duyệt", 30);
             return;
         }

@@ -13,10 +13,10 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
 
-import OverflowGateBot.context.BotContextMenuClass;
-import OverflowGateBot.context.contexts.DeleteMessageContextMenu;
-import OverflowGateBot.context.contexts.PostMapContextMenu;
-import OverflowGateBot.context.contexts.PostSchematicContextMenu;
+import OverflowGateBot.lib.discord.context.BotContextMenuClass;
+import OverflowGateBot.lib.discord.context.contexts.DeleteMessageContextMenu;
+import OverflowGateBot.lib.discord.context.contexts.PostMapContextMenu;
+import OverflowGateBot.lib.discord.context.contexts.PostSchematicContextMenu;
 
 import static OverflowGateBot.OverflowGateBot.*;
 
@@ -88,7 +88,7 @@ public class ContextMenuHandler extends ListenerAdapter {
         }
 
         // Shar permission to use bot
-        if (!guildHandler.guildConfigs.containsKey(guild.getId()) && !member.getId().equals(sharId)) {
+        if (!guildHandler.guildConfigs.containsKey(guild.getId()) && !member.getId().equals(SHAR_ID)) {
             reply(event, "Máy chủ của bạn chưa được duyệt, liên hệ admin Shar để được duyệt", 30);
             return;
         }

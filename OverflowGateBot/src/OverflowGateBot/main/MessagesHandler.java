@@ -21,7 +21,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import javax.annotation.Nonnull;
 import javax.imageio.*;
 
-import OverflowGateBot.mindustry.ContentHandler;
+import OverflowGateBot.lib.mindustry.ContentHandler;
 
 import java.awt.image.*;
 import java.io.*;
@@ -97,12 +97,16 @@ public class MessagesHandler extends ListenerAdapter {
             });
 
         // Delete in channel that it should not be
-        if (guildHandler.inChannels(message.getGuild().getId(), message.getChannel().getId(), "schematicChannel")
-                || guildHandler.inChannels(message.getGuild().getId(), message.getChannel().getId(), "mapChannel")) {
-            replyTempMessage(message, "Vui lòng không gửi tin nhắn vào kênh này!", 30);
-            message.delete().queue();
-            return;
-        }
+        /*
+         * if (guildHandler.inChannels(message.getGuild().getId(),
+         * message.getChannel().getId(), "schematicChannel")
+         * || guildHandler.inChannels(message.getGuild().getId(),
+         * message.getChannel().getId(), "mapChannel")) {
+         * replyTempMessage(message, "Vui lòng không gửi tin nhắn vào kênh này!", 30);
+         * message.delete().queue();
+         * return;
+         * }
+         */
 
         // Update exp on message sent
         userHandler.onMessage(message);
@@ -124,7 +128,6 @@ public class MessagesHandler extends ListenerAdapter {
         // You can't change your nickname XD
         if (event.getMember().getUser().isBot())
             return;
-        userHandler.setDisplayName(event.getEntity());
     }
 
     @Override
@@ -142,7 +145,7 @@ public class MessagesHandler extends ListenerAdapter {
 
     @Override
     public void onGuildMemberJoin(@Nonnull GuildMemberJoinEvent event) {
-        userHandler.addNewMember(event.getMember());
+        userHandler.addUser(event.getMember());
 
         log("```" + event.getMember().getEffectiveName() + " tham gia máy chủ```", event.getGuild());
     }
@@ -229,12 +232,12 @@ public class MessagesHandler extends ListenerAdapter {
     public void sendMapPreview(Attachment attachment, Member member, MessageChannel channel) {
         try {
 
-            ContentHandler.Map map = contentHandler.readMap(onet.download(attachment.getUrl()));
+            ContentHandler.Map map = contentHandler.readMap(networkHandler.download(attachment.getUrl()));
             new File("cache/").mkdir();
             new File("cache/temp/").mkdir();
             File mapFile = new File("cache/temp/" + attachment.getFileName());
             Fi imageFile = Fi.get("cache/temp/image_" + attachment.getFileName().replace(".msav", ".png"));
-            Streams.copy(onet.download(attachment.getUrl()), new FileOutputStream(mapFile));
+            Streams.copy(networkHandler.download(attachment.getUrl()), new FileOutputStream(mapFile));
             ImageIO.write(map.image, "png", imageFile.file());
 
             EmbedBuilder builder = new EmbedBuilder().setImage("attachment://" + imageFile.name())
@@ -249,7 +252,6 @@ public class MessagesHandler extends ListenerAdapter {
             if (f == null)
                 return;
             channel.sendFile(mapFile).addFile(f).setEmbeds(builder.build()).queue();
-            userHandler.addMoney(member, 300);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -375,8 +377,6 @@ public class MessagesHandler extends ListenerAdapter {
             builder.addField("*Thông tin:*", field.toString(), true);
             // send embed
             channel.sendFile(schemFile).addFile(previewFile).setEmbeds(builder.build()).queue();
-
-            userHandler.addMoney(member, 30);
 
         } catch (Exception e) {
             e.printStackTrace();
