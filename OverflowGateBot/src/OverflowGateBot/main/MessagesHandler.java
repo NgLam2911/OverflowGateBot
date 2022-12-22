@@ -21,7 +21,10 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import javax.annotation.Nonnull;
 import javax.imageio.*;
 
+import OverflowGateBot.lib.data.GuildData.CHANNEL_TYPE;
 import OverflowGateBot.lib.mindustry.ContentHandler;
+import OverflowGateBot.main.DatabaseHandler.LOG_TYPE;
+import OverflowGateBot.main.GuildHandler.GuildCache;
 
 import java.awt.image.*;
 import java.io.*;
@@ -76,8 +79,9 @@ public class MessagesHandler extends ListenerAdapter {
     }
 
     public void handleMessage(Message message) {
-
+        // Log all message that has been sent
         List<Attachment> attachments = message.getAttachments();
+
         // Schematic preview
         if ((isSchematicText(message) && attachments.isEmpty()) || isSchematicFile(attachments)) {
             System.out.println(getMessageSender(message) + ": sent a schematic ");
@@ -110,17 +114,8 @@ public class MessagesHandler extends ListenerAdapter {
 
         // Update exp on message sent
         userHandler.onMessage(message);
-
-        // Send message to all needed channels
-        if (!message.getContentRaw().isBlank()) {
-            for (TextChannel c : serverChatChannel.values()) {
-                if (!message.getChannel().getName().equals(c.getName()))
-                    c.sendMessage(
-                            getMessageSender(message) + ": " + message.getContentRaw() + message.getContentDisplay())
-                            .queue();
-            }
-        }
-
+        guildHandler.getGuild(message.getGuild());
+        DatabaseHandler.log(LOG_TYPE.MESSAGE, getMessageSender(message) + ": " + message.getContentDisplay());
     }
 
     @Override
@@ -189,19 +184,17 @@ public class MessagesHandler extends ListenerAdapter {
         return false;
     }
 
-    public void log(@Nonnull String content, Guild guild) {
-        String botLogChannelId = guildHandler.botLogChannels.get(guild.getId());
-        if (botLogChannelId == null) {
-            System.out.println("Bot log channel for guild " + guild.getName() + " not exists");
+    public void log(@Nonnull String content, @Nonnull Guild guild) {
+        GuildCache guildData = guildHandler.getGuild(guild);
+        if (guildData == null)
             return;
-        }
-        TextChannel botLogChannel = guild.getTextChannelById(botLogChannelId);
+
+        List<TextChannel> botLogChannel = guildData.data._getChannel(CHANNEL_TYPE.BOT_LOG);
         if (botLogChannel == null) {
-            System.out.println("Bot log channel for guild " + guild.getName() + " with id" + botLogChannelId
-                    + " not exists");
+            System.out.println("Bot log channel for guild " + guild.getName() + "does not exists");
             return;
         }
-        botLogChannel.sendMessage(content).queue();
+        botLogChannel.forEach(c -> c.sendMessage(content).queue());
     }
 
     // Its bad lol

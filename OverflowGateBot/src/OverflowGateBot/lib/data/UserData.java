@@ -1,21 +1,12 @@
-package OverflowGateBot.lib.data.user;
-
-import java.util.HashMap;
+package OverflowGateBot.lib.data;
 
 import javax.annotation.Nonnull;
 
 import org.bson.Document;
 
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Role;
+public class UserData {
 
-import static OverflowGateBot.OverflowGateBot.*;
-
-public class AlphaUser {
-    @Nonnull
     public String userId;
-    @Nonnull
     public String guildId;
     public Integer point = 0;
     public Integer level = 0;
@@ -23,12 +14,16 @@ public class AlphaUser {
     public Integer pvpPoint = 0;
     public Boolean hideLevel = false;
 
-    public AlphaUser(@Nonnull String guildId, @Nonnull String userId) {
+    // For codec
+    public UserData() {
+    }
+
+    public UserData(@Nonnull String guildId, @Nonnull String userId) {
         this.userId = userId;
         this.guildId = guildId;
     }
 
-    public AlphaUser modify(@Nonnull String guildId, @Nonnull String userId, Integer point, Integer level,
+    public UserData modify(String guildId, String userId, Integer point, Integer level,
             Integer money, Integer pvpPoint, Boolean hideLevel) {
         this.userId = userId;
         this.guildId = guildId;
@@ -80,7 +75,6 @@ public class AlphaUser {
         return this.hideLevel;
     }
 
-
     @Override
     public String toString() {
         return "userId:" + this.userId + "\n"
@@ -123,48 +117,20 @@ public class AlphaUser {
             p -= extra;
             level += 1;
             lvUp = true;
-            checkMemberRole();
+            checkLevelRole();
         }
         point += p;
         return lvUp;
     }
 
-    // Add money :v
-    public void addMoney(int p) {
-        this.money += p;
+    public void checkLevelRole() {
     }
 
-    // Give player member role if all requirements satisfied
-    public void checkMemberRole() {
-        if (level >= 3) {
-            Guild guild = jda.getGuildById(guildId);
-            if (guild == null)
-                return;
-            Member member = guild.getMemberById(userId);
-            if (member == null) {
-            } else {
-                HashMap<String, Object> guildInfo = guildHandler.guildConfigs.get(guildId);
-                if (guildInfo == null)
-                    return;
-                Object roleId = guildInfo.get("memberRole");
-                if (roleId == null)
-                    return;
-                String _roleId = roleId.toString();
-                if (_roleId == null || _roleId.isEmpty()) {
-                    return;
-                }
-                Role memberRole = guild.getRoleById(_roleId);
-                if (memberRole != null) {
-                    guild.addRoleToMember(member, memberRole).queue();
-                } else
-                    System.out.println("Role not exist: " + roleId);
-            }
-        }
-    }
-
-    public AlphaUser mergeUser(AlphaUser data) {
-        modify(guildId, userId, point, level, money + data.money, pvpPoint + data.pvpPoint, hideLevel);
-        this.addPoint(data._getTotalPoint());
+    public UserData mergeUser(UserData data) {
+        if (data == null)
+            return this;
+        modify(guildId, userId, point, level, money + data.money, pvpPoint + data.pvpPoint, hideLevel)
+                .addPoint(data._getTotalPoint());
         return this;
     }
 }

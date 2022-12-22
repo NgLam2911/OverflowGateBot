@@ -1,9 +1,8 @@
 package OverflowGateBot.lib.discord.command.commands.subcommands.AdminCommands;
 
-
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
-import static OverflowGateBot.OverflowGateBot.serverStatus;
+import static OverflowGateBot.OverflowGateBot.serverStatusHandler;
 
 import OverflowGateBot.lib.discord.command.BotSubcommandClass;
 
@@ -19,7 +18,7 @@ public class ReloadServerCommand extends BotSubcommandClass {
 
     @Override
     public void onCommand(SlashCommandInteractionEvent event) {
-        serverStatus.reloadServer(event.getGuild(), event.getMessageChannel());
+        serverStatusHandler.reloadServer(event.getGuild(), event.getMessageChannel());
         reply(event, "Đã làm mới máy chủ", 10);
     }
 }

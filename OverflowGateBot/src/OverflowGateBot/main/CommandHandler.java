@@ -6,9 +6,7 @@ import OverflowGateBot.lib.discord.command.BotCommandClass;
 import OverflowGateBot.lib.discord.command.commands.AdminCommand;
 import OverflowGateBot.lib.discord.command.commands.BotCommand;
 import OverflowGateBot.lib.discord.command.commands.MindustryCommand;
-import OverflowGateBot.lib.discord.command.commands.RegisterGuildCommand;
 import OverflowGateBot.lib.discord.command.commands.SharCommand;
-import OverflowGateBot.lib.discord.command.commands.UnregisterGuildCommand;
 import OverflowGateBot.lib.discord.command.commands.UserCommand;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -34,29 +32,15 @@ public class CommandHandler extends ListenerAdapter {
 
     public CommandHandler() {
 
-        SharCommand sharCommand = new SharCommand();
-        RegisterGuildCommand registerGuildCommand = new RegisterGuildCommand();
-        UnregisterGuildCommand unregisterGuildCommand = new UnregisterGuildCommand();
-
         addCommand(new AdminCommand());
         addCommand(new BotCommand());
         addCommand(new MindustryCommand());
         addCommand(new UserCommand());
-        addCommand(sharCommand);
-        addCommand(registerGuildCommand);
-        addCommand(unregisterGuildCommand);
+        addCommand(new SharCommand());
 
         jda.addEventListener(this);
-        jda.upsertCommand(sharCommand.command).queue();
-        jda.upsertCommand(registerGuildCommand.command).queue();
-        jda.upsertCommand(unregisterGuildCommand.command).queue();
-
-        for (BotCommandClass command : commands.values()) {
-            jda.upsertCommand(command.command).queue();
-        }
 
         System.out.println("Command handler up");
-
     }
 
     public void addCommand(BotCommandClass command) {
@@ -76,9 +60,6 @@ public class CommandHandler extends ListenerAdapter {
 
         event.deferReply().queue();
         handleCommand(event);
-
-        event.getHook().deleteOriginal().queueAfter(30, TimeUnit.SECONDS);
-
     }
 
     @Override
@@ -109,11 +90,15 @@ public class CommandHandler extends ListenerAdapter {
             return;
         }
 
-        // Shar permission to use bot
-        if (!guildHandler.guildConfigs.containsKey(guild.getId()) && !member.getId().equals(SHAR_ID)) {
-            reply(event, "Máy chủ của bạn chưa được duyệt, liên hệ admin Shar để được duyệt", 30);
-            return;
-        }
+        /*
+         * // Shar permission to use bot
+         * if (!guildHandler.guildConfigs.containsKey(guild.getId()) &&
+         * !member.getId().equals(SHAR_ID)) {
+         * reply(event,
+         * "Máy chủ của bạn chưa được duyệt, liên hệ admin Shar để được duyệt", 30);
+         * return;
+         * }
+         */
 
         if (commands.containsKey(command)) {
             commands.get(command).onCommand(event);

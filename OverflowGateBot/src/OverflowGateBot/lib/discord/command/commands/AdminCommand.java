@@ -1,8 +1,5 @@
 package OverflowGateBot.lib.discord.command.commands;
 
-
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 import static OverflowGateBot.OverflowGateBot.*;
@@ -12,6 +9,7 @@ import OverflowGateBot.lib.discord.command.commands.subcommands.AdminCommands.Re
 import OverflowGateBot.lib.discord.command.commands.subcommands.AdminCommands.ReloadServerCommand;
 import OverflowGateBot.lib.discord.command.commands.subcommands.AdminCommands.SetChannelCommand;
 import OverflowGateBot.lib.discord.command.commands.subcommands.AdminCommands.SetRoleCommand;
+import OverflowGateBot.lib.discord.command.commands.subcommands.AdminCommands.ShowLevelCommand;
 
 public class AdminCommand extends BotCommandClass {
 
@@ -21,6 +19,7 @@ public class AdminCommand extends BotCommandClass {
         addSubcommands(new ReloadServerCommand());
         addSubcommands(new SetChannelCommand());
         addSubcommands(new SetRoleCommand());
+        addSubcommands(new ShowLevelCommand());
     }
 
     @Override
@@ -30,15 +29,7 @@ public class AdminCommand extends BotCommandClass {
 
     @Override
     public void onCommand(SlashCommandInteractionEvent event) {
-        Guild guild = event.getGuild();
-        if (guild == null)
-            return;
-
-        Member member = event.getMember();
-        if (member == null)
-            return;
-
-        if (!guildHandler.isAdmin(member)) {
+        if (!userHandler.isAdmin(event.getMember()) && !userHandler.isShar(event.getMember())) {
             reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
             return;
         }

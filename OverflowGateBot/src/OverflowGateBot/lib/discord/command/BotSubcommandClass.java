@@ -40,16 +40,6 @@ public class BotSubcommandClass extends SubcommandData {
 
     }
 
-    public void replyEmbeds(SlashCommandInteractionEvent event, EmbedBuilder builder, int sec) {
-        event.getHook().sendMessageEmbeds(builder.build())
-                .queue(_message -> _message.delete().queueAfter(sec, TimeUnit.SECONDS));
-    }
-
-    public void reply(SlashCommandInteractionEvent event, String content, int sec) {
-        event.getHook().sendMessage("```" + content + "```")
-                .queue(_message -> _message.delete().queueAfter(sec, TimeUnit.SECONDS));
-    }
-
     // Auto complete handler
     public void sendAutoComplete(@Nonnull CommandAutoCompleteInteractionEvent event, HashMap<String, String> list) {
         if (list.isEmpty()) {
@@ -89,5 +79,15 @@ public class BotSubcommandClass extends SubcommandData {
             event.replyChoice("Không tìm thấy kết quả khớp", "Không tìm thấy kết quả khớp").queue();
         else
             event.replyChoice(name, value).queue();
+    }
+
+    public void replyEmbeds(SlashCommandInteractionEvent event, EmbedBuilder builder, int sec) {
+        event.getHook().sendMessageEmbeds(builder.build())
+                .queue(_message -> _message.delete().queueAfter(sec, TimeUnit.SECONDS));
+    }
+
+    public void reply(SlashCommandInteractionEvent event, String content, int sec) {
+        event.getHook().sendMessage("```" + content + "```")
+                .queue(_message -> _message.delete().queueAfter(sec, TimeUnit.SECONDS));
     }
 }

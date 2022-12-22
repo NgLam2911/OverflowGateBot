@@ -1,85 +1,111 @@
 package OverflowGateBot.main;
 
-import java.io.File;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Iterator;
 
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.Role;
+import javax.annotation.Nonnull;
+
+import org.bson.Document;
+import org.bson.conversions.Bson;
+
+import com.mongodb.MongoException;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.ReplaceOptions;
+
+import OverflowGateBot.lib.data.DataCache;
+import OverflowGateBot.lib.data.GuildData;
+import net.dv8tion.jda.api.entities.Guild;
 
 import static OverflowGateBot.OverflowGateBot.*;
 
 public class GuildHandler {
 
-    // Guild config
-    /*
-     * public HashMap<String, String> guildChannel = new HashMap<>(); public
-     * HashMap<String, String> schematicChannel = new HashMap<>(); public
-     * HashMap<String, String> mapChannel = new HashMap<>(); public HashMap<String,
-     * String> serverStatusChannel = new HashMap<>(); public HashMap<String, String>
-     * universeChatChannel = new HashMap<>(); public HashMap<String, String> botLog
-     * = new HashMap<>();
-     */
-
-    // Roles
-    /*
-     * public String adminRole; public String memberRole;
-     */
-
-    // Guilds
-    public HashMap<String, HashMap<String, Object>> guildConfigs = new HashMap<>();
-    public Set<String> guildIds = new HashSet<>();
-
-    // For auto complete
-    public Set<String> guildRoles = new HashSet<>();
-    public Set<String> guildChannels = new HashSet<>();
-
-    public HashMap<String, String> botLogChannels = new HashMap<>();
+    public HashMap<String, GuildCache> guildCache = new HashMap<>();
 
     public GuildHandler() {
-        new File("cache/").mkdir();
-        new File("cache/temp").mkdir();
-        new File("cache/temp/map").mkdir();
-        new File("cache/temp/schem").mkdir();
-        new File("cache/data").mkdir();
-        new File("cache/data/guild").mkdir();
-        new File("cache/data/user").mkdir();
-
-        guildRoles.add("adminRole");
-        guildRoles.add("memberRole");
-
-        guildChannels.add("channels");
-        guildChannels.add("schematicChannel");
-        guildChannels.add("mapChannel");
-        guildChannels.add("botLog");
-        guildChannels.add("universeChatChannel");
-        guildChannels.add("serverStatusChannel");
-
-        botLogChannels.put("1010373870395596830", "1010412857541799997");
 
         System.out.println("Guild handler up");
     }
 
-    public boolean isAdmin(Message message) {
-        return isAdmin(message.getMember());
+    public void update() {
+        updateGuildCache();
     }
 
-    public boolean isAdmin(Member member) {
-        if (member.isOwner())
-            return true;
+    public void updateGuildCache() {
+        Iterator<GuildCache> iterator = guildCache.values().iterator();
+        while (iterator.hasNext()) {
+            GuildCache guild = iterator.next();
+            if (!guild.isAlive(1)) {
+                iterator.remove();
+                updateGuild(guild.data);
+            }
+        }
+    }
 
-        if (member.getUser().getId().equals(SHAR_ID))
-            return true;
+    public GuildCache getGuild(Guild guild) {
+        if (guild == null)
+            return null;
+        return getGuild(guild.getId());
+    }
 
-        HashMap<String, Object> guildConfig = guildConfigs.get(member.getGuild().getId());
-        if (guildConfig == null)
-            return false;
+    // Add guild to cache
+    public GuildCache addGuild(@Nonnull String guildId) {
+        GuildData guildData = new GuildData(guildId);
+        GuildCache guildCacheData = new GuildCache(guildData);
+        guildCache.put(guildId, guildCacheData);
+        return guildCacheData;
+    }
 
-        for (Role role : member.getRoles())
-            if (role.getId().equals(guildConfig.get("adminRole")))
-                return true;
-        return false;
+    // Get guild from cache/database
+    public GuildCache getGuild(@Nonnull String guildId) {
+        // If guild exist in cache then return, else query guild from database
+        if (guildCache.containsKey(guildId))
+            return guildCache.get(guildId);
+
+        // Create new guild cache to store temporary guild data
+
+        if (!DatabaseHandler.collectionExists(DatabaseHandler.guildDatabase, GUILD_COLLECTION)) {
+            DatabaseHandler.guildDatabase.createCollection(GUILD_COLLECTION);
+            return new GuildCache(new GuildData(guildId));
+
+        }
+        MongoCollection<GuildData> collection = DatabaseHandler.guildDatabase.getCollection(GUILD_COLLECTION,
+                GuildData.class);
+
+        // Get guild from database
+        Bson filter = new Document().append("guildId", guildId);
+        FindIterable<GuildData> data = collection.find(filter).limit(1);
+
+        return new GuildCache(data.first());
+    }
+
+    // Update guild on database
+    public void updateGuild(GuildData guild) {
+        try {
+            // Create collection if it's not exist
+            if (!DatabaseHandler.collectionExists(DatabaseHandler.guildDatabase, GUILD_COLLECTION))
+                DatabaseHandler.guildDatabase.createCollection(GUILD_COLLECTION);
+
+            MongoCollection<GuildData> collection = DatabaseHandler.guildDatabase.getCollection(GUILD_COLLECTION,
+                    GuildData.class);
+
+            // Filter for guild id, guild id is unique for each collection
+            Bson filter = new Document().append("guildId", guild.guildId);
+            collection.replaceOne(filter, guild, new ReplaceOptions().upsert(true));
+
+        } catch (MongoException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public class GuildCache extends DataCache {
+        public GuildData data;
+
+        public GuildCache(GuildData data) {
+            super(GUILD_ALIVE_TIME);
+            this.data = data;
+        }
+
     }
 }

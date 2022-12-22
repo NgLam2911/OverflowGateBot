@@ -1,4 +1,4 @@
-package OverflowGateBot.lib.mindustry;
+package OverflowGateBot.main;
 
 import java.awt.Color;
 import java.io.File;
@@ -33,7 +33,7 @@ import arc.util.Strings;
 import static OverflowGateBot.OverflowGateBot.*;
 import static mindustry.Vars.*;
 
-public class ServerStatus {
+public class ServerStatusHandler {
 
     final int SERVER_RELOAD_PEROID = 2 * 60 * 1000;
 
@@ -44,7 +44,7 @@ public class ServerStatus {
 
     private String filePath = "server.json";
 
-    public ServerStatus() {
+    public ServerStatusHandler() {
 
         serverStatusChannels.put("1010373870395596830", "1012362641060155462");
         serverStatusChannels.put("927900627865042965", "1023581213144907937");
@@ -114,6 +114,10 @@ public class ServerStatus {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void update() {
+
     }
 
     public void endDiscover() {

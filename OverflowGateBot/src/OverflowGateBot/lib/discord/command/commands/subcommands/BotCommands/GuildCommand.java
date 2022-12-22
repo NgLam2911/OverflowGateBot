@@ -25,6 +25,8 @@ public class GuildCommand extends BotSubcommandClass {
         return "Hiển thị thông tin của máy chủ discord mà bot đã gia nhập:\n\t<guild>: Tên máy chủ muốn xem, nếu không nhập guild thì sẽ hiện tất cả các máy chủ, ngược lại sẽ hiện thông tin máy chủ đã nhập";
     }
 
+    // TODO
+
     @Override
     public void onCommand(SlashCommandInteractionEvent event) {
         OptionMapping guildOption = event.getOption("guild");
@@ -33,10 +35,6 @@ public class GuildCommand extends BotSubcommandClass {
             List<Guild> guilds = jda.getGuilds();
             EmbedBuilder builder = new EmbedBuilder();
             StringBuilder field = new StringBuilder();
-            for (Guild g : guilds) {
-                String registered = guildHandler.guildIds.contains(g.getId()) ? "Đã được duyệt" : "Chưa được duyệt";
-                field.append("_" + g.getName() + "_: " + registered + "\n");
-            }
             builder.addField("_Máy chủ_", field.toString(), false);
             replyEmbeds(event, builder, 30);
         } else {
@@ -55,14 +53,7 @@ public class GuildCommand extends BotSubcommandClass {
                 field.append("```Chủ máy chủ: " + owner.getEffectiveName() + "\n");
 
             String status;
-            if (guildHandler.guildIds.contains(guild.getId())) {
-                status = "Đã được duyệt";
-                // TODO Extra info here
-            } else {
-                status = "Chưa được duyệt";
-            }
             field.append("Số thành viên: " + guild.getMemberCount() + "\n" + //
-                    "Tình trạng: " + status + "\n" + //
                     "```");
             builder.setDescription("Link: " + guild.getTextChannels().get(0).createInvite().complete().getUrl());
             builder.addField("Thông tin cơ bản:", field.toString(), false);

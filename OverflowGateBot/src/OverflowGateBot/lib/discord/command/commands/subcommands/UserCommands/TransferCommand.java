@@ -1,6 +1,6 @@
 package OverflowGateBot.lib.discord.command.commands.subcommands.UserCommands;
 
-import OverflowGateBot.lib.data.user.AlphaUser;
+
 import OverflowGateBot.lib.discord.command.BotSubcommandClass;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -9,8 +9,6 @@ import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInterac
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-
-import static OverflowGateBot.OverflowGateBot.userHandler;
 
 import java.util.HashMap;
 import java.util.HashSet;

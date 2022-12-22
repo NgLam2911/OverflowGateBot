@@ -32,10 +32,6 @@ public class ContextMenuHandler extends ListenerAdapter {
         addCommand(new PostSchematicContextMenu());
         addCommand(new DeleteMessageContextMenu());
 
-        for (BotContextMenuClass command : commands.values()) {
-            jda.upsertCommand(command.command).queue();
-        }
-
         System.out.println("Context menu handler up");
     }
 
@@ -60,10 +56,7 @@ public class ContextMenuHandler extends ListenerAdapter {
     @Override
     public void onMessageContextInteraction(@Nonnull MessageContextInteractionEvent event) {
         event.deferReply().queue();
-        System.out.println(messagesHandler.getMessageSender(event.getTarget()) + ": used " + event.getName());
         handleCommand(event);
-
-        event.getHook().deleteOriginal().queue();
     }
 
     public void handleCommand(MessageContextInteractionEvent event) {
@@ -87,14 +80,20 @@ public class ContextMenuHandler extends ListenerAdapter {
             return;
         }
 
-        // Shar permission to use bot
-        if (!guildHandler.guildConfigs.containsKey(guild.getId()) && !member.getId().equals(SHAR_ID)) {
-            reply(event, "Máy chủ của bạn chưa được duyệt, liên hệ admin Shar để được duyệt", 30);
-            return;
-        }
+        /*
+         * // Shar permission to use bot
+         * if (!guildHandler.guildConfigs.containsKey(guild.getId()) &&
+         * !member.getId().equals(SHAR_ID)) {
+         * reply(event,
+         * "Máy chủ của bạn chưa được duyệt, liên hệ admin Shar để được duyệt", 30);
+         * return;
+         * }
+         */
 
-        if (commands.containsKey(command))
+        if (commands.containsKey(command)) {
             commands.get(command).onCommand(event);
+            System.out.println(messagesHandler.getMessageSender(event.getTarget()) + ": used " + event.getName());
+        }
     }
 
     void replyEmbeds(MessageContextInteractionEvent event, EmbedBuilder builder, int sec) {

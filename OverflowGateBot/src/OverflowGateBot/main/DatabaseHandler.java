@@ -4,6 +4,8 @@ import static com.mongodb.MongoClientSettings.getDefaultCodecRegistry;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
+import org.bson.BsonDateTime;
+import org.bson.Document;
 import org.bson.codecs.configuration.CodecProvider;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
@@ -14,38 +16,56 @@ import com.mongodb.ServerApi;
 import com.mongodb.ServerApiVersion;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoIterable;
+import com.mongodb.client.model.CreateCollectionOptions;
+import com.mongodb.client.model.TimeSeriesOptions;
+
+import static OverflowGateBot.OverflowGateBot.*;
 
 public class DatabaseHandler {
 
-    private final String URL = "mongodb+srv://bot1:imthebot1@cluster0.7omeswq.mongodb.net/?retryWrites=true&w=majority";
-    public static MongoDatabase database;
+    private static MongoClient mongoClient;
 
-    public DatabaseHandler() {
-        try {
-            ConnectionString connectionString = new ConnectionString(URL);
-            MongoClientSettings settings = MongoClientSettings.builder()
-                    .applyConnectionString(connectionString)
-                    .serverApi(ServerApi.builder()
-                            .version(ServerApiVersion.V1)
-                            .build())
-                    .build();
+    public static MongoDatabase userDatabase;
+    public static MongoDatabase guildDatabase;
+    public static MongoDatabase logDatabase;
 
-            // Set up pojo
-            CodecProvider pojoCodecProvider = PojoCodecProvider.builder().automatic(true).build();
-            CodecRegistry pojoCodecRegistry = fromRegistries(getDefaultCodecRegistry(),
-                    fromProviders(pojoCodecProvider));
-
-            MongoClient mongoClient = MongoClients.create(settings);
-            database = mongoClient.getDatabase("Cluster0").withCodecRegistry(pojoCodecRegistry);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public enum DATABASE {
+        USER, GUILD, LOG
     }
 
-    public static boolean collectionExists(final String collectionName) {
+    public enum LOG_TYPE {
+        MESSAGE, DATABASE, USER
+    }
+
+    public DatabaseHandler() {
+
+        ConnectionString connectionString = new ConnectionString(DATABASE_URL);
+        MongoClientSettings settings = MongoClientSettings.builder()
+                .applyConnectionString(connectionString)
+                .serverApi(ServerApi.builder()
+                        .version(ServerApiVersion.V1)
+                        .build())
+                .build();
+
+        mongoClient = MongoClients.create(settings);
+
+        CodecProvider pojoCodecProvider = PojoCodecProvider.builder().automatic(true).build();
+        CodecRegistry pojoCodecRegistry = fromRegistries(getDefaultCodecRegistry(),
+                fromProviders(pojoCodecProvider));
+
+        guildDatabase = mongoClient.getDatabase(DATABASE.GUILD.name()).withCodecRegistry(pojoCodecRegistry);
+        userDatabase = mongoClient.getDatabase(DATABASE.USER.name()).withCodecRegistry(pojoCodecRegistry);
+        logDatabase = mongoClient.getDatabase(DATABASE.LOG.name()).withCodecRegistry(pojoCodecRegistry);
+
+        
+        System.out.println("Database handler up");
+    }
+
+    // Check if collection exists
+    public static boolean collectionExists(MongoDatabase database, final String collectionName) {
         MongoIterable<String> collectionNames = database.listCollectionNames();
         for (final String name : collectionNames) {
             if (name.equalsIgnoreCase(collectionName)) {
@@ -54,4 +74,24 @@ public class DatabaseHandler {
         }
         return false;
     }
+
+    // TODO: Threading support
+
+    public static void log(LOG_TYPE log, String content) {
+        // Create collection if it doesn't exist
+        if (!collectionExists(logDatabase, log.name()))
+            logDatabase.createCollection(log.name(),
+                    new CreateCollectionOptions().timeSeriesOptions(new TimeSeriesOptions(TIME_INSERT_STRING)));
+
+        MongoCollection<Document> collection = logDatabase.getCollection(log.name(), Document.class);
+        // Insert log message
+        collection.insertOne(new Document().append(String.valueOf("Content"), content).//
+                append(TIME_INSERT_STRING, new BsonDateTime(System.currentTimeMillis())));
+
+        // Delete old log message if storage is full
+        while (collection.estimatedDocumentCount() > MAX_LOG_COUNT) {
+            collection.deleteOne(new Document());
+        }
+    }
+
 }

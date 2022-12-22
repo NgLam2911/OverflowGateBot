@@ -1,11 +1,11 @@
 package OverflowGateBot.lib.discord.command.commands.subcommands.MindustryCommands;
 
-
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
-import static OverflowGateBot.OverflowGateBot.serverStatus;
+import static OverflowGateBot.OverflowGateBot.serverStatusHandler;
 
 import OverflowGateBot.lib.discord.command.BotSubcommandClass;
+import OverflowGateBot.main.ServerStatusHandler;
 
 public class RefreshServerCommand extends BotSubcommandClass {
     public RefreshServerCommand() {
@@ -19,7 +19,7 @@ public class RefreshServerCommand extends BotSubcommandClass {
 
     @Override
     public void onCommand(SlashCommandInteractionEvent event) {
-        serverStatus.refreshServerStat(event.getGuild(), event.getMessageChannel());
+        serverStatusHandler.refreshServerStat(event.getGuild(), event.getMessageChannel());
         reply(event, "Đã làm mới máy chủ", 10);
     }
 

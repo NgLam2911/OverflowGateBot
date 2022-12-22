@@ -8,13 +8,19 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 
-import static OverflowGateBot.OverflowGateBot.userHandler;
-
+import java.util.Arrays;
 import java.util.HashMap;
 
-import OverflowGateBot.lib.discord.command.BotSubcommandClass;;
+import OverflowGateBot.lib.data.UserData;
+import OverflowGateBot.lib.discord.command.BotSubcommandClass;
+
+import static OverflowGateBot.OverflowGateBot.userHandler;
 
 public class AddCommand extends BotSubcommandClass {
+
+    private enum POINT_TYPE {
+        MONEY, PVP
+    }
 
     public AddCommand() {
         super("add", "Shar only");
@@ -29,48 +35,63 @@ public class AddCommand extends BotSubcommandClass {
     }
     // TODO
 
-    /*
-     * @Override
-     * public void onCommand(SlashCommandInteractionEvent event) {
-     * OptionMapping typeOption = event.getOption("type");
-     * if (typeOption == null)
-     * return;
-     * OptionMapping userOption = event.getOption("user");
-     * if (userOption == null)
-     * return;
-     * OptionMapping pointOption = event.getOption("point");
-     * if (pointOption == null)
-     * return;
-     * Guild guild = event.getGuild();
-     * if (guild == null)
-     * return;
-     * 
-     * String type = typeOption.getAsString();
-     * User user = userOption.getAsUser();
-     * int point = pointOption.getAsInt();
-     * Member receiver = guild.getMember(user);
-     * 
-     * if (receiver == null) {
-     * reply(event, "Không tìm thấy " + user.getName(), 10);
-     * return;
-     * }
-     * Boolean result = userHandler.add(receiver, type, point);
-     * if (result)
-     * reply(event, "Thêm thành công " + point + " " + type + " cho " +
-     * receiver.getEffectiveName(), 30);
-     * else
-     * reply(event, "Thêm không thành công " + point + " " + type + " cho " +
-     * receiver.getEffectiveName(), 30);
-     * }
-     * 
-     * @Override
-     * public void onAutoComplete(CommandAutoCompleteInteractionEvent event) {
-     * String focus = event.getFocusedOption().getName();
-     * if (focus.equals("type")) {
-     * HashMap<String, String> options = new HashMap<String, String>();
-     * userHandler.sorter.keySet().forEach(t -> options.put(t, t));
-     * sendAutoComplete(event, options);
-     * }
-     * }
-     */
+    @Override
+    public void onCommand(SlashCommandInteractionEvent event) {
+        OptionMapping typeOption = event.getOption("type");
+        if (typeOption == null)
+            return;
+        OptionMapping userOption = event.getOption("user");
+        if (userOption == null)
+            return;
+        OptionMapping pointOption = event.getOption("point");
+        if (pointOption == null)
+            return;
+        Guild guild = event.getGuild();
+        if (guild == null)
+            return;
+
+        String type = typeOption.getAsString();
+        User user = userOption.getAsUser();
+        int point = pointOption.getAsInt();
+        Member r = guild.getMember(user);
+        Member s = event.getMember();
+
+        if (r == null || s == null)
+            return;
+
+        UserData sender = userHandler.getUserAwait(s).data;
+        UserData receiver = userHandler.getUserAwait(r).data;
+
+        POINT_TYPE pt = POINT_TYPE.valueOf(type);
+
+        switch (pt) {
+            case MONEY:
+                if (sender.money >= point) {
+                    sender.money -= point;
+                    receiver.money += point;
+                }
+                break;
+            case PVP:
+                if (sender.pvpPoint >= point) {
+                    sender.pvpPoint -= point;
+                    receiver.pvpPoint += point;
+                }
+                break;
+            default:
+                reply(event, "Chuyển không thành công, giá trị " + type + " không hợp lệ", 30);
+                return;
+        }
+        reply(event, "Chuyển thành công " + point + " " + type + " đến " + r.getEffectiveName(), 30);
+    }
+
+    @Override
+    public void onAutoComplete(CommandAutoCompleteInteractionEvent event) {
+        String focus = event.getFocusedOption().getName();
+        if (focus.equals("type")) {
+            HashMap<String, String> options = new HashMap<String, String>();
+            Arrays.asList(POINT_TYPE.values()).forEach(t -> options.put(t.name(), t.name()));
+            sendAutoComplete(event, options);
+        }
+    }
+
 }
