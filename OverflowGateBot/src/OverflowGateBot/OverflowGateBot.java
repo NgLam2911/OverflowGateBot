@@ -22,7 +22,7 @@ public class OverflowGateBot {
 
     public static final String SHAR_ID = "719322804549320725";
 
-    protected static final long UPDATE_PERIOD = 60l * 1000l;
+    protected static final long UPDATE_PERIOD = 60 * 1000l;
     public static final int GUILD_ALIVE_TIME = 30;
     public static final int USER_ALIVE_TIME = 10;
 

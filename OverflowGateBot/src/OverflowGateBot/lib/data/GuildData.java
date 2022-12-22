@@ -8,7 +8,6 @@ import javax.annotation.Nonnull;
 
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 
 import static OverflowGateBot.OverflowGateBot.*;
@@ -29,14 +28,12 @@ public class GuildData {
 
     public List<String> adminRoleId = new ArrayList<String>();
     // Schematic channel id, map channel id
-    public HashMap<CHANNEL_TYPE, List<String>> channelId = new HashMap<CHANNEL_TYPE, List<String>>();
+    public HashMap<String, List<String>> channelId = new HashMap<String, List<String>>();
 
     // Roles that require level to achieve
     public HashMap<String, Integer> levelRoleId = new HashMap<String, Integer>();
 
-    public Guild guild;
-    public HashMap<CHANNEL_TYPE, List<TextChannel>> channel = new HashMap<CHANNEL_TYPE, List<TextChannel>>();
-    public HashMap<String, Role> levelRole = new HashMap<String, Role>();
+    private Guild guild;
 
     // For codec
     public GuildData() {
@@ -44,7 +41,7 @@ public class GuildData {
 
     public GuildData(@Nonnull String guildId) {
         this.guildId = guildId;
-        getGuild();
+        _getGuild();
     }
 
     public void setShowLevel(boolean showLevel) {
@@ -52,9 +49,9 @@ public class GuildData {
         if (this.showLevel == showLevel)
             return;
 
-        if (getGuild() == null)
+        if (_getGuild() == null)
             return;
-        
+
         Member bot = guild.getMember(jda.getSelfUser());
         if (bot == null)
             throw new IllegalStateException("Bot not in guild " + guildId);
@@ -84,11 +81,11 @@ public class GuildData {
         return this.adminRoleId;
     }
 
-    public void setChannelId(HashMap<CHANNEL_TYPE, List<String>> channelId) {
+    public void setChannelId(HashMap<String, List<String>> channelId) {
         this.channelId = channelId;
     }
 
-    public HashMap<CHANNEL_TYPE, List<String>> getChannelId() {
+    public HashMap<String, List<String>> getChannelId() {
         return this.channelId;
     }
 
@@ -100,28 +97,21 @@ public class GuildData {
         return this.levelRoleId;
     }
 
-    public Guild getGuild() {
+    public Guild _getGuild() {
         guild = jda.getGuildById(guildId);
         if (guild == null)
             throw new IllegalStateException("Guild with id " + guildId + " not found");
         return guild;
     }
 
-    public boolean _isChannel(CHANNEL_TYPE channel_type, String channelId) {
+    public boolean _containsChannel(String channel_type, String channelId) {
         List<String> channelIds = this.channelId.get(channel_type);
         if (channelIds == null)
             return false;
-
-        for (String c : channelIds)
-            if (c.equals(channelId))
-                return true;
-        return false;
+        return channelIds.contains(channelId);
     }
 
-    public List<TextChannel> _getChannel(CHANNEL_TYPE channel_type) {
-        if (this.channel.containsKey(channel_type))
-            return this.channel.get(channel_type);
-
+    public List<TextChannel> _getChannels(String channel_type) {
         List<String> channelIds = this.channelId.get(channel_type);
         if (channelIds == null)
             return null;
@@ -135,7 +125,30 @@ public class GuildData {
             if (temp != null)
                 channels.add(temp);
         }
-        this.channel.put(channel_type, channels);
         return channels;
     }
+
+    public boolean _addChannel(String channel_type, String channel_id) {
+        if (channelId.get(channel_type) == null)
+            return false;
+        if (channelId.get(channel_type).contains(channel_id))
+            return false;
+        channelId.get(channel_type).add(channel_id);
+        return true;
+    }
+
+    public boolean _removeChannel(String channel_type, String channel_id) {
+        if (channelId.get(channel_type) == null)
+            return false;
+        return channelId.get(channel_type).remove(channel_id);
+    }
+
+    public boolean _addRole(String roleId, int level) {
+        return levelRoleId.put(roleId, level) != null;
+    }
+
+    public boolean _removeRole(String roleId) {
+        return levelRoleId.remove(roleId) != null;
+    }
+
 }

@@ -76,12 +76,17 @@ public class GuildHandler {
         // Get guild from database
         Bson filter = new Document().append("guildId", guildId);
         FindIterable<GuildData> data = collection.find(filter).limit(1);
+        if (data.iterator().hasNext()) {
+            GuildCache guildCacheData = guildCache.put(guildId, new GuildCache(data.first()));
+            return guildCacheData;
+        } else {
+            return addGuild(guildId);
+        }
 
-        return new GuildCache(data.first());
     }
 
     // Update guild on database
-    public void updateGuild(GuildData guild) {
+    public void updateGuild(GuildData guildData) {
         try {
             // Create collection if it's not exist
             if (!DatabaseHandler.collectionExists(DatabaseHandler.guildDatabase, GUILD_COLLECTION))
@@ -91,8 +96,8 @@ public class GuildHandler {
                     GuildData.class);
 
             // Filter for guild id, guild id is unique for each collection
-            Bson filter = new Document().append("guildId", guild.guildId);
-            collection.replaceOne(filter, guild, new ReplaceOptions().upsert(true));
+            Bson filter = new Document().append("guildId", guildData.guildId);
+            collection.replaceOne(filter, guildData, new ReplaceOptions().upsert(true));
 
         } catch (MongoException e) {
             e.printStackTrace();

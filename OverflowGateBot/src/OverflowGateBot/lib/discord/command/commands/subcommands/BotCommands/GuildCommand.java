@@ -35,8 +35,10 @@ public class GuildCommand extends BotSubcommandClass {
             List<Guild> guilds = jda.getGuilds();
             EmbedBuilder builder = new EmbedBuilder();
             StringBuilder field = new StringBuilder();
+            guilds.forEach(g -> field.append(g.getName() + "\n"));
             builder.addField("_Máy chủ_", field.toString(), false);
             replyEmbeds(event, builder, 30);
+
         } else {
             // Get the guild base on name
             String guildId = guildOption.getAsString();
@@ -52,7 +54,6 @@ public class GuildCommand extends BotSubcommandClass {
             if (owner != null)
                 field.append("```Chủ máy chủ: " + owner.getEffectiveName() + "\n");
 
-            String status;
             field.append("Số thành viên: " + guild.getMemberCount() + "\n" + //
                     "```");
             builder.setDescription("Link: " + guild.getTextChannels().get(0).createInvite().complete().getUrl());

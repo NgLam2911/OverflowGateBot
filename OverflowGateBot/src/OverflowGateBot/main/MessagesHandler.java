@@ -189,9 +189,9 @@ public class MessagesHandler extends ListenerAdapter {
         if (guildData == null)
             return;
 
-        List<TextChannel> botLogChannel = guildData.data._getChannel(CHANNEL_TYPE.BOT_LOG);
+        List<TextChannel> botLogChannel = guildData.data._getChannels(CHANNEL_TYPE.BOT_LOG.name());
         if (botLogChannel == null) {
-            System.out.println("Bot log channel for guild " + guild.getName() + "does not exists");
+            System.out.println("Bot log channel for guild " + guild.getName() + " does not exists");
             return;
         }
         botLogChannel.forEach(c -> c.sendMessage(content).queue());
