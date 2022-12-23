@@ -84,7 +84,7 @@ public class OverflowGateBot {
     }
 
     public static void updateCommand() {
-        // jda.updateCommands().complete();
+        jda.updateCommands().complete();
         commandHandler.commands.values().forEach(c -> jda.upsertCommand(c.command).complete());
         contextMenuHandler.commands.values().forEach(c -> jda.upsertCommand(c.command).complete());
     }

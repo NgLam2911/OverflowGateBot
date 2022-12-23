@@ -19,8 +19,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
-import org.bson.Document;
-
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 
@@ -31,11 +29,12 @@ public class LeaderboardCommand extends BotSubcommandClass {
     enum ORDER {
         LEVEL,
         MONEY,
-        PVPPOINT
+        PVP_POINT
     }
 
     enum LEADERBOARD {
         GUILD,
+        ONLINE,
         ALL
     }
 
@@ -73,6 +72,9 @@ public class LeaderboardCommand extends BotSubcommandClass {
 
         List<UserData> users = new ArrayList<UserData>();
 
+        EmbedBuilder builder = new EmbedBuilder();
+        builder.setTitle("BẢNG XẾP HẠNG");
+
         switch (leaderboard) {
             case ALL:
                 jda.getGuilds().forEach(guild -> {
@@ -84,9 +86,7 @@ public class LeaderboardCommand extends BotSubcommandClass {
                     MongoCollection<UserData> collection = DatabaseHandler.userDatabase.getCollection(guildId,
                             UserData.class);
 
-                    FindIterable<UserData> data = collection.find().//
-                            sort(new Document().append("point", -1)).//
-                            sort(new Document().append(order.name().toLowerCase(), -1));
+                    FindIterable<UserData> data = collection.find();
                     data.forEach(d -> users.add(d));
                 });
                 break;
@@ -103,10 +103,11 @@ public class LeaderboardCommand extends BotSubcommandClass {
                 MongoCollection<UserData> collection = DatabaseHandler.userDatabase.getCollection(guildId,
                         UserData.class);
 
-                FindIterable<UserData> data = collection.find().sort(new Document().append("point", -1))
-                        .sort(new Document().append(order.name().toLowerCase(), -1));
+                FindIterable<UserData> data = collection.find();
                 data.forEach(d -> users.add(d));
                 break;
+            case ONLINE:
+                users.addAll(userHandler.userCache.values());
         }
         switch (order) {
             case LEVEL:
@@ -116,6 +117,7 @@ public class LeaderboardCommand extends BotSubcommandClass {
                         return b._getTotalPoint() - a._getTotalPoint();
                     }
                 });
+                break;
 
             case MONEY:
                 users.sort(new Comparator<UserData>() {
@@ -124,17 +126,28 @@ public class LeaderboardCommand extends BotSubcommandClass {
                         return b.money - a.money;
                     }
                 });
-            case PVPPOINT:
+                break;
+
+            case PVP_POINT:
                 users.sort(new Comparator<UserData>() {
                     @Override
                     public int compare(UserData a, UserData b) {
                         return b.pvpPoint - a.point;
                     }
                 });
+                break;
+
+            default:
+                users.sort(new Comparator<UserData>() {
+                    @Override
+                    public int compare(UserData a, UserData b) {
+                        return b._getTotalPoint() - a._getTotalPoint();
+                    }
+                });
+                break;
 
         }
 
-        EmbedBuilder builder = new EmbedBuilder();
         UserData user = userHandler.getUserAwait(member);
         int position = users.indexOf(user);
 
@@ -146,22 +159,14 @@ public class LeaderboardCommand extends BotSubcommandClass {
         }
         if (position > 10)
             builder.addField("Hạng: " + position, getUserInformation(user, order), false);
+
         replyEmbeds(event, builder, 30);
     }
 
     public String getUserInformation(UserData user, ORDER order) {
         String data = "";
-        String guildId = user.guildId;
-        String userId = user.userId;
-        if (guildId == null || userId == null)
-            return data;
-        Guild guild = jda.getGuildById(guildId);
-        if (guild == null)
-            return data;
-        Member member = guild.getMemberById(userId);
-        if (member == null)
-            return data;
-        data += member.getEffectiveName() + ":\t";
+        data += user._getName() + ":\t";
+
         switch (order) {
             case LEVEL:
                 data += "cấp " + user.getLevel() + " (" + user._getTotalPoint() + " kinh nghiệm)";
@@ -169,10 +174,9 @@ public class LeaderboardCommand extends BotSubcommandClass {
             case MONEY:
                 data += user.money + " Alpha";
                 break;
-            case PVPPOINT:
+            case PVP_POINT:
                 data += user.pvpPoint + " điểm";
         }
-
         return data;
     }
 

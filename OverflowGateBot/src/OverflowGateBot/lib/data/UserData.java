@@ -9,6 +9,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.ReplaceOptions;
 
 import OverflowGateBot.main.DatabaseHandler;
+import OverflowGateBot.main.DatabaseHandler.LOG_TYPE;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
@@ -139,8 +140,12 @@ public class UserData extends DataCache {
         return guild;
     }
 
+    public String _getName() {
+        return _getMember().getEffectiveName();
+    }
+
     // Add point for user
-    public boolean addPoint(int p) {
+    public boolean _addPoint(int p) {
         boolean levelUp = false;
         int extra;
 
@@ -154,12 +159,22 @@ public class UserData extends DataCache {
         point += p;
 
         update(1);
-        checkLevelRole();
+        _checkLevelRole();
         return levelUp;
     }
 
+    public void _addMoney(int m) {
+        this.money += m;
+        update(1);
+    }
+
+    public void _addPVPPoint(int m) {
+        this.pvpPoint += m;
+        update();
+    }
+
     // Add role to member when level is satisfied
-    public void checkLevelRole() {
+    public void _checkLevelRole() {
         ConcurrentHashMap<String, Integer> levelRoleId = guildHandler.getGuild(this.guildId).levelRoleId;
         Guild guild = _getGuild();
         Member bot = guild.getMember(jda.getSelfUser());
@@ -181,11 +196,11 @@ public class UserData extends DataCache {
         }
     }
 
-    public UserData mergeUser(UserData data) {
+    public UserData _mergeUser(UserData data) {
         if (data == null)
             return this;
         modify(guildId, userId, point, level, money + data.money, pvpPoint + data.pvpPoint, hideLevel)
-                .addPoint(data._getTotalPoint());
+                ._addPoint(data._getTotalPoint());
         return this;
     }
 
@@ -202,5 +217,6 @@ public class UserData extends DataCache {
         // Filter for user id, user id is unique for each collection
         Bson filter = new Document().append("userId", this.userId);
         collection.replaceOne(filter, this, new ReplaceOptions().upsert(true));
+        DatabaseHandler.log(LOG_TYPE.DATABASE, "Update user id:" + userId + " | guild id:" + guildId);
     }
 }

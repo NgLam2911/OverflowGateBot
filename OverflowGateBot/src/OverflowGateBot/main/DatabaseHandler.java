@@ -60,7 +60,6 @@ public class DatabaseHandler {
         userDatabase = mongoClient.getDatabase(DATABASE.USER.name()).withCodecRegistry(pojoCodecRegistry);
         logDatabase = mongoClient.getDatabase(DATABASE.LOG.name()).withCodecRegistry(pojoCodecRegistry);
 
-        
         System.out.println("Database handler up");
     }
 
@@ -78,20 +77,23 @@ public class DatabaseHandler {
     // TODO: Threading support
 
     public static void log(LOG_TYPE log, String content) {
-        // Create collection if it doesn't exist
-        if (!collectionExists(logDatabase, log.name()))
-            logDatabase.createCollection(log.name(),
-                    new CreateCollectionOptions().timeSeriesOptions(new TimeSeriesOptions(TIME_INSERT_STRING)));
+        networkHandler.run(0, () -> {
+            // Create collection if it doesn't exist
+            if (!collectionExists(logDatabase, log.name()))
+                logDatabase.createCollection(log.name(),
+                        new CreateCollectionOptions().timeSeriesOptions(new TimeSeriesOptions(TIME_INSERT_STRING)));
 
-        MongoCollection<Document> collection = logDatabase.getCollection(log.name(), Document.class);
-        // Insert log message
-        collection.insertOne(new Document().append(String.valueOf("Content"), content).//
-                append(TIME_INSERT_STRING, new BsonDateTime(System.currentTimeMillis())));
+            MongoCollection<Document> collection = logDatabase.getCollection(log.name(), Document.class);
+            // Insert log message
+            collection.insertOne(new Document().//
+                    append("Content", content).//
+                    append(TIME_INSERT_STRING, new BsonDateTime(System.currentTimeMillis())));
 
-        // Delete old log message if storage is full
-        while (collection.estimatedDocumentCount() > MAX_LOG_COUNT) {
-            collection.deleteOne(new Document());
-        }
+            // Delete old log message if storage is full
+            while (collection.estimatedDocumentCount() > MAX_LOG_COUNT) {
+                collection.deleteOne(new Document());
+            }
+        });
     }
 
 }

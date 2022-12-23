@@ -63,8 +63,9 @@ public class UserHandler {
         UserData user = getUserInstance(member);
         user.reset();
 
-        user.addPoint(1);
-        user.checkLevelRole();
+        user._addMoney(1);
+        user._addPoint(1);
+        user._checkLevelRole();
     }
 
     public boolean isShar(Member member) {
@@ -115,7 +116,7 @@ public class UserHandler {
         UserData userFromCache = getUserFromCache(member.getGuild().getId(), member.getId());
         networkHandler.run(0, () -> {
             UserData userFromDatabase = getUserFromDatabase(member.getGuild().getId(), member.getId());
-            userFromCache.mergeUser(userFromDatabase);
+            userFromCache._mergeUser(userFromDatabase);
             userCache.put(userFromCache._getHashId(), userFromCache);
         });
 
@@ -128,7 +129,7 @@ public class UserHandler {
         String userId = member.getId();
         UserData userFromCache = getUserFromCache(guildId, userId);
         UserData userFromDatabase = getUserFromDatabase(guildId, userId);
-        userFromDatabase.mergeUser(userFromCache);
+        userFromDatabase._mergeUser(userFromCache);
         userCache.put(guildId + userId, userFromDatabase);
         return userFromDatabase;
     }

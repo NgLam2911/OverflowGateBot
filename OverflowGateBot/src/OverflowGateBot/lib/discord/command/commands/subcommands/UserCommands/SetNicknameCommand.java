@@ -1,6 +1,7 @@
 package OverflowGateBot.lib.discord.command.commands.subcommands.UserCommands;
 
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -26,24 +27,42 @@ public class SetNicknameCommand extends BotSubcommandClass {
     public void onCommand(SlashCommandInteractionEvent event) {
         Guild guild = event.getGuild();
         if (guild == null)
-            return;
+            throw new IllegalStateException("No guild found");
+
+        Member bot = guild.getMember(jda.getSelfUser());
+        Member target = event.getMember();
         OptionMapping userOption = event.getOption("user");
         OptionMapping nicknameOption = event.getOption("nickname");
-        if (nicknameOption == null)
-            return;
 
-        // TODO
-        /*
-         * if (userOption == null) {
-         * userHandler.setNickName(event.getMember(), nicknameOption.getAsString());
-         * reply(event, "Đổi biệt danh thành " + nicknameOption.getAsString(), 10);
-         * } else {
-         * if (guildHandler.isAdmin(event.getMember())) {
-         * User user = userOption.getAsUser();
-         * userHandler.setNickName(guild.getMember(user), nicknameOption.getAsString());
-         * reply(event, "Đổi biệt danh thành " + nicknameOption.getAsString(), 10);
-         * } else
-         * reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
-         */
+        if (bot == null)
+            throw new IllegalStateException("Bot not in guild");
+
+        if (nicknameOption == null)
+            throw new IllegalStateException("Invalid option");
+        String nickname = nicknameOption.getAsString();
+
+        if (userOption == null) {
+            if (target == null)
+                throw new IllegalStateException("Invalid option");
+            else {
+                if (!bot.canInteract(target))
+                    return;
+                target.modifyNickname(nickname).queue();
+                reply(event, "Đổi biệt danh thành " + nickname, 10);
+            }
+        } else {
+            if (userHandler.isAdmin(event.getMember())) {
+                User user = userOption.getAsUser();
+                target = guild.getMember(user);
+                if (target == null)
+                    throw new IllegalStateException("Bot not in guild");
+                if (!bot.canInteract(target))
+                    return;
+                target.modifyNickname(nickname);
+                reply(event, "Đổi biệt danh thành " + nickname, 10);
+            } else
+                reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
+
+        }
     }
 }

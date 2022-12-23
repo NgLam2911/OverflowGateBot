@@ -185,6 +185,7 @@ public class GuildData extends DataCache {
         // Filter for guild id, guild id is unique for each collection
         Bson filter = new Document().append("guildId", this.guildId);
         collection.replaceOne(filter, this, new ReplaceOptions().upsert(true));
+        DatabaseHandler.log(LOG_TYPE.DATABASE, "Update guild id: " + guildId);
     }
 
 }

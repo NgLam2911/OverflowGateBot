@@ -102,20 +102,18 @@ public class MessagesHandler extends ListenerAdapter {
             });
 
         // Delete in channel that it should not be
-        /*
-         * if (guildHandler.inChannels(message.getGuild().getId(),
-         * message.getChannel().getId(), "schematicChannel")
-         * || guildHandler.inChannels(message.getGuild().getId(),
-         * message.getChannel().getId(), "mapChannel")) {
-         * replyTempMessage(message, "Vui lòng không gửi tin nhắn vào kênh này!", 30);
-         * message.delete().queue();
-         * return;
-         * }
-         */
+        GuildData guildData = guildHandler.getGuild(message.getGuild());
+
+        if (guildData._containsChannel(CHANNEL_TYPE.SCHEMATIC.name(), message.getTextChannel().getId()) || //
+                guildData._containsChannel(CHANNEL_TYPE.MAP.name(), message.getTextChannel().getId())) {
+
+            message.delete().queue();
+            replyTempMessage(message, "Vui lòng không gửi tin nhắn vào kênh này!", 30);
+            return;
+        }
 
         // Update exp on message sent
         userHandler.onMessage(message);
-        guildHandler.getGuild(message.getGuild());
         DatabaseHandler.log(LOG_TYPE.MESSAGE, getMessageSender(message) + ": " + message.getContentDisplay());
     }
 

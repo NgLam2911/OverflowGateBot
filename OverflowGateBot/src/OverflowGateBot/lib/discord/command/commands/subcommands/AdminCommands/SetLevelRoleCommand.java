@@ -35,7 +35,7 @@ public class SetLevelRoleCommand extends BotSubcommandClass {
         String roleId = roleOption.getAsRole().getId();
         Guild guild = event.getGuild();
         if (guild == null)
-            throw new IllegalStateException("No guild data found");
+            throw new IllegalStateException("No guild found");
 
         OptionMapping levelOption = event.getOption("level");
         if (levelOption == null)

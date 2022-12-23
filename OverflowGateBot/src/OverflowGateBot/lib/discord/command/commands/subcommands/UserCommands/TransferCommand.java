@@ -1,6 +1,6 @@
 package OverflowGateBot.lib.discord.command.commands.subcommands.UserCommands;
 
-
+import OverflowGateBot.lib.data.UserData;
 import OverflowGateBot.lib.discord.command.BotSubcommandClass;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -11,20 +11,21 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+
+import static OverflowGateBot.OverflowGateBot.*;
 
 public class TransferCommand extends BotSubcommandClass {
 
-    Set<String> typeOption = new HashSet<>();
+    enum TYPE {
+        PVP_POINT,
+        MONEY
+    }
 
     public TransferCommand() {
         super("transfer", "Chuyển chỉ số cho người khác");
         this.addOption(OptionType.STRING, "type", "Loại chỉ số muốn chuyển", true, true).//
                 addOption(OptionType.USER, "user", "Người muốn chuyển", true).//
                 addOption(OptionType.INTEGER, "point", "Số điểm muốn chuyển", true);
-        typeOption.add("PVPPoint");
-        typeOption.add("Money");
     }
 
     @Override
@@ -46,17 +47,43 @@ public class TransferCommand extends BotSubcommandClass {
         OptionMapping pointOption = event.getOption("point");
         if (pointOption == null)
             return;
+
         String type = typeOption.getAsString();
         User user = userOption.getAsUser();
         int point = pointOption.getAsInt();
+        Member sender = event.getMember();
         Member receiver = guild.getMember(user);
-        if (receiver == null) {
-            System.out.println("No receiver found for user " + user);
+
+        if (receiver == null || sender == null) {
+            reply(event, "Người nhận không hợp lệ", 30);
             return;
         }
-       
+        UserData senderData = userHandler.getUserAwait(sender);
+        UserData receiverData = userHandler.getUserAwait(receiver);
+        String result;
 
-        // TODO
+        switch (TYPE.valueOf(type)) {
+            case MONEY:
+                if (senderData.money - point >= 0) {
+                    senderData._addMoney(-point);
+                    receiverData._addMoney(point);
+                    result = "Đã chuyển " + point + " điểm Alpha cho " + receiverData._getName();
+                } else
+                    result = "Không đủ điểm để chuyển";
+                break;
+            case PVP_POINT:
+                if (senderData.pvpPoint - point >= 0) {
+                    senderData._addPVPPoint(point);
+                    receiverData._addPVPPoint(point);
+                    result = "Đã chuyển " + point + " điểm PVP cho " + receiverData._getName();
+                } else
+                    result = "Không đủ điểm để chuyển";
+                break;
+            default:
+                result = "Giá trị <type> không hợp lệ: ";
+        }
+        reply(event, result, 30);
+
     }
 
     @Override
@@ -64,7 +91,8 @@ public class TransferCommand extends BotSubcommandClass {
         String focus = event.getFocusedOption().getName();
         if (focus.equals("type")) {
             HashMap<String, String> options = new HashMap<String, String>();
-            typeOption.forEach(t -> options.put(t, t));
+            for (TYPE t : TYPE.values())
+                options.put(t.name(), t.name());
             sendAutoComplete(event, options);
         }
     }
