@@ -1,11 +1,6 @@
 package OverflowGateBot.main;
 
 import java.awt.Color;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -24,10 +19,6 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.MessageHistory;
 import net.dv8tion.jda.api.entities.User;
 
-import org.json.simple.*;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-
 import arc.util.Strings;
 
 import static OverflowGateBot.OverflowGateBot.*;
@@ -42,12 +33,7 @@ public class ServerStatusHandler {
     HashMap<String, String> servers = new HashMap<>();
     HashMap<String, String> serverStatusChannels = new HashMap<>();
 
-    private String filePath = "server.json";
-
     public ServerStatusHandler() {
-
-        serverStatusChannels.put("1010373870395596830", "1012362641060155462");
-        serverStatusChannels.put("927900627865042965", "1023581213144907937");
 
         Net net = new Net(platform.getNet());
 
@@ -107,13 +93,7 @@ public class ServerStatusHandler {
             servers.keySet().forEach(ip -> displayServerStatus(guild, channel, ip));
         }
 
-        new File("cache/data/").mkdir();
-        try {
-            load();
-            save();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
     }
 
     public void update() {
@@ -229,40 +209,5 @@ public class ServerStatusHandler {
         }
         builder.addField("Kỷ lục đợt cao nhất của các bản đồ sinh tồn: ", field.toString(), false);
         return builder;
-    }
-
-    // TODO Database
-    public void save() throws IOException {
-        JSONObject map = new JSONObject(survivalMap);
-
-        try (FileWriter file = new FileWriter("cache/data/" + filePath)) {
-            file.write(map.toJSONString());
-            file.flush();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    // TODO Database
-    public void load() throws FileNotFoundException, IOException {
-        new File("cache/").mkdir();
-        JSONParser jsonParser = new JSONParser();
-
-        File file = new File("cache/data/" + filePath);
-        if (!file.exists())
-            file.createNewFile();
-
-        try (FileReader reader = new FileReader("cache/data/" + filePath)) {
-            JSONObject map = (JSONObject) jsonParser.parse(reader);
-            if (map == null)
-                return;
-            for (Object key : map.keySet()) {
-                survivalMap.put(key.toString(), Integer.valueOf(map.get(key).toString()));
-            }
-
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
     }
 }

@@ -59,8 +59,8 @@ public class AddCommand extends BotSubcommandClass {
         if (r == null || s == null)
             return;
 
-        UserData sender = userHandler.getUserAwait(s).data;
-        UserData receiver = userHandler.getUserAwait(r).data;
+        UserData sender = userHandler.getUserAwait(s);
+        UserData receiver = userHandler.getUserAwait(r);
 
         POINT_TYPE pt = POINT_TYPE.valueOf(type);
 

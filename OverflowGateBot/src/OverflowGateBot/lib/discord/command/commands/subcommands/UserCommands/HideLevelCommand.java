@@ -4,9 +4,8 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-
+import OverflowGateBot.lib.data.UserData;
 import OverflowGateBot.lib.discord.command.BotSubcommandClass;
-import OverflowGateBot.main.UserHandler.UserCache;
 
 import static OverflowGateBot.OverflowGateBot.userHandler;
 
@@ -33,8 +32,8 @@ public class HideLevelCommand extends BotSubcommandClass {
         Member member = event.getMember();
         if (member == null)
             return;
-        UserCache user = userHandler.getUserInstance(member);
-        user.data.hideLevel = hideLevel;
+        UserData user = userHandler.getUserInstance(member);
+        user.hideLevel = hideLevel;
         if (hideLevel)
             reply(event, "Đã ẩn level", 10);
         else

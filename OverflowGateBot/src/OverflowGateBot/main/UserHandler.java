@@ -10,17 +10,13 @@ import javax.annotation.Nonnull;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
-import com.mongodb.MongoException;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.model.ReplaceOptions;
 
-import OverflowGateBot.lib.data.DataCache;
 import OverflowGateBot.lib.data.GuildData;
 import OverflowGateBot.lib.data.UserData;
 import OverflowGateBot.main.DatabaseHandler.LOG_TYPE;
 
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Role;
@@ -30,7 +26,7 @@ import static OverflowGateBot.OverflowGateBot.*;
 public class UserHandler {
 
     // Hash map to store user cache
-    public HashMap<String, UserCache> userCache = new HashMap<>();
+    public HashMap<String, UserData> userCache = new HashMap<>();
 
     public UserHandler() {
 
@@ -42,12 +38,12 @@ public class UserHandler {
     }
 
     public void updateCache() {
-        Iterator<UserCache> iterator = userCache.values().iterator();
+        Iterator<UserData> iterator = userCache.values().iterator();
         while (iterator.hasNext()) {
-            UserCache user = iterator.next();
+            UserData user = iterator.next();
             if (!user.isAlive(1)) {
                 iterator.remove();
-                updateUser(user.data);
+                user.update();
             }
         }
     }
@@ -64,14 +60,9 @@ public class UserHandler {
             System.out.println("Invalid message sender");
             return;
         }
-        UserCache userCacheData = getUserInstance(member);
-        userCacheData.reset();
-        UserData user = userCacheData.data;
+        UserData user = getUserInstance(member);
+        user.reset();
 
-        if (user == null) {
-            System.out.println("User not exist");
-            return;
-        }
         user.addPoint(1);
         user.checkLevelRole();
     }
@@ -85,10 +76,11 @@ public class UserHandler {
     public boolean isAdmin(Member member) {
         if (member == null)
             return false;
-
+        if (member.isOwner())
+            return true;
         List<Role> roles = member.getRoles();
 
-        GuildData guildData = guildHandler.getGuild(member.getGuild().getId()).data;
+        GuildData guildData = guildHandler.getGuild(member.getGuild().getId());
         for (String adminId : guildData.adminRoleId) {
             for (Role role : roles) {
                 if (role.getId().equals(adminId))
@@ -99,21 +91,20 @@ public class UserHandler {
     }
 
     // Add user to cache
-    public UserCache addUser(@Nonnull String guildId, @Nonnull String userId) {
+    public UserData addUser(@Nonnull String guildId, @Nonnull String userId) {
         UserData userData = new UserData(guildId, userId);
-        UserCache userCacheData = new UserCache(userData);
         // Key is hashId = guildId + userId
-        userCache.put(userCacheData.data._getHashId(), userCacheData);
-        return userCacheData;
+        userCache.put(userData._getHashId(), userData);
+        return userData;
     }
 
     // Add user to cache
-    public UserCache addUser(Member member) {
+    public UserData addUser(Member member) {
         return addUser(member.getGuild().getId(), member.getId());
     }
 
     // Get user from cache and merge with data from database later
-    public UserCache getUserInstance(@Nonnull Member member) {
+    public UserData getUserInstance(@Nonnull Member member) {
         String guildId = member.getGuild().getId();
         String userId = member.getId();
         // If user exist in cache then return, else query user from database
@@ -121,29 +112,29 @@ public class UserHandler {
         if (userCache.containsKey(hashId))
             return userCache.get(hashId);
 
-        UserCache userFromCache = getUserFromCache(member.getGuild().getId(), member.getId());
+        UserData userFromCache = getUserFromCache(member.getGuild().getId(), member.getId());
         networkHandler.run(0, () -> {
-            UserCache userFromDatabase = getUserFromDatabase(member.getGuild().getId(), member.getId());
-            userFromCache.data.mergeUser(userFromDatabase.data);
-            userCache.put(userFromCache.data._getHashId(), userFromCache);
+            UserData userFromDatabase = getUserFromDatabase(member.getGuild().getId(), member.getId());
+            userFromCache.mergeUser(userFromDatabase);
+            userCache.put(userFromCache._getHashId(), userFromCache);
         });
 
         return userFromCache;
     }
 
     // Waiting for data from database
-    public UserCache getUserAwait(@Nonnull Member member) {
+    public UserData getUserAwait(@Nonnull Member member) {
         String guildId = member.getGuild().getId();
         String userId = member.getId();
-        UserCache userFromCache = getUserFromCache(guildId, userId);
-        UserCache userFromDatabase = getUserFromDatabase(guildId, userId);
-        userFromDatabase.data.mergeUser(userFromCache.data);
+        UserData userFromCache = getUserFromCache(guildId, userId);
+        UserData userFromDatabase = getUserFromDatabase(guildId, userId);
+        userFromDatabase.mergeUser(userFromCache);
         userCache.put(guildId + userId, userFromDatabase);
         return userFromDatabase;
     }
 
     // Get user from cache/database
-    public UserCache getUserFromCache(@Nonnull String guildId, @Nonnull String userId) {
+    public UserData getUserFromCache(@Nonnull String guildId, @Nonnull String userId) {
         // If user exist in cache then return, else query user from database
         String hashId = guildId + userId;
         if (userCache.containsKey(hashId))
@@ -153,12 +144,12 @@ public class UserHandler {
         return addUser(guildId, userId);
     }
 
-    public UserCache getUserFromDatabase(@Nonnull String guildId, @Nonnull String userId) {
+    public UserData getUserFromDatabase(@Nonnull String guildId, @Nonnull String userId) {
         // User from a new guild
         if (!DatabaseHandler.collectionExists(DatabaseHandler.userDatabase, guildId)) {
             DatabaseHandler.userDatabase.createCollection(guildId);
-            DatabaseHandler.log(LOG_TYPE.DATABASE, "Create new guild collection with id " + guildId);
-            return new UserCache(new UserData(guildId, userId));
+            DatabaseHandler.log(LOG_TYPE.DATABASE, "Create new user collection with guild id " + guildId);
+            return new UserData(guildId, userId);
 
         }
         MongoCollection<UserData> collection = DatabaseHandler.userDatabase.getCollection(guildId,
@@ -168,55 +159,6 @@ public class UserHandler {
         Bson filter = new Document().append("userId", userId);
         FindIterable<UserData> data = collection.find(filter).limit(1);
 
-        return new UserCache(data.first());
-    }
-
-    // Update user on database
-    public void updateUser(UserData user) {
-        try {
-            // Create collection if it's not exist
-            if (!DatabaseHandler.collectionExists(DatabaseHandler.userDatabase, user.guildId))
-                DatabaseHandler.userDatabase.createCollection(user.guildId);
-
-            MongoCollection<UserData> collection = DatabaseHandler.userDatabase.getCollection(user.guildId,
-                    UserData.class);
-
-            // Filter for user id, user id is unique for each collection
-            Bson filter = new Document().append("userId", user.userId);
-            collection.replaceOne(filter, user, new ReplaceOptions().upsert(true));
-
-        } catch (MongoException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public class UserCache extends DataCache {
-
-        public UserData data;
-        public Member member;
-
-        public UserCache(UserData data) {
-            super(USER_ALIVE_TIME);
-            this.data = data;
-        }
-
-        // Get discord member instance
-        public Member getMember() {
-            if (member != null)
-                return member;
-
-            String guildId = data.guildId;
-            String userId = data.userId;
-
-            if (guildId == null || userId == null)
-                return null;
-
-            Guild guild = jda.getGuildById(guildId);
-            if (guild == null)
-                return null;
-
-            member = guild.getMemberById(userId);
-            return member;
-        }
+        return data.first();
     }
 }

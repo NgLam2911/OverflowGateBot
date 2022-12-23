@@ -55,8 +55,6 @@ public class CommandHandler extends ListenerAdapter {
 
     @Override
     public void onSlashCommandInteraction(@Nonnull SlashCommandInteractionEvent event) {
-        System.out.println(messagesHandler.getMessageSender(event) + ": used " + event.getName() + " "
-                + event.getSubcommandName() + " " + event.getOptions().toString());
 
         event.deferReply().queue();
         handleCommand(event);
@@ -74,15 +72,15 @@ public class CommandHandler extends ListenerAdapter {
 
         Guild guild = event.getGuild();
         if (guild == null)
-            return;
+            throw new IllegalStateException("Guild not exists");
 
         Member botMember = guild.getMember(jda.getSelfUser());
         if (botMember == null)
-            return;
+            throw new IllegalStateException("Bot not exists");
 
         Member member = event.getMember();
         if (member == null)
-            return;
+            throw new IllegalStateException("Member not exists");
 
         // If bot don't have manager server permission then return
         if (!botMember.hasPermission(Permission.ADMINISTRATOR)) {
@@ -101,7 +99,12 @@ public class CommandHandler extends ListenerAdapter {
          */
 
         if (commands.containsKey(command)) {
+            // Call subcommand
             commands.get(command).onCommand(event);
+            // Print to terminal
+            System.out.println(messagesHandler.getMessageSender(event) + ": used " + event.getName() + " "
+                    + event.getSubcommandName() + " " + event.getOptions().toString());
+            // Send to discord log channel
             if (!command.equals("shar")) {
                 messagesHandler.log("```" +
                         member.getEffectiveName() + " đã sử dụng " + command + " " + event.getSubcommandName() + "```",

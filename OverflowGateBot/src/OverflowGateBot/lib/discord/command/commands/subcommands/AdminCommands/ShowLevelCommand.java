@@ -1,7 +1,7 @@
 package OverflowGateBot.lib.discord.command.commands.subcommands.AdminCommands;
 
+import OverflowGateBot.lib.data.GuildData;
 import OverflowGateBot.lib.discord.command.BotSubcommandClass;
-import OverflowGateBot.main.GuildHandler.GuildCache;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -24,14 +24,15 @@ public class ShowLevelCommand extends BotSubcommandClass {
     public void onCommand(SlashCommandInteractionEvent event) {
         OptionMapping showOption = event.getOption("show");
         if (showOption == null)
-            return;
+            throw new IllegalStateException("Invalid option");
 
         boolean show = showOption.getAsBoolean();
-        GuildCache guildCache = guildHandler.getGuild(event.getGuild());
+        GuildData guildCache = guildHandler.getGuild(event.getGuild());
         if (guildCache == null)
-            return;
-        guildCache.data.setShowLevel(show);
-        if (guildCache.data.showLevel == show)
+            throw new IllegalStateException("No guild data found");
+
+        reply(event, "Đang cập nhật", 10);
+        if (guildCache.setShowLevel(show))
             reply(event, "Cập nhật thành công", 10);
         else
             reply(event, "Cập nhật không thành công", 10);

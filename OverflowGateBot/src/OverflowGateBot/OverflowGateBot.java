@@ -22,9 +22,10 @@ public class OverflowGateBot {
 
     public static final String SHAR_ID = "719322804549320725";
 
-    protected static final long UPDATE_PERIOD = 60 * 1000l;
+    public static final long UPDATE_PERIOD = 60 * 1000l;
     public static final int GUILD_ALIVE_TIME = 30;
     public static final int USER_ALIVE_TIME = 10;
+    public static final int UPDATE_LIMIT = 10;
 
     public static final String DATABASE_URL = "mongodb+srv://bot1:imthebot1@cluster0.7omeswq.mongodb.net/?retryWrites=true&w=majority";
     public static final String GUILD_COLLECTION = "GUILD_DATA";
@@ -63,6 +64,7 @@ public class OverflowGateBot {
             serverStatusHandler = new ServerStatusHandler();
 
             networkHandler.run(0, UPDATE_PERIOD, () -> update());
+            // updateCommand();
 
             System.out.println("Bot online");
 
@@ -82,7 +84,7 @@ public class OverflowGateBot {
     }
 
     public static void updateCommand() {
-        jda.updateCommands().complete();
+        // jda.updateCommands().complete();
         commandHandler.commands.values().forEach(c -> jda.upsertCommand(c.command).complete());
         contextMenuHandler.commands.values().forEach(c -> jda.upsertCommand(c.command).complete());
     }

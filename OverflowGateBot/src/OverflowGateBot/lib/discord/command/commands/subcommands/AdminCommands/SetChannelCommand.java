@@ -1,6 +1,5 @@
 package OverflowGateBot.lib.discord.command.commands.subcommands.AdminCommands;
 
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -11,9 +10,9 @@ import static OverflowGateBot.OverflowGateBot.guildHandler;
 
 import java.util.HashMap;
 
+import OverflowGateBot.lib.data.GuildData;
 import OverflowGateBot.lib.data.GuildData.CHANNEL_TYPE;
 import OverflowGateBot.lib.discord.command.BotSubcommandClass;
-import OverflowGateBot.main.GuildHandler.GuildCache;
 
 public class SetChannelCommand extends BotSubcommandClass {
 
@@ -31,27 +30,25 @@ public class SetChannelCommand extends BotSubcommandClass {
     public void onCommand(SlashCommandInteractionEvent event) {
         OptionMapping typeOption = event.getOption("type");
         if (typeOption == null)
-            return;
-
+            throw new IllegalStateException("Invalid option");
         String type = typeOption.getAsString();
-        Guild guild = event.getGuild();
-        if (guild == null)
-            return;
 
-        try {
-            TextChannel channel = event.getTextChannel();
-            GuildCache guildData = guildHandler.getGuild(guild);
-            if (guildData == null)
-                throw new IllegalStateException("No guild data found");
+        TextChannel channel = event.getTextChannel();
+        GuildData guildData = guildHandler.getGuild(event.getGuild());
+        if (guildData == null)
+            throw new IllegalStateException("Guild data not found with <" + event.getGuild() + ">");
 
-            if (guildData.data._containsChannel(type, channel.getId())) {
-                guildData.data._removeChannel(type, channel.getId());
-            } else {
-                guildData.data._addChannel(type, channel.getId());
-            }
+        if (guildData._containsChannel(type, channel.getId())) {
+            if (guildData._removeChannel(type, channel.getId()))
+                reply(event, "Xóa kênh thành công", 30);
+            else
+                reply(event, "Xóa kênh không thành công", 30);
 
-        } catch (Exception e) {
-            e.printStackTrace();
+        } else {
+            if (guildData._addChannel(type, channel.getId()))
+                reply(event, "Thêm kênh thành công", 30);
+            else
+                reply(event, "Thêm kênh không thành công", 30);
         }
     }
 

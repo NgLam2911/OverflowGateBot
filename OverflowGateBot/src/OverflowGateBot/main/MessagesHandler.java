@@ -21,10 +21,11 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import javax.annotation.Nonnull;
 import javax.imageio.*;
 
+import OverflowGateBot.lib.data.GuildData;
+import OverflowGateBot.lib.data.UserData;
 import OverflowGateBot.lib.data.GuildData.CHANNEL_TYPE;
 import OverflowGateBot.lib.mindustry.ContentHandler;
 import OverflowGateBot.main.DatabaseHandler.LOG_TYPE;
-import OverflowGateBot.main.GuildHandler.GuildCache;
 
 import java.awt.image.*;
 import java.io.*;
@@ -120,9 +121,24 @@ public class MessagesHandler extends ListenerAdapter {
 
     @Override
     public void onGuildMemberUpdateNickname(@Nonnull GuildMemberUpdateNicknameEvent event) {
-        // You can't change your nickname XD
-        if (event.getMember().getUser().isBot())
-            return;
+        Member target = event.getEntity();
+        UserData userData = userHandler.getUserAwait(target);
+        if (userData == null)
+            throw new IllegalStateException("No user data found");
+
+        Member bot = event.getGuild().getMember(jda.getSelfUser());
+        if (bot == null)
+            throw new IllegalStateException("Bot not in guild");
+
+        if (bot.canInteract(target)) {
+            String name = target.getEffectiveName();
+            String nickname = name.substring(name.indexOf("]") + 1, 0);
+            if (userData.hideLevel)
+                target.modifyNickname(nickname).queue();
+            else
+                target.modifyNickname("[Level" + userData.level + "] " + nickname).queue();
+        }
+
     }
 
     @Override
@@ -134,15 +150,26 @@ public class MessagesHandler extends ListenerAdapter {
             Invite invite = inviteChannels.get(0).createInvite().complete();
             user.openPrivateChannel().queue(channel -> channel.sendMessage(invite.getUrl()).queue());
         }
-
-        log("```" + user.getName() + " rời máy chủ```", event.getGuild());
+        log(user.getName() + " rời máy chủ", event.getGuild());
     }
 
     @Override
     public void onGuildMemberJoin(@Nonnull GuildMemberJoinEvent event) {
         userHandler.addUser(event.getMember());
+        log(event.getMember().getEffectiveName() + " tham gia máy chủ", event.getGuild());
+    }
 
-        log("```" + event.getMember().getEffectiveName() + " tham gia máy chủ```", event.getGuild());
+    public void log(@Nonnull String content, Guild guild) {
+        GuildData guildData = guildHandler.getGuild(guild);
+        if (guildData == null)
+            throw new IllegalStateException("No guild data found");
+
+        List<TextChannel> botLogChannel = guildData._getChannels(CHANNEL_TYPE.BOT_LOG.name());
+        if (botLogChannel == null) {
+            System.out.println("Bot log channel for guild " + guild.getName() + " does not exists");
+
+        } else
+            botLogChannel.forEach(c -> c.sendMessage("```" + content + "```").queue());
     }
 
     public boolean isSchematicText(Message message) {
@@ -182,19 +209,6 @@ public class MessagesHandler extends ListenerAdapter {
                 return true;
         }
         return false;
-    }
-
-    public void log(@Nonnull String content, @Nonnull Guild guild) {
-        GuildCache guildData = guildHandler.getGuild(guild);
-        if (guildData == null)
-            return;
-
-        List<TextChannel> botLogChannel = guildData.data._getChannels(CHANNEL_TYPE.BOT_LOG.name());
-        if (botLogChannel == null) {
-            System.out.println("Bot log channel for guild " + guild.getName() + " does not exists");
-            return;
-        }
-        botLogChannel.forEach(c -> c.sendMessage(content).queue());
     }
 
     // Its bad lol

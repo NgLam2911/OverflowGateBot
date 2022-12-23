@@ -1,7 +1,7 @@
 package OverflowGateBot.lib.discord.command.commands.subcommands.AdminCommands;
 
+import OverflowGateBot.lib.data.GuildData;
 import OverflowGateBot.lib.discord.command.BotSubcommandClass;
-import OverflowGateBot.main.GuildHandler.GuildCache;
 
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -14,7 +14,7 @@ public class SetAdminCommand extends BotSubcommandClass {
 
     public SetAdminCommand() {
         super("setadmin", "Cài đặt vai trò admin cho máy chủ");
-        this.addOption(OptionType.ROLE, "role", "Vai trò admin", true, true);
+        this.addOption(OptionType.ROLE, "role", "Vai trò admin", true);
     }
 
     @Override
@@ -31,17 +31,17 @@ public class SetAdminCommand extends BotSubcommandClass {
         Role role = roleOption.getAsRole();
         String roleId = role.getId();
 
-        GuildCache guildData = guildHandler.getGuild(event.getGuild());
+        GuildData guildData = guildHandler.getGuild(event.getGuild());
         if (guildData == null)
-            throw new IllegalStateException("No guild data found");
+            throw new IllegalStateException("Guild data not found with <" + event.getGuild() + ">");
 
-        if (guildData.data.adminRoleId.contains(roleId)) {
-            if (guildData.data.adminRoleId.remove(roleId))
+        if (guildData.adminRoleId.contains(roleId)) {
+            if (guildData.adminRoleId.remove(roleId))
                 reply(event, "Xóa vai trò thành công", 30);
             else
                 reply(event, "Xóa vai trò thất bại", 30);
         } else {
-            if (guildData.data.adminRoleId.add(roleId))
+            if (guildData.adminRoleId.add(roleId))
                 reply(event, "Thêm vai trò thành công", 30);
             else
                 reply(event, "Thêm vai trò thất bại", 30);

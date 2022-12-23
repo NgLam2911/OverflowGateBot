@@ -7,8 +7,9 @@ import static OverflowGateBot.OverflowGateBot.*;
 import OverflowGateBot.lib.discord.command.BotCommandClass;
 import OverflowGateBot.lib.discord.command.commands.subcommands.AdminCommands.RefreshSlashCommand;
 import OverflowGateBot.lib.discord.command.commands.subcommands.AdminCommands.ReloadServerCommand;
+import OverflowGateBot.lib.discord.command.commands.subcommands.AdminCommands.SetAdminCommand;
 import OverflowGateBot.lib.discord.command.commands.subcommands.AdminCommands.SetChannelCommand;
-import OverflowGateBot.lib.discord.command.commands.subcommands.AdminCommands.SetRoleCommand;
+import OverflowGateBot.lib.discord.command.commands.subcommands.AdminCommands.SetLevelRoleCommand;
 import OverflowGateBot.lib.discord.command.commands.subcommands.AdminCommands.ShowLevelCommand;
 
 public class AdminCommand extends BotCommandClass {
@@ -18,8 +19,9 @@ public class AdminCommand extends BotCommandClass {
         addSubcommands(new RefreshSlashCommand());
         addSubcommands(new ReloadServerCommand());
         addSubcommands(new SetChannelCommand());
-        addSubcommands(new SetRoleCommand());
+        addSubcommands(new SetLevelRoleCommand());
         addSubcommands(new ShowLevelCommand());
+        addSubcommands(new SetAdminCommand());
     }
 
     @Override
@@ -29,11 +31,10 @@ public class AdminCommand extends BotCommandClass {
 
     @Override
     public void onCommand(SlashCommandInteractionEvent event) {
-        if (!userHandler.isAdmin(event.getMember()) && !userHandler.isShar(event.getMember())) {
+        if (userHandler.isAdmin(event.getMember()) && userHandler.isShar(event.getMember()))
+            runCommand(event);
+        else
             reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
-            return;
-        }
 
-        runCommand(event);
     }
 }
