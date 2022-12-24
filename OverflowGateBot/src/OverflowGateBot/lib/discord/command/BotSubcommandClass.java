@@ -37,7 +37,7 @@ public class BotSubcommandClass extends SubcommandData {
     // Override
     public void onCommand(SlashCommandInteractionEvent event) {
         if (this.threaded)
-            networkHandler.run(0, () -> runCommand(event));
+            networkHandler.run(name, 0, () -> runCommand(event));
         else
             runCommand(event);
     }

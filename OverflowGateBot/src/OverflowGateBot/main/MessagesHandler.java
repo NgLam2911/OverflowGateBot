@@ -21,6 +21,8 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import javax.annotation.Nonnull;
 import javax.imageio.*;
 
+import org.bson.Document;
+
 import OverflowGateBot.lib.data.GuildData;
 import OverflowGateBot.lib.data.UserData;
 import OverflowGateBot.lib.data.GuildData.CHANNEL_TYPE;
@@ -93,28 +95,30 @@ public class MessagesHandler extends ListenerAdapter {
             sendMapPreview(message, message.getChannel());
         }
 
-        // Log member message/file/image url to terminal
-        if (!message.getContentRaw().isEmpty())
-            System.out.println(getMessageSender(message) + ": " + message.getContentDisplay());
-        else if (!message.getAttachments().isEmpty())
-            message.getAttachments().forEach(attachment -> {
-                System.out.println(getMessageSender(message) + ": " + attachment.getUrl());
-            });
-
         // Delete in channel that it should not be
         GuildData guildData = guildHandler.getGuild(message.getGuild());
 
         if (guildData._containsChannel(CHANNEL_TYPE.SCHEMATIC.name(), message.getTextChannel().getId()) || //
                 guildData._containsChannel(CHANNEL_TYPE.MAP.name(), message.getTextChannel().getId())) {
-
-            message.delete().queue();
-            replyTempMessage(message, "Vui lòng không gửi tin nhắn vào kênh này!", 30);
-            return;
+            if (!message.getContentRaw().isEmpty()) {
+                message.delete().queue();
+                replyTempMessage(message, "Vui lòng không gửi tin nhắn vào kênh này!", 30);
+            }
         }
 
         // Update exp on message sent
         userHandler.onMessage(message);
-        DatabaseHandler.log(LOG_TYPE.MESSAGE, getMessageSender(message) + ": " + message.getContentDisplay());
+        DatabaseHandler.log(LOG_TYPE.MESSAGE, new Document().append(message.getId(),
+                getMessageSender(message) + ": " + message.getContentDisplay()));
+
+        // Log member message/file/image url to terminal
+        if (!message.getContentRaw().isEmpty())
+            System.out.println(getMessageSender(message) + ": " + message.getContentDisplay());
+
+        else if (!message.getAttachments().isEmpty())
+            message.getAttachments().forEach(attachment -> {
+                System.out.println(getMessageSender(message) + ": " + attachment.getUrl());
+            });
     }
 
     @Override
@@ -132,6 +136,11 @@ public class MessagesHandler extends ListenerAdapter {
     }
 
     @Override
+    public void onMessageDelete(@Nonnull MessageDeleteEvent event) {
+        DatabaseHandler.log(LOG_TYPE.MESSAGE_DELETED, new Document("DELETED", event.getMessageId()));
+    }
+
+    @Override
     public void onGuildMemberRemove(@Nonnull GuildMemberRemoveEvent event) {
         // Send invite link to member who left the guild
         User user = event.getUser();
@@ -140,24 +149,23 @@ public class MessagesHandler extends ListenerAdapter {
             Invite invite = inviteChannels.get(0).createInvite().complete();
             user.openPrivateChannel().queue(channel -> channel.sendMessage(invite.getUrl()).queue());
         }
-        log(user.getName() + " rời máy chủ", event.getGuild());
+        log(event.getGuild(), user.getName() + " rời máy chủ");
     }
 
     @Override
     public void onGuildMemberJoin(@Nonnull GuildMemberJoinEvent event) {
         userHandler.addUser(event.getMember());
-        log(event.getMember().getEffectiveName() + " tham gia máy chủ", event.getGuild());
+        log(event.getGuild(), event.getMember().getEffectiveName() + " tham gia máy chủ");
     }
 
-    public void log(@Nonnull String content, Guild guild) {
+    public void log(Guild guild, @Nonnull String content) {
         GuildData guildData = guildHandler.getGuild(guild);
         if (guildData == null)
             throw new IllegalStateException("No guild data found");
 
         List<TextChannel> botLogChannel = guildData._getChannels(CHANNEL_TYPE.BOT_LOG.name());
         if (botLogChannel == null) {
-            System.out.println("Bot log channel for guild " + guild.getName() + " does not exists");
-
+            System.out.println("Bot log channel for guild <" + guild.getName() + "> does not exists");
         } else
             botLogChannel.forEach(c -> c.sendMessage("```" + content + "```").queue());
     }

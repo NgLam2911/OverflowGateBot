@@ -12,7 +12,6 @@ import org.bson.conversions.Bson;
 
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 
 import OverflowGateBot.lib.data.GuildData;
 import OverflowGateBot.lib.data.UserData;
@@ -29,7 +28,6 @@ public class UserHandler {
 
     // Hash map to store user cache
     public HashMap<String, UserData> userCache = new HashMap<>();
-    private MongoDatabase userDatabase = DatabaseHandler.getDatabase(DATABASE.USER);
 
     public UserHandler() {
 
@@ -121,7 +119,7 @@ public class UserHandler {
             return userCache.get(hashId);
 
         UserData userData = addUser(member);
-        networkHandler.run(0, () -> {
+        networkHandler.run("GET DATA " + hashId, 0, () -> {
             UserData userFromDatabase = getUserFromDatabase(member.getGuild().getId(), member.getId());
             userData._merge(userFromDatabase);
             userCache.put(userData._getHashId(), userData);
@@ -160,12 +158,12 @@ public class UserHandler {
     public UserData getUserFromDatabase(@Nonnull String guildId, @Nonnull String userId) {
         // User from a new guild
         if (!DatabaseHandler.collectionExists(DATABASE.USER, guildId)) {
-            userDatabase.createCollection(guildId);
-            DatabaseHandler.log(LOG_TYPE.DATABASE, "Create new user collection with guild id " + guildId);
+            DatabaseHandler.getDatabase(DATABASE.USER).createCollection(guildId);
+            DatabaseHandler.log(LOG_TYPE.DATABASE, new Document().append("NEW GUILD", guildId));
             return addUser(guildId, userId);
 
         }
-        MongoCollection<UserData> collection = userDatabase.getCollection(guildId,
+        MongoCollection<UserData> collection = DatabaseHandler.getDatabase(DATABASE.USER).getCollection(guildId,
                 UserData.class);
 
         // Get user from database

@@ -10,7 +10,6 @@ import org.bson.conversions.Bson;
 
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 
 import OverflowGateBot.lib.data.GuildData;
 import OverflowGateBot.main.DatabaseHandler.DATABASE;
@@ -21,7 +20,6 @@ import static OverflowGateBot.OverflowGateBot.*;
 public class GuildHandler {
 
     public HashMap<String, GuildData> guildCache = new HashMap<>();
-    private MongoDatabase guildDatabase = DatabaseHandler.getDatabase(DATABASE.GUILD);
 
     public GuildHandler() {
 
@@ -64,15 +62,16 @@ public class GuildHandler {
             return guildCache.get(guildId);
 
         // Create new guild cache to store temporary guild data
-        if (!DatabaseHandler.collectionExists(guildDatabase, GUILD_COLLECTION)) {
-            guildDatabase.createCollection(GUILD_COLLECTION);
+        if (!DatabaseHandler.collectionExists(DATABASE.GUILD, GUILD_COLLECTION)) {
+            DatabaseHandler.createCollection(DATABASE.GUILD, GUILD_COLLECTION);
             return addGuild(guildId);
 
         }
 
         addGuild(guildId);
 
-        MongoCollection<GuildData> collection = guildDatabase.getCollection(GUILD_COLLECTION,
+        MongoCollection<GuildData> collection = DatabaseHandler.getDatabase(DATABASE.GUILD).getCollection(
+                GUILD_COLLECTION,
                 GuildData.class);
 
         // Get guild from database

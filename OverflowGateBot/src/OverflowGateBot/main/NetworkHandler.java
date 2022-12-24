@@ -27,7 +27,7 @@ public class NetworkHandler {
     }
 
     public void pingServer(String ip, Consumer<Host> listener) {
-        run(0, () -> {
+        run("PING" ,0, () -> {
             try {
                 String resultIP = ip;
                 int port = 6567;
@@ -56,8 +56,8 @@ public class NetworkHandler {
         });
     }
 
-    public void run(long delay, long period, Runnable r) {
-        new Timer(true).schedule(new TimerTask() {
+    public void run(String name, long delay, long period, Runnable r) {
+        new Timer(name, true).schedule(new TimerTask() {
             @Override
             public void run() {
                 r.run();
@@ -65,8 +65,8 @@ public class NetworkHandler {
         }, delay, period);
     }
 
-    public void run(long delay, Runnable r) {
-        new Timer(true).schedule(new TimerTask() {
+    public void run(String name, long delay, Runnable r) {
+        new Timer(name, true).schedule(new TimerTask() {
             @Override
             public void run() {
                 r.run();

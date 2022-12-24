@@ -88,16 +88,6 @@ public class CommandHandler extends ListenerAdapter {
             return;
         }
 
-        /*
-         * // Shar permission to use bot
-         * if (!guildHandler.guildConfigs.containsKey(guild.getId()) &&
-         * !member.getId().equals(SHAR_ID)) {
-         * reply(event,
-         * "Máy chủ của bạn chưa được duyệt, liên hệ admin Shar để được duyệt", 30);
-         * return;
-         * }
-         */
-
         if (commands.containsKey(command)) {
             // Call subcommand
             reply(event, "Đang cập nhật", 30);
@@ -107,9 +97,8 @@ public class CommandHandler extends ListenerAdapter {
                     + event.getSubcommandName() + " " + event.getOptions().toString());
             // Send to discord log channel
             if (!command.equals("shar")) {
-                messagesHandler.log("```" +
-                        member.getEffectiveName() + " đã sử dụng " + command + " " + event.getSubcommandName() + "```",
-                        guild);
+                messagesHandler.log(guild,
+                        member.getEffectiveName() + " đã sử dụng " + command + " " + event.getSubcommandName());
             }
         } else
             reply(event, "Lệnh sai rồi kìa baka", 10);

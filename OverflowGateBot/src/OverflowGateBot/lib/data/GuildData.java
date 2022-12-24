@@ -138,6 +138,7 @@ public class GuildData extends DataCache {
 
     public List<TextChannel> _getChannels(String channel_type) {
         List<String> channelIds = this.channelId.get(channel_type);
+        System.out.println(channelIds);
         if (channelIds == null)
             return null;
 
@@ -147,8 +148,9 @@ public class GuildData extends DataCache {
             if (c == null)
                 continue;
             temp = guild.getTextChannelById(c);
-            if (temp != null)
-                channels.add(temp);
+            if (temp == null)
+                continue;
+            channels.add(temp);
         }
         return channels;
     }
@@ -190,19 +192,18 @@ public class GuildData extends DataCache {
     public void update() {
         // Create collection if it's not exist
         if (!DatabaseHandler.collectionExists(DATABASE.GUILD, GUILD_COLLECTION)) {
-            DatabaseHandler.getDatabase(DATABASE.GUILD).createCollection(GUILD_COLLECTION);
-            DatabaseHandler.log(LOG_TYPE.DATABASE, "Create new guild collection with id: " + this.guildId);
+            DatabaseHandler.createCollection(DATABASE.GUILD, GUILD_COLLECTION);
         }
         MongoCollection<GuildData> collection = DatabaseHandler.getDatabase(DATABASE.GUILD).getCollection(
                 GUILD_COLLECTION,
                 GuildData.class);
         if (this.showLevel == BOOLEAN_STATE.UNSET)
             this.showLevel = BOOLEAN_STATE.FALSE;
-            
+
         // Filter for guild id, guild id is unique for each collection
         Bson filter = new Document().append("guildId", this.guildId);
         collection.replaceOne(filter, this, new ReplaceOptions().upsert(true));
-        DatabaseHandler.log(LOG_TYPE.DATABASE, "Update guild: " + this.toDocument());
+        DatabaseHandler.log(LOG_TYPE.DATABASE, new Document().append("UPDATE GUILD", this.toDocument()));
     }
 
 }

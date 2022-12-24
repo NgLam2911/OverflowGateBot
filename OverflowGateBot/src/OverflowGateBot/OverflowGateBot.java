@@ -63,7 +63,7 @@ public class OverflowGateBot {
             contextMenuHandler = new ContextMenuHandler();
             serverStatusHandler = new ServerStatusHandler();
 
-            networkHandler.run(0, UPDATE_PERIOD, () -> update());
+            networkHandler.run("UPDATE", 0, UPDATE_PERIOD, () -> update());
 
             System.out.println("Bot online");
 

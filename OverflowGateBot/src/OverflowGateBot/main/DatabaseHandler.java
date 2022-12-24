@@ -36,7 +36,8 @@ public class DatabaseHandler {
     public enum LOG_TYPE {
         MESSAGE,
         DATABASE,
-        USER
+        USER,
+        MESSAGE_DELETED
     }
 
     private static ConnectionString connectionString = new ConnectionString(DATABASE_URL);
@@ -82,8 +83,13 @@ public class DatabaseHandler {
         return collectionExists(getDatabase(databaseName), collectionName);
     }
 
-    public static void log(LOG_TYPE log, String content) {
-        networkHandler.run(0, () -> {
+    public static void createCollection(DATABASE databaseName, final String collectionName) {
+        getDatabase(databaseName).createCollection(collectionName);
+        log(LOG_TYPE.DATABASE, new Document().append("CREATE GUILD", collectionName));
+    }
+
+    public static void log(LOG_TYPE log, Document content) {
+        networkHandler.run("LOG" + log.name(), 0, () -> {
             MongoDatabase logDatabase = getDatabase(DATABASE.LOG);
             // Create collection if it doesn't exist
             if (!collectionExists(logDatabase, log.name()))
@@ -91,9 +97,7 @@ public class DatabaseHandler {
 
             MongoCollection<Document> collection = logDatabase.getCollection(log.name(), Document.class);
             // Insert log message
-            collection.insertOne(new Document().//
-                    append("Content", content).//
-                    append(TIME_INSERT_STRING, new BsonDateTime(System.currentTimeMillis())));
+            collection.insertOne(content.append(TIME_INSERT_STRING, new BsonDateTime(System.currentTimeMillis())));
 
             // Delete old log message if storage is full
             while (collection.estimatedDocumentCount() > MAX_LOG_COUNT) {

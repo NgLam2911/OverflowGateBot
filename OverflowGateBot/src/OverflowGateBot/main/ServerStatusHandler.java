@@ -99,7 +99,7 @@ public class ServerStatusHandler {
     }
 
     public void displayServerStatus(Guild guild, MessageChannel channel, String ip) {
-        networkHandler.run(0l, SERVER_RELOAD_PEROID, () -> sendServerStatus(guild, channel, ip));
+        networkHandler.run("AUTO REFRESH SERVER", 0l, SERVER_RELOAD_PEROID, () -> sendServerStatus(guild, channel, ip));
     }
 
     public void refreshServerStat(Guild guild, MessageChannel channel) {

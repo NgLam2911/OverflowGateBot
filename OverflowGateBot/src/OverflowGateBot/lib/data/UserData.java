@@ -26,11 +26,11 @@ public class UserData extends DataCache {
     public String userId;
     @Nonnull
     public String guildId;
-    public String name;
     public Integer point = 0;
     public Integer level = 0;
     public Integer money = 0;
     public Integer pvpPoint = 0;
+    public String name = new String();
     public BOOLEAN_STATE showLevel = BOOLEAN_STATE.UNSET;
 
     // For codec
@@ -166,6 +166,8 @@ public class UserData extends DataCache {
         if (bot.canInteract(member)) {
 
             String nickname = this.name;
+            if (nickname.isBlank())
+                nickname = _getMember().getUser().getName();
             if (showLevel == BOOLEAN_STATE.FALSE)
                 nickname = "[Lv" + this.level + "] " + nickname;
             member.modifyNickname(nickname).queue();
@@ -243,7 +245,7 @@ public class UserData extends DataCache {
     public void update() {
         // Create collection if it's not exist
         if (!DatabaseHandler.collectionExists(DATABASE.USER, this.guildId))
-            DatabaseHandler.getDatabase(DATABASE.USER).createCollection(this.guildId);
+            DatabaseHandler.createCollection(DATABASE.USER, this.guildId);
 
         MongoCollection<UserData> collection = DatabaseHandler.getDatabase(DATABASE.USER).getCollection(this.guildId,
                 UserData.class);
@@ -254,6 +256,6 @@ public class UserData extends DataCache {
         // Filter for user id, user id is unique for each collection
         Bson filter = new Document().append("userId", this.userId);
         collection.replaceOne(filter, this, new ReplaceOptions().upsert(true));
-        DatabaseHandler.log(LOG_TYPE.DATABASE, "Update user : " + this.toDocument());
+        DatabaseHandler.log(LOG_TYPE.DATABASE, new Document().append("UPDATE USER", this.toDocument()));
     }
 }

@@ -4,7 +4,6 @@ import OverflowGateBot.lib.data.UserData;
 import OverflowGateBot.lib.discord.command.BotSubcommandClass;
 import OverflowGateBot.main.DatabaseHandler;
 import OverflowGateBot.main.DatabaseHandler.DATABASE;
-import OverflowGateBot.main.DatabaseHandler.LOG_TYPE;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
@@ -80,10 +79,9 @@ public class LeaderboardCommand extends BotSubcommandClass {
             case ALL:
                 jda.getGuilds().forEach(guild -> {
                     String guildId = guild.getId();
-                    if (!DatabaseHandler.collectionExists(DATABASE.USER, guildId)) {
-                        DatabaseHandler.getDatabase(DATABASE.USER).createCollection(guildId);
-                        DatabaseHandler.log(LOG_TYPE.DATABASE, "Create new user collection with guild id " + guildId);
-                    }
+                    if (!DatabaseHandler.collectionExists(DATABASE.USER, guildId))
+                        DatabaseHandler.createCollection(DATABASE.USER, guildId);
+
                     MongoCollection<UserData> collection = DatabaseHandler.getDatabase(DATABASE.USER).getCollection(
                             guildId,
                             UserData.class);
@@ -98,10 +96,9 @@ public class LeaderboardCommand extends BotSubcommandClass {
                 if (guild == null)
                     throw new IllegalStateException("Guild not found");
                 String guildId = guild.getId();
-                if (!DatabaseHandler.collectionExists(DATABASE.USER, guildId)) {
-                    DatabaseHandler.getDatabase(DATABASE.USER).createCollection(guildId);
-                    DatabaseHandler.log(LOG_TYPE.DATABASE, "Create new user collection with guild id " + guildId);
-                }
+                if (!DatabaseHandler.collectionExists(DATABASE.USER, guildId))
+                    DatabaseHandler.createCollection(DATABASE.USER, guildId);
+
                 MongoCollection<UserData> collection = DatabaseHandler.getDatabase(DATABASE.USER).getCollection(guildId,
                         UserData.class);
 
