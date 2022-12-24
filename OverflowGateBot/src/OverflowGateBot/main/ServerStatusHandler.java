@@ -18,7 +18,7 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.MessageHistory;
 import net.dv8tion.jda.api.entities.User;
-
+import arc.util.Log;
 import arc.util.Strings;
 
 import static OverflowGateBot.OverflowGateBot.*;
@@ -91,7 +91,7 @@ public class ServerStatusHandler {
     }
 
     public void endDiscover() {
-        System.out.println("Done");
+        Log.info("Done");
     }
 
     public void addServerIP(Host host) {

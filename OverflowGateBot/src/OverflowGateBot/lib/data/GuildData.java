@@ -70,14 +70,12 @@ public class GuildData extends DataCache {
         if (bot == null)
             throw new IllegalStateException("Bot not in guild " + guildId);
 
-        System.out.println(showLevel);
         // Loop through guild members and modify their nickname
         guild.getMembers().forEach(member -> {
             if (member != null)
                 if (bot.canInteract(member)) {
                     String name = member.getEffectiveName();
                     String nickname = name.substring(name.indexOf("]") + 1, name.length());
-                    System.out.println(name);
                     member.modifyNickname(nickname).queue();
                 }
         });
@@ -116,7 +114,7 @@ public class GuildData extends DataCache {
 
     public Document toDocument() {
         return new Document().append("guildId", this.guildId).//
-                append("showLevel", this.showLevel).//
+                append("showLevel", this.showLevel.name()).//
                 append("adminRoleId", this.adminRoleId).//
                 append("channelId", this.channelId).//
                 append("levelRoleId", this.levelRoleId);
@@ -138,7 +136,6 @@ public class GuildData extends DataCache {
 
     public List<TextChannel> _getChannels(String channel_type) {
         List<String> channelIds = this.channelId.get(channel_type);
-        System.out.println(channelIds);
         if (channelIds == null)
             return null;
 

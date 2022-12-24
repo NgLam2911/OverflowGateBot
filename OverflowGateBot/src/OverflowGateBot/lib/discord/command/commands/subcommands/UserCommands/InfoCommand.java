@@ -40,6 +40,7 @@ public class InfoCommand extends BotSubcommandClass {
                 reply(event, "Lỗi không xác định", 10);
                 return;
             }
+
             replyEmbeds(event, getDisplayedUserInformation(member), 30);
 
         } else {
@@ -67,10 +68,13 @@ public class InfoCommand extends BotSubcommandClass {
         String roleString = "";
         for (Role role : roles)
             roleString += role.getName() + ", ";
-        roleString = roleString.substring(0, roleString.length() - 2);
-        builder.addField("Vai trò", roleString, false);
+        if (!roleString.isEmpty())
+            roleString = roleString.substring(0, roleString.length() - 2);
         // Display point
+        // TODO: Deadlock
         UserData user = userHandler.getUserAwait(member);
+
+        builder.addField("Vai trò", roleString, false);
         builder.addField("Thông tin cơ bản",
                 "Cấp: " + user.level + " (" + user.point + "\\" + user._getLevelCap() + ")" + //
                         "\nTổng kinh nghiệm: " + user._getTotalPoint(),

@@ -13,6 +13,7 @@ import com.mongodb.client.MongoCollection;
 
 import OverflowGateBot.lib.data.GuildData;
 import OverflowGateBot.main.DatabaseHandler.DATABASE;
+import arc.util.Log;
 import net.dv8tion.jda.api.entities.Guild;
 
 import static OverflowGateBot.OverflowGateBot.*;
@@ -23,7 +24,7 @@ public class GuildHandler {
 
     public GuildHandler() {
 
-        System.out.println("Guild handler up");
+        Log.info("Guild handler up");
     }
 
     public void update() {
@@ -51,7 +52,7 @@ public class GuildHandler {
     public GuildData addGuild(@Nonnull String guildId) {
         GuildData guildData = new GuildData(guildId);
         guildCache.put(guildId, guildData);
-        System.out.println("Guild <" + guildId + "> online");
+        Log.info("Guild <" + guildId + "> online");
         return guildData;
     }
 

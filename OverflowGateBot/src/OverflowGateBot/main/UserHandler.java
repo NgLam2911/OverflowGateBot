@@ -13,11 +13,12 @@ import org.bson.conversions.Bson;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 
+import OverflowGateBot.lib.BotException;
 import OverflowGateBot.lib.data.GuildData;
 import OverflowGateBot.lib.data.UserData;
 import OverflowGateBot.main.DatabaseHandler.DATABASE;
 import OverflowGateBot.main.DatabaseHandler.LOG_TYPE;
-
+import arc.util.Log;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Role;
@@ -31,7 +32,7 @@ public class UserHandler {
 
     public UserHandler() {
 
-        System.out.println("User handler up");
+        Log.info("User handler up");
     }
 
     public void update() {
@@ -58,10 +59,9 @@ public class UserHandler {
     public void onMessage(Message message) {
         Member member = message.getMember();
         if (member == null) {
-            System.out.println("Invalid message sender");
-            return;
+            throw new IllegalStateException(BotException.MEMBER_IS_NULL.name());
         }
-        UserData user = getUserInstant(member);
+        UserData user = getUserAwait(member);
         user.reset();
 
         user._addMoney(1);
@@ -109,25 +109,6 @@ public class UserHandler {
         return addUser(member.getGuild().getId(), member.getId());
     }
 
-    // Get user from cache and merge with data from database later
-    public UserData getUserInstant(@Nonnull Member member) {
-        String guildId = member.getGuild().getId();
-        String userId = member.getId();
-        // If user exist in cache then return, else query user from database
-        String hashId = guildId + userId;
-        if (userCache.containsKey(hashId))
-            return userCache.get(hashId);
-
-        UserData userData = addUser(member);
-        networkHandler.run("GET DATA " + hashId, 0, () -> {
-            UserData userFromDatabase = getUserFromDatabase(member.getGuild().getId(), member.getId());
-            userData._merge(userFromDatabase);
-            userCache.put(userData._getHashId(), userData);
-        });
-
-        return userData;
-    }
-
     // Waiting for data from database
     public UserData getUserAwait(@Nonnull Member member) {
         String guildId = member.getGuild().getId();
@@ -137,22 +118,11 @@ public class UserHandler {
         if (userCache.containsKey(hashId))
             return userCache.get(hashId);
 
-        UserData userFromCache = getUserFromCache(guildId, userId);
+        UserData userFromCache = addUser(guildId, userId);
         UserData userFromDatabase = getUserFromDatabase(guildId, userId);
         userFromDatabase._merge(userFromCache);
-        userCache.put(guildId + userId, userFromDatabase);
+        userCache.put(hashId, userFromDatabase);
         return userFromDatabase;
-    }
-
-    // Get user from cache/database
-    public UserData getUserFromCache(@Nonnull String guildId, @Nonnull String userId) {
-        // If user exist in cache then return, else query user from database
-        String hashId = guildId + userId;
-        if (userCache.containsKey(hashId))
-            return userCache.get(hashId);
-
-        // Create new user cache to store temporary user data
-        return addUser(guildId, userId);
     }
 
     public UserData getUserFromDatabase(@Nonnull String guildId, @Nonnull String userId) {

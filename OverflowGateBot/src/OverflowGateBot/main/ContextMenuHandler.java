@@ -17,6 +17,7 @@ import OverflowGateBot.lib.discord.context.BotContextMenuClass;
 import OverflowGateBot.lib.discord.context.contexts.DeleteMessageContextMenu;
 import OverflowGateBot.lib.discord.context.contexts.PostMapContextMenu;
 import OverflowGateBot.lib.discord.context.contexts.PostSchematicContextMenu;
+import arc.util.Log;
 
 import static OverflowGateBot.OverflowGateBot.*;
 
@@ -32,7 +33,7 @@ public class ContextMenuHandler extends ListenerAdapter {
         addCommand(new PostSchematicContextMenu());
         addCommand(new DeleteMessageContextMenu());
 
-        System.out.println("Context menu handler up");
+        Log.info("Context menu handler up");
     }
 
     public void addCommand(BotContextMenuClass command) {
@@ -92,7 +93,7 @@ public class ContextMenuHandler extends ListenerAdapter {
 
         if (commands.containsKey(command)) {
             commands.get(command).onCommand(event);
-            System.out.println(messagesHandler.getMessageSender(event.getTarget()) + ": used " + event.getName());
+            Log.info(messagesHandler.getMessageSender(event.getTarget()) + ": used " + event.getName());
         }
     }
 

@@ -121,7 +121,7 @@ public class UserData extends DataCache {
                 append("guildId", this.guildId).//
                 append("point", this.point).//
                 append("level", this.level).//
-                append("showLevel", this.showLevel);
+                append("showLevel", this.showLevel.name());
     }
 
     public String _getHashId() {

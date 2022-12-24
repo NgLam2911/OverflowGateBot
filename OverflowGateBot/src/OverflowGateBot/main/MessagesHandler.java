@@ -47,7 +47,7 @@ public class MessagesHandler extends ListenerAdapter {
     public MessagesHandler() {
 
         jda.addEventListener(this);
-        System.out.println("Message handler up");
+        Log.info("Message handler up");
     }
 
     public String getMessageSender(Message message) {
@@ -84,10 +84,11 @@ public class MessagesHandler extends ListenerAdapter {
     public void handleMessage(Message message) {
         // Log all message that has been sent
         List<Attachment> attachments = message.getAttachments();
+        Member member = message.getMember();
 
         // Schematic preview
         if ((isSchematicText(message) && attachments.isEmpty()) || isSchematicFile(attachments)) {
-            System.out.println(getMessageSender(message) + ": sent a schematic ");
+            Log.info(getMessageSender(message) + ": sent a schematic ");
             sendSchematicPreview(message, message.getChannel());
         }
 
@@ -108,16 +109,17 @@ public class MessagesHandler extends ListenerAdapter {
 
         // Update exp on message sent
         userHandler.onMessage(message);
-        DatabaseHandler.log(LOG_TYPE.MESSAGE, new Document().append(message.getId(),
-                getMessageSender(message) + ": " + message.getContentDisplay()));
+        DatabaseHandler.log(LOG_TYPE.MESSAGE, new Document().append("messageId", message.getId()).append("message",
+                getMessageSender(message) + ": " + message.getContentDisplay())
+                .append("userId", member == null ? null : member.getId()));
 
-        // Log member message/file/image url to terminal
+        // Log member message/file/image url to terminals
         if (!message.getContentRaw().isEmpty())
-            System.out.println(getMessageSender(message) + ": " + message.getContentDisplay());
+            Log.info(getMessageSender(message) + ": " + message.getContentDisplay());
 
         else if (!message.getAttachments().isEmpty())
             message.getAttachments().forEach(attachment -> {
-                System.out.println(getMessageSender(message) + ": " + attachment.getUrl());
+                Log.info(getMessageSender(message) + ": " + attachment.getUrl());
             });
     }
 
@@ -165,7 +167,7 @@ public class MessagesHandler extends ListenerAdapter {
 
         List<TextChannel> botLogChannel = guildData._getChannels(CHANNEL_TYPE.BOT_LOG.name());
         if (botLogChannel == null) {
-            System.out.println("Bot log channel for guild <" + guild.getName() + "> does not exists");
+            Log.info("Bot log channel for guild <" + guild.getName() + "> does not exists");
         } else
             botLogChannel.forEach(c -> c.sendMessage("```" + content + "```").queue());
     }

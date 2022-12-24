@@ -33,8 +33,8 @@ public class ShowLevelCommand extends BotSubcommandClass {
         Member member = event.getMember();
         if (member == null)
             return;
-            
-        UserData user = userHandler.getUserInstant(member);
+
+        UserData user = userHandler.getUserAwait(member);
         user.showLevel = BOOLEAN_STATE.valueOf(String.valueOf(showLevel));
         if (showLevel)
             reply(event, "Đã ẩn level", 10);

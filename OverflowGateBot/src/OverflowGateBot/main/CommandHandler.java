@@ -8,6 +8,7 @@ import OverflowGateBot.lib.discord.command.commands.BotCommand;
 import OverflowGateBot.lib.discord.command.commands.MindustryCommand;
 import OverflowGateBot.lib.discord.command.commands.SharCommand;
 import OverflowGateBot.lib.discord.command.commands.UserCommand;
+import arc.util.Log;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
@@ -40,7 +41,7 @@ public class CommandHandler extends ListenerAdapter {
 
         jda.addEventListener(this);
 
-        System.out.println("Command handler up");
+        Log.info("Command handler up");
     }
 
     public void addCommand(BotCommandClass command) {
@@ -93,7 +94,7 @@ public class CommandHandler extends ListenerAdapter {
             reply(event, "Đang cập nhật", 30);
             commands.get(command).onCommand(event);
             // Print to terminal
-            System.out.println(messagesHandler.getMessageSender(event) + ": used " + event.getName() + " "
+            Log.info(messagesHandler.getMessageSender(event) + ": used " + event.getName() + " "
                     + event.getSubcommandName() + " " + event.getOptions().toString());
             // Send to discord log channel
             if (!command.equals("shar")) {

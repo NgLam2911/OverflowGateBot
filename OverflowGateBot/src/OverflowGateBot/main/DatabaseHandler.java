@@ -22,6 +22,8 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoIterable;
 
+import arc.util.Log;
+
 import static OverflowGateBot.OverflowGateBot.*;
 
 public class DatabaseHandler {
@@ -57,7 +59,7 @@ public class DatabaseHandler {
     private static ConcurrentHashMap<String, MongoDatabase> database = new ConcurrentHashMap<String, MongoDatabase>();
 
     public DatabaseHandler() {
-        System.out.println("Database handler up");
+        Log.info("Database handler up");
     }
 
     public static MongoDatabase getDatabase(DATABASE name) {
@@ -89,7 +91,7 @@ public class DatabaseHandler {
     }
 
     public static void log(LOG_TYPE log, Document content) {
-        networkHandler.run("LOG" + log.name(), 0, () -> {
+        networkHandler.run("LOG " + log.name(), 0, () -> {
             MongoDatabase logDatabase = getDatabase(DATABASE.LOG);
             // Create collection if it doesn't exist
             if (!collectionExists(logDatabase, log.name()))

@@ -9,6 +9,7 @@ import OverflowGateBot.main.MessagesHandler;
 import OverflowGateBot.main.NetworkHandler;
 import OverflowGateBot.main.ServerStatusHandler;
 import OverflowGateBot.main.UserHandler;
+import arc.util.Log;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
@@ -62,10 +63,11 @@ public class OverflowGateBot {
             commandHandler = new CommandHandler();
             contextMenuHandler = new ContextMenuHandler();
             serverStatusHandler = new ServerStatusHandler();
+            // updateCommand();
 
             networkHandler.run("UPDATE", 0, UPDATE_PERIOD, () -> update());
 
-            System.out.println("Bot online");
+            Log.info("Bot online");
 
         } catch (Exception e) {
             throw new RuntimeException(e);
