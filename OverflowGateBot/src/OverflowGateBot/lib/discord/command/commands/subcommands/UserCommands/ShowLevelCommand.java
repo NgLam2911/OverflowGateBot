@@ -5,13 +5,14 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import OverflowGateBot.lib.data.UserData;
+import OverflowGateBot.lib.data.GuildData.BOOLEAN_STATE;
 import OverflowGateBot.lib.discord.command.BotSubcommandClass;
 
 import static OverflowGateBot.OverflowGateBot.userHandler;
 
-public class HideLevelCommand extends BotSubcommandClass {
-    public HideLevelCommand() {
-        super("hidelevel", "Ẩn/ tắt ẩn cấp độ của người dùng");
+public class ShowLevelCommand extends BotSubcommandClass {
+    public ShowLevelCommand() {
+        super("showlevel", "Ẩn/ tắt ẩn cấp độ của người dùng");
         this.addOption(OptionType.BOOLEAN, "hide", "Ẩn", true);
     }
 
@@ -23,18 +24,19 @@ public class HideLevelCommand extends BotSubcommandClass {
 
     @Override
     public void onCommand(SlashCommandInteractionEvent event) {
-        Boolean hideLevel;
+        Boolean showLevel;
         OptionMapping hideOption = event.getOption("hide");
         if (hideOption == null)
-            hideLevel = true;
+            showLevel = true;
         else
-            hideLevel = hideOption.getAsBoolean();
+            showLevel = hideOption.getAsBoolean();
         Member member = event.getMember();
         if (member == null)
             return;
-        UserData user = userHandler.getUserInstance(member);
-        user.hideLevel = hideLevel;
-        if (hideLevel)
+            
+        UserData user = userHandler.getUserInstant(member);
+        user.showLevel = BOOLEAN_STATE.valueOf(String.valueOf(showLevel));
+        if (showLevel)
             reply(event, "Đã ẩn level", 10);
         else
             reply(event, "Đã tắt ẩn level", 10);

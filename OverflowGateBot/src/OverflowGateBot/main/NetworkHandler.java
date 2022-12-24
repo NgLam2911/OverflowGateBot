@@ -57,7 +57,7 @@ public class NetworkHandler {
     }
 
     public void run(long delay, long period, Runnable r) {
-        new Timer().schedule(new TimerTask() {
+        new Timer(true).schedule(new TimerTask() {
             @Override
             public void run() {
                 r.run();
@@ -66,7 +66,7 @@ public class NetworkHandler {
     }
 
     public void run(long delay, Runnable r) {
-        new Timer().schedule(new TimerTask() {
+        new Timer(true).schedule(new TimerTask() {
             @Override
             public void run() {
                 r.run();

@@ -100,6 +100,7 @@ public class CommandHandler extends ListenerAdapter {
 
         if (commands.containsKey(command)) {
             // Call subcommand
+            reply(event, "Đang cập nhật", 30);
             commands.get(command).onCommand(event);
             // Print to terminal
             System.out.println(messagesHandler.getMessageSender(event) + ": used " + event.getName() + " "

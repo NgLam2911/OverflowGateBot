@@ -34,16 +34,7 @@ public class ServerStatusHandler {
     HashMap<String, String> serverStatusChannels = new HashMap<>();
 
     public ServerStatusHandler() {
-
         Net net = new Net(platform.getNet());
-
-        servers.put("sur.vndustry.xyz", "472975996589572099");
-        servers.put("168.119.146.55:26406", null);
-        servers.put("Fourgamingstudio.ddns.net", "664052500571226112");
-        servers.put("mindustry.myddns.me", "680370707347406878");
-        servers.put("mindustryvn.ddns.net:28583", "680370707347406878");
-        servers.put("parts-syracuse.at.playit.gg:56752", null);
-        servers.put("notes-immigration.at.playit.gg:23209", null);
 
         net.discoverServers(this::addServerIP, this::endDiscover);
 
@@ -92,7 +83,6 @@ public class ServerStatusHandler {
 
             servers.keySet().forEach(ip -> displayServerStatus(guild, channel, ip));
         }
-
 
     }
 

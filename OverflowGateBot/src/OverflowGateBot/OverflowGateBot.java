@@ -23,7 +23,7 @@ public class OverflowGateBot {
     public static final String SHAR_ID = "719322804549320725";
 
     public static final long UPDATE_PERIOD = 60 * 1000l;
-    public static final int GUILD_ALIVE_TIME = 30;
+    public static final int GUILD_ALIVE_TIME = 10;
     public static final int USER_ALIVE_TIME = 10;
     public static final int UPDATE_LIMIT = 10;
 
@@ -64,7 +64,6 @@ public class OverflowGateBot {
             serverStatusHandler = new ServerStatusHandler();
 
             networkHandler.run(0, UPDATE_PERIOD, () -> update());
-            // updateCommand();
 
             System.out.println("Bot online");
 

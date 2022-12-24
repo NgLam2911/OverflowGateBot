@@ -3,6 +3,7 @@ package OverflowGateBot.lib.discord.command.commands.subcommands.UserCommands;
 import OverflowGateBot.lib.data.UserData;
 import OverflowGateBot.lib.discord.command.BotSubcommandClass;
 import OverflowGateBot.main.DatabaseHandler;
+import OverflowGateBot.main.DatabaseHandler.DATABASE;
 import OverflowGateBot.main.DatabaseHandler.LOG_TYPE;
 
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -39,7 +40,7 @@ public class LeaderboardCommand extends BotSubcommandClass {
     }
 
     public LeaderboardCommand() {
-        super("leaderboard", "Hiện thị bản xếp hạng của người dùng");
+        super("leaderboard", "Hiện thị bản xếp hạng của người dùng", true);
         this.addOptions(new OptionData(OptionType.STRING, "orderby", "Tên bảng xếp hạng", true, true)).//
                 addOptions(new OptionData(OptionType.STRING, "leaderboard", "Tên bảng xếp hạng", true, true));
     }
@@ -53,7 +54,7 @@ public class LeaderboardCommand extends BotSubcommandClass {
     public void onCommand(SlashCommandInteractionEvent event) {
         Member member = event.getMember();
         if (member == null)
-            throw new IllegalStateException("User left the guild");
+            throw new IllegalStateException("User not in guild");
         OptionMapping orderOption = event.getOption("orderby");
         OptionMapping leaderboardOption = event.getOption("leaderboard");
         ORDER order;
@@ -73,17 +74,18 @@ public class LeaderboardCommand extends BotSubcommandClass {
         List<UserData> users = new ArrayList<UserData>();
 
         EmbedBuilder builder = new EmbedBuilder();
-        builder.setTitle("BẢNG XẾP HẠNG");
+        builder.setTitle("BẢNG XẾP HẠNG (" + leaderboard + ")");
 
         switch (leaderboard) {
             case ALL:
                 jda.getGuilds().forEach(guild -> {
                     String guildId = guild.getId();
-                    if (!DatabaseHandler.collectionExists(DatabaseHandler.userDatabase, guildId)) {
-                        DatabaseHandler.userDatabase.createCollection(guildId);
+                    if (!DatabaseHandler.collectionExists(DATABASE.USER, guildId)) {
+                        DatabaseHandler.getDatabase(DATABASE.USER).createCollection(guildId);
                         DatabaseHandler.log(LOG_TYPE.DATABASE, "Create new user collection with guild id " + guildId);
                     }
-                    MongoCollection<UserData> collection = DatabaseHandler.userDatabase.getCollection(guildId,
+                    MongoCollection<UserData> collection = DatabaseHandler.getDatabase(DATABASE.USER).getCollection(
+                            guildId,
                             UserData.class);
 
                     FindIterable<UserData> data = collection.find();
@@ -96,11 +98,11 @@ public class LeaderboardCommand extends BotSubcommandClass {
                 if (guild == null)
                     throw new IllegalStateException("Guild not found");
                 String guildId = guild.getId();
-                if (!DatabaseHandler.collectionExists(DatabaseHandler.userDatabase, guildId)) {
-                    DatabaseHandler.userDatabase.createCollection(guildId);
+                if (!DatabaseHandler.collectionExists(DATABASE.USER, guildId)) {
+                    DatabaseHandler.getDatabase(DATABASE.USER).createCollection(guildId);
                     DatabaseHandler.log(LOG_TYPE.DATABASE, "Create new user collection with guild id " + guildId);
                 }
-                MongoCollection<UserData> collection = DatabaseHandler.userDatabase.getCollection(guildId,
+                MongoCollection<UserData> collection = DatabaseHandler.getDatabase(DATABASE.USER).getCollection(guildId,
                         UserData.class);
 
                 FindIterable<UserData> data = collection.find();
@@ -149,7 +151,7 @@ public class LeaderboardCommand extends BotSubcommandClass {
         }
 
         UserData user = userHandler.getUserAwait(member);
-        int position = users.indexOf(user);
+        int position = users.indexOf(user) + 1;
 
         // Display sender position if its not contained in the leaderboard
         int length = users.size() > 10 ? 10 : users.size();
@@ -165,7 +167,7 @@ public class LeaderboardCommand extends BotSubcommandClass {
 
     public String getUserInformation(UserData user, ORDER order) {
         String data = "";
-        data += user._getName() + ":\t";
+        data += user._getName() + ":               ";
 
         switch (order) {
             case LEVEL:
@@ -177,6 +179,7 @@ public class LeaderboardCommand extends BotSubcommandClass {
             case PVP_POINT:
                 data += user.pvpPoint + " điểm";
         }
+        data += "\nMáy chủ:           " + user._getGuild().getName();
         return data;
     }
 

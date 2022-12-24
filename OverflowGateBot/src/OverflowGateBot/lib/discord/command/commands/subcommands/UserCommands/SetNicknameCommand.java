@@ -9,11 +9,12 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 
 import static OverflowGateBot.OverflowGateBot.*;
 
+import OverflowGateBot.lib.data.UserData;
 import OverflowGateBot.lib.discord.command.BotSubcommandClass;
 
 public class SetNicknameCommand extends BotSubcommandClass {
     public SetNicknameCommand() {
-        super("setnickname", "Thay đổi tên của người dùng");
+        super("setnickname", "Thay đổi tên của người dùng", true);
         this.addOption(OptionType.STRING, "nickname", "Biệt danh muốn đặt", true).//
                 addOption(OptionType.USER, "user", "Tên người muốn đổi(Admin only");
     }
@@ -34,6 +35,11 @@ public class SetNicknameCommand extends BotSubcommandClass {
         OptionMapping userOption = event.getOption("user");
         OptionMapping nicknameOption = event.getOption("nickname");
 
+        if (target == null)
+            throw new IllegalStateException("User not in guild");
+
+        UserData targetData = userHandler.getUserAwait(target);
+
         if (bot == null)
             throw new IllegalStateException("Bot not in guild");
 
@@ -42,23 +48,22 @@ public class SetNicknameCommand extends BotSubcommandClass {
         String nickname = nicknameOption.getAsString();
 
         if (userOption == null) {
-            if (target == null)
-                throw new IllegalStateException("Invalid option");
-            else {
-                if (!bot.canInteract(target))
-                    return;
-                target.modifyNickname(nickname).queue();
-                reply(event, "Đổi biệt danh thành " + nickname, 10);
-            }
+            targetData.setName(nickname);
+            targetData._displayLevelName();
+            reply(event, "Đổi biệt danh thành " + nickname, 10);
+
         } else {
             if (userHandler.isAdmin(event.getMember())) {
                 User user = userOption.getAsUser();
                 target = guild.getMember(user);
                 if (target == null)
-                    throw new IllegalStateException("Bot not in guild");
-                if (!bot.canInteract(target))
-                    return;
-                target.modifyNickname(nickname);
+                    throw new IllegalStateException("User not in guild");
+                targetData = userHandler.getUserAwait(target);
+                if (targetData == null)
+                    throw new IllegalStateException("User data not found");
+                targetData.setName(nickname);
+                targetData._displayLevelName();
+
                 reply(event, "Đổi biệt danh thành " + nickname, 10);
             } else
                 reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);

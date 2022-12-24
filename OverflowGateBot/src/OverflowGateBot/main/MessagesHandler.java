@@ -127,15 +127,7 @@ public class MessagesHandler extends ListenerAdapter {
         Member bot = event.getGuild().getMember(jda.getSelfUser());
         if (bot == null)
             throw new IllegalStateException("Bot not in guild");
-
-        if (bot.canInteract(target)) {
-            String name = target.getEffectiveName();
-            String nickname = name.substring(name.indexOf("]") + 1, 0);
-            if (userData.hideLevel)
-                target.modifyNickname(nickname).queue();
-            else
-                target.modifyNickname("[Level" + userData.level + "] " + nickname).queue();
-        }
+        userData._displayLevelName();
 
     }
 

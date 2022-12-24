@@ -10,9 +10,10 @@ import org.bson.conversions.Bson;
 
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 
 import OverflowGateBot.lib.data.GuildData;
-
+import OverflowGateBot.main.DatabaseHandler.DATABASE;
 import net.dv8tion.jda.api.entities.Guild;
 
 import static OverflowGateBot.OverflowGateBot.*;
@@ -20,6 +21,7 @@ import static OverflowGateBot.OverflowGateBot.*;
 public class GuildHandler {
 
     public HashMap<String, GuildData> guildCache = new HashMap<>();
+    private MongoDatabase guildDatabase = DatabaseHandler.getDatabase(DATABASE.GUILD);
 
     public GuildHandler() {
 
@@ -51,6 +53,7 @@ public class GuildHandler {
     public GuildData addGuild(@Nonnull String guildId) {
         GuildData guildData = new GuildData(guildId);
         guildCache.put(guildId, guildData);
+        System.out.println("Guild <" + guildId + "> online");
         return guildData;
     }
 
@@ -61,13 +64,15 @@ public class GuildHandler {
             return guildCache.get(guildId);
 
         // Create new guild cache to store temporary guild data
-
-        if (!DatabaseHandler.collectionExists(DatabaseHandler.guildDatabase, GUILD_COLLECTION)) {
-            DatabaseHandler.guildDatabase.createCollection(GUILD_COLLECTION);
-            return new GuildData(guildId);
+        if (!DatabaseHandler.collectionExists(guildDatabase, GUILD_COLLECTION)) {
+            guildDatabase.createCollection(GUILD_COLLECTION);
+            return addGuild(guildId);
 
         }
-        MongoCollection<GuildData> collection = DatabaseHandler.guildDatabase.getCollection(GUILD_COLLECTION,
+
+        addGuild(guildId);
+
+        MongoCollection<GuildData> collection = guildDatabase.getCollection(GUILD_COLLECTION,
                 GuildData.class);
 
         // Get guild from database
@@ -75,10 +80,10 @@ public class GuildHandler {
         FindIterable<GuildData> data = collection.find(filter).limit(1);
         GuildData first = data.first();
         if (first != null) {
-            GuildData guildCacheData = guildCache.put(guildId, first);
-            return guildCacheData;
+            guildCache.put(guildId, first);
+            return first;
         } else {
-            return addGuild(guildId);
+            return getGuild(guildId);
         }
     }
 }

@@ -4,6 +4,8 @@ import static com.mongodb.MongoClientSettings.getDefaultCodecRegistry;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.bson.BsonDateTime;
 import org.bson.Document;
 import org.bson.codecs.configuration.CodecProvider;
@@ -19,48 +21,50 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoIterable;
-import com.mongodb.client.model.CreateCollectionOptions;
-import com.mongodb.client.model.TimeSeriesOptions;
 
 import static OverflowGateBot.OverflowGateBot.*;
 
 public class DatabaseHandler {
 
-    private static MongoClient mongoClient;
-
-    public static MongoDatabase userDatabase;
-    public static MongoDatabase guildDatabase;
-    public static MongoDatabase logDatabase;
-
     public enum DATABASE {
-        USER, GUILD, LOG
+        USER,
+        GUILD,
+        LOG,
+        DAILY
     }
 
     public enum LOG_TYPE {
-        MESSAGE, DATABASE, USER
+        MESSAGE,
+        DATABASE,
+        USER
     }
 
+    private static ConnectionString connectionString = new ConnectionString(DATABASE_URL);
+    private static MongoClientSettings settings = MongoClientSettings.builder()
+            .applyConnectionString(connectionString)
+            .serverApi(ServerApi.builder()
+                    .version(ServerApiVersion.V1)
+                    .build())
+            .build();
+
+    private static MongoClient mongoClient = MongoClients.create(settings);
+
+    private static CodecProvider pojoCodecProvider = PojoCodecProvider.builder().automatic(true).build();
+    private static CodecRegistry pojoCodecRegistry = fromRegistries(getDefaultCodecRegistry(),
+            fromProviders(pojoCodecProvider));
+
+    private static ConcurrentHashMap<String, MongoDatabase> database = new ConcurrentHashMap<String, MongoDatabase>();
+
     public DatabaseHandler() {
-
-        ConnectionString connectionString = new ConnectionString(DATABASE_URL);
-        MongoClientSettings settings = MongoClientSettings.builder()
-                .applyConnectionString(connectionString)
-                .serverApi(ServerApi.builder()
-                        .version(ServerApiVersion.V1)
-                        .build())
-                .build();
-
-        mongoClient = MongoClients.create(settings);
-
-        CodecProvider pojoCodecProvider = PojoCodecProvider.builder().automatic(true).build();
-        CodecRegistry pojoCodecRegistry = fromRegistries(getDefaultCodecRegistry(),
-                fromProviders(pojoCodecProvider));
-
-        guildDatabase = mongoClient.getDatabase(DATABASE.GUILD.name()).withCodecRegistry(pojoCodecRegistry);
-        userDatabase = mongoClient.getDatabase(DATABASE.USER.name()).withCodecRegistry(pojoCodecRegistry);
-        logDatabase = mongoClient.getDatabase(DATABASE.LOG.name()).withCodecRegistry(pojoCodecRegistry);
-
         System.out.println("Database handler up");
+    }
+
+    public static MongoDatabase getDatabase(DATABASE name) {
+        if (database.containsKey(name.name()))
+            return database.get(name.name());
+        MongoDatabase db = mongoClient.getDatabase(name.name()).withCodecRegistry(pojoCodecRegistry);
+        database.put(name.name(), db);
+        return db;
     }
 
     // Check if collection exists
@@ -74,14 +78,16 @@ public class DatabaseHandler {
         return false;
     }
 
-    // TODO: Threading support
+    public static boolean collectionExists(DATABASE databaseName, final String collectionName) {
+        return collectionExists(getDatabase(databaseName), collectionName);
+    }
 
     public static void log(LOG_TYPE log, String content) {
         networkHandler.run(0, () -> {
+            MongoDatabase logDatabase = getDatabase(DATABASE.LOG);
             // Create collection if it doesn't exist
             if (!collectionExists(logDatabase, log.name()))
-                logDatabase.createCollection(log.name(),
-                        new CreateCollectionOptions().timeSeriesOptions(new TimeSeriesOptions(TIME_INSERT_STRING)));
+                logDatabase.createCollection(log.name());
 
             MongoCollection<Document> collection = logDatabase.getCollection(log.name(), Document.class);
             // Insert log message

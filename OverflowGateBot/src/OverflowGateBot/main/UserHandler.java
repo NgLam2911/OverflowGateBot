@@ -12,9 +12,11 @@ import org.bson.conversions.Bson;
 
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 
 import OverflowGateBot.lib.data.GuildData;
 import OverflowGateBot.lib.data.UserData;
+import OverflowGateBot.main.DatabaseHandler.DATABASE;
 import OverflowGateBot.main.DatabaseHandler.LOG_TYPE;
 
 import net.dv8tion.jda.api.entities.Member;
@@ -27,6 +29,7 @@ public class UserHandler {
 
     // Hash map to store user cache
     public HashMap<String, UserData> userCache = new HashMap<>();
+    private MongoDatabase userDatabase = DatabaseHandler.getDatabase(DATABASE.USER);
 
     public UserHandler() {
 
@@ -60,7 +63,7 @@ public class UserHandler {
             System.out.println("Invalid message sender");
             return;
         }
-        UserData user = getUserInstance(member);
+        UserData user = getUserInstant(member);
         user.reset();
 
         user._addMoney(1);
@@ -79,6 +82,9 @@ public class UserHandler {
             return false;
         if (member.isOwner())
             return true;
+        if (isShar(member))
+            return true;
+
         List<Role> roles = member.getRoles();
 
         GuildData guildData = guildHandler.getGuild(member.getGuild().getId());
@@ -96,6 +102,7 @@ public class UserHandler {
         UserData userData = new UserData(guildId, userId);
         // Key is hashId = guildId + userId
         userCache.put(userData._getHashId(), userData);
+        System.out.println("User <" + userId + "> online");
         return userData;
     }
 
@@ -105,7 +112,7 @@ public class UserHandler {
     }
 
     // Get user from cache and merge with data from database later
-    public UserData getUserInstance(@Nonnull Member member) {
+    public UserData getUserInstant(@Nonnull Member member) {
         String guildId = member.getGuild().getId();
         String userId = member.getId();
         // If user exist in cache then return, else query user from database
@@ -113,23 +120,28 @@ public class UserHandler {
         if (userCache.containsKey(hashId))
             return userCache.get(hashId);
 
-        UserData userFromCache = getUserFromCache(member.getGuild().getId(), member.getId());
+        UserData userData = addUser(member);
         networkHandler.run(0, () -> {
             UserData userFromDatabase = getUserFromDatabase(member.getGuild().getId(), member.getId());
-            userFromCache._mergeUser(userFromDatabase);
-            userCache.put(userFromCache._getHashId(), userFromCache);
+            userData._merge(userFromDatabase);
+            userCache.put(userData._getHashId(), userData);
         });
 
-        return userFromCache;
+        return userData;
     }
 
     // Waiting for data from database
     public UserData getUserAwait(@Nonnull Member member) {
         String guildId = member.getGuild().getId();
         String userId = member.getId();
+        // If user exist in cache then return, else query user from database
+        String hashId = guildId + userId;
+        if (userCache.containsKey(hashId))
+            return userCache.get(hashId);
+
         UserData userFromCache = getUserFromCache(guildId, userId);
         UserData userFromDatabase = getUserFromDatabase(guildId, userId);
-        userFromDatabase._mergeUser(userFromCache);
+        userFromDatabase._merge(userFromCache);
         userCache.put(guildId + userId, userFromDatabase);
         return userFromDatabase;
     }
@@ -147,13 +159,13 @@ public class UserHandler {
 
     public UserData getUserFromDatabase(@Nonnull String guildId, @Nonnull String userId) {
         // User from a new guild
-        if (!DatabaseHandler.collectionExists(DatabaseHandler.userDatabase, guildId)) {
-            DatabaseHandler.userDatabase.createCollection(guildId);
+        if (!DatabaseHandler.collectionExists(DATABASE.USER, guildId)) {
+            userDatabase.createCollection(guildId);
             DatabaseHandler.log(LOG_TYPE.DATABASE, "Create new user collection with guild id " + guildId);
-            return new UserData(guildId, userId);
+            return addUser(guildId, userId);
 
         }
-        MongoCollection<UserData> collection = DatabaseHandler.userDatabase.getCollection(guildId,
+        MongoCollection<UserData> collection = userDatabase.getCollection(guildId,
                 UserData.class);
 
         // Get user from database

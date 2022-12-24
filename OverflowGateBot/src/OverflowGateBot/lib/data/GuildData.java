@@ -13,6 +13,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.ReplaceOptions;
 
 import OverflowGateBot.main.DatabaseHandler;
+import OverflowGateBot.main.DatabaseHandler.DATABASE;
 import OverflowGateBot.main.DatabaseHandler.LOG_TYPE;
 
 import net.dv8tion.jda.api.entities.Guild;
@@ -30,10 +31,16 @@ public class GuildData extends DataCache {
         BOT_LOG
     }
 
+    public enum BOOLEAN_STATE {
+        TRUE,
+        FALSE,
+        UNSET
+    }
+
     @Nonnull
     public String guildId = new String();
 
-    public boolean showLevel = false;
+    public BOOLEAN_STATE showLevel = BOOLEAN_STATE.UNSET;
 
     public List<String> adminRoleId = new ArrayList<String>();
     // Schematic channel id, map channel id
@@ -54,9 +61,7 @@ public class GuildData extends DataCache {
         _getGuild();
     }
 
-    public boolean setShowLevel(boolean showLevel) {
-        if (this.showLevel == showLevel)
-            return false;
+    public boolean setShowLevel(BOOLEAN_STATE showLevel) {
 
         if (_getGuild() == null)
             throw new IllegalStateException("Guild id is invalid");
@@ -65,12 +70,14 @@ public class GuildData extends DataCache {
         if (bot == null)
             throw new IllegalStateException("Bot not in guild " + guildId);
 
+        System.out.println(showLevel);
         // Loop through guild members and modify their nickname
         guild.getMembers().forEach(member -> {
             if (member != null)
                 if (bot.canInteract(member)) {
                     String name = member.getEffectiveName();
-                    String nickname = name.substring(name.indexOf("]") + 1, 0);
+                    String nickname = name.substring(name.indexOf("]") + 1, name.length());
+                    System.out.println(name);
                     member.modifyNickname(nickname).queue();
                 }
         });
@@ -79,7 +86,7 @@ public class GuildData extends DataCache {
         return true;
     }
 
-    public boolean getShowLevel() {
+    public BOOLEAN_STATE getShowLevel() {
         return this.showLevel;
     }
 
@@ -105,6 +112,14 @@ public class GuildData extends DataCache {
 
     public ConcurrentHashMap<String, Integer> getLevelRoleId() {
         return this.levelRoleId;
+    }
+
+    public Document toDocument() {
+        return new Document().append("guildId", this.guildId).//
+                append("showLevel", this.showLevel).//
+                append("adminRoleId", this.adminRoleId).//
+                append("channelId", this.channelId).//
+                append("levelRoleId", this.levelRoleId);
     }
 
     public Guild _getGuild() {
@@ -139,7 +154,6 @@ public class GuildData extends DataCache {
     }
 
     public boolean _addChannel(String channel_type, String channel_id) {
-        System.out.println("Command executed at addChannel");
         if (channelId.get(channel_type) == null)
             channelId.put(channel_type, new ArrayList<String>());
 
@@ -175,17 +189,20 @@ public class GuildData extends DataCache {
     @Override
     public void update() {
         // Create collection if it's not exist
-        if (!DatabaseHandler.collectionExists(DatabaseHandler.guildDatabase, GUILD_COLLECTION)) {
-            DatabaseHandler.guildDatabase.createCollection(GUILD_COLLECTION);
+        if (!DatabaseHandler.collectionExists(DATABASE.GUILD, GUILD_COLLECTION)) {
+            DatabaseHandler.getDatabase(DATABASE.GUILD).createCollection(GUILD_COLLECTION);
             DatabaseHandler.log(LOG_TYPE.DATABASE, "Create new guild collection with id: " + this.guildId);
         }
-        MongoCollection<GuildData> collection = DatabaseHandler.guildDatabase.getCollection(GUILD_COLLECTION,
+        MongoCollection<GuildData> collection = DatabaseHandler.getDatabase(DATABASE.GUILD).getCollection(
+                GUILD_COLLECTION,
                 GuildData.class);
-
+        if (this.showLevel == BOOLEAN_STATE.UNSET)
+            this.showLevel = BOOLEAN_STATE.FALSE;
+            
         // Filter for guild id, guild id is unique for each collection
         Bson filter = new Document().append("guildId", this.guildId);
         collection.replaceOne(filter, this, new ReplaceOptions().upsert(true));
-        DatabaseHandler.log(LOG_TYPE.DATABASE, "Update guild id: " + guildId);
+        DatabaseHandler.log(LOG_TYPE.DATABASE, "Update guild: " + this.toDocument());
     }
 
 }

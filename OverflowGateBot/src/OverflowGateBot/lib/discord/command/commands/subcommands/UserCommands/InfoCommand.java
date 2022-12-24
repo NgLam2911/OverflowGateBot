@@ -20,7 +20,7 @@ import java.util.List;
 
 public class InfoCommand extends BotSubcommandClass {
     public InfoCommand() {
-        super("info", "Hiển thị thông tin người dùng");
+        super("info", "Hiển thị thông tin người dùng", true);
         this.addOption(OptionType.USER, "user", "Tên thành viên", false);
     }
 

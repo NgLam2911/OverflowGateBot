@@ -22,7 +22,7 @@ public class TransferCommand extends BotSubcommandClass {
     }
 
     public TransferCommand() {
-        super("transfer", "Chuyển chỉ số cho người khác");
+        super("transfer", "Chuyển chỉ số cho người khác", true);
         this.addOption(OptionType.STRING, "type", "Loại chỉ số muốn chuyển", true, true).//
                 addOption(OptionType.USER, "user", "Người muốn chuyển", true).//
                 addOption(OptionType.INTEGER, "point", "Số điểm muốn chuyển", true);

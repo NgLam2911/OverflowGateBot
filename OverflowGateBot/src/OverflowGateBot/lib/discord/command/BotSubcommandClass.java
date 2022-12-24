@@ -13,12 +13,20 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 
+import static OverflowGateBot.OverflowGateBot.*;
+
 public class BotSubcommandClass extends SubcommandData {
 
     private final int MAX_OPTIONS = 10;
+    private boolean threaded = false;
 
     public BotSubcommandClass(@Nonnull String name, @Nonnull String description) {
         super(name, description);
+    }
+
+    public BotSubcommandClass(@Nonnull String name, @Nonnull String description, boolean threaded) {
+        super(name, description);
+        this.threaded = threaded;
     }
 
     // Override
@@ -28,7 +36,10 @@ public class BotSubcommandClass extends SubcommandData {
 
     // Override
     public void onCommand(SlashCommandInteractionEvent event) {
-        runCommand(event);
+        if (this.threaded)
+            networkHandler.run(0, () -> runCommand(event));
+        else
+            runCommand(event);
     }
 
     // Override

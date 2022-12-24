@@ -8,7 +8,9 @@ import org.bson.conversions.Bson;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.ReplaceOptions;
 
+import OverflowGateBot.lib.data.GuildData.BOOLEAN_STATE;
 import OverflowGateBot.main.DatabaseHandler;
+import OverflowGateBot.main.DatabaseHandler.DATABASE;
 import OverflowGateBot.main.DatabaseHandler.LOG_TYPE;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -24,11 +26,12 @@ public class UserData extends DataCache {
     public String userId;
     @Nonnull
     public String guildId;
+    public String name;
     public Integer point = 0;
     public Integer level = 0;
     public Integer money = 0;
     public Integer pvpPoint = 0;
-    public Boolean hideLevel = false;
+    public BOOLEAN_STATE showLevel = BOOLEAN_STATE.UNSET;
 
     // For codec
     public UserData() {
@@ -43,13 +46,13 @@ public class UserData extends DataCache {
         this.guildId = guildId;
     }
 
-    public UserData modify(@Nonnull String guildId, @Nonnull String userId, Integer point, Integer level,
-            Integer money, Integer pvpPoint, Boolean hideLevel) {
+    public UserData modify(@Nonnull String guildId, @Nonnull String userId, String name, Integer point, Integer level,
+            Integer money, Integer pvpPoint) {
         this.userId = userId;
         this.guildId = guildId;
+        this.name = name;
         this.point = point;
         this.level = level;
-        this.hideLevel = hideLevel;
         this.money = money;
         this.pvpPoint = pvpPoint;
         return this;
@@ -71,6 +74,15 @@ public class UserData extends DataCache {
         return this.guildId;
     }
 
+    public void setName(String name) {
+        this.name = name;
+        update();
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
     public void setPoint(int point) {
         this.point = point;
     }
@@ -87,12 +99,12 @@ public class UserData extends DataCache {
         return this.level;
     }
 
-    public void setHideLevel(boolean hideLevel) {
-        this.hideLevel = hideLevel;
+    public void setshowLevel(BOOLEAN_STATE showLevel) {
+        this.showLevel = showLevel;
     }
 
-    public boolean getHideLevel() {
-        return this.hideLevel;
+    public BOOLEAN_STATE getshowLevel() {
+        return this.showLevel;
     }
 
     @Override
@@ -101,7 +113,7 @@ public class UserData extends DataCache {
                 + "guildId:" + this.guildId + "\n"
                 + "point:" + this.point + "\n"
                 + "level:" + this.level + "\n"
-                + "hideLevel:" + this.hideLevel + "\n";
+                + "showLevel:" + this.showLevel + "\n";
     }
 
     public Document toDocument() {
@@ -109,7 +121,7 @@ public class UserData extends DataCache {
                 append("guildId", this.guildId).//
                 append("point", this.point).//
                 append("level", this.level).//
-                append("hideLevel", this.hideLevel);
+                append("showLevel", this.showLevel);
     }
 
     public String _getHashId() {
@@ -124,7 +136,7 @@ public class UserData extends DataCache {
         return ((level - 1) * level * (2 * (level - 1) + 1) / 6) + point;
     }
 
-    public Member _getMember() {
+    public @Nonnull Member _getMember() {
         Guild guild = _getGuild();
         Member member = guild.getMemberById(userId);
         if (member == null)
@@ -144,6 +156,22 @@ public class UserData extends DataCache {
         return _getMember().getEffectiveName();
     }
 
+    public void _displayLevelName() {
+        Member bot = _getGuild().getMember(jda.getSelfUser());
+        if (bot == null)
+            throw new IllegalStateException("Bot not in guild " + guildId);
+
+        Member member = _getMember();
+        // Loop through guild members and modify their nickname
+        if (bot.canInteract(member)) {
+
+            String nickname = this.name;
+            if (showLevel == BOOLEAN_STATE.FALSE)
+                nickname = "[Lv" + this.level + "] " + nickname;
+            member.modifyNickname(nickname).queue();
+        }
+    }
+
     // Add point for user
     public boolean _addPoint(int p) {
         boolean levelUp = false;
@@ -155,22 +183,25 @@ public class UserData extends DataCache {
             p -= extra;
             level += 1;
             levelUp = true;
+            _displayLevelName();
+            _checkLevelRole();
         }
         point += p;
 
         update(1);
-        _checkLevelRole();
         return levelUp;
     }
 
-    public void _addMoney(int m) {
+    public int _addMoney(int m) {
         this.money += m;
         update(1);
+        return m;
     }
 
-    public void _addPVPPoint(int m) {
+    public int _addPVPPoint(int m) {
         this.pvpPoint += m;
         update();
+        return m;
     }
 
     // Add role to member when level is satisfied
@@ -196,11 +227,14 @@ public class UserData extends DataCache {
         }
     }
 
-    public UserData _mergeUser(UserData data) {
+    public UserData _merge(UserData data) {
         if (data == null)
             return this;
-        modify(guildId, userId, point, level, money + data.money, pvpPoint + data.pvpPoint, hideLevel)
+        modify(guildId, userId, name, point, level, money + data.money, pvpPoint + data.pvpPoint)
                 ._addPoint(data._getTotalPoint());
+        if (this.showLevel == BOOLEAN_STATE.UNSET)
+            this.showLevel = data.showLevel;
+
         return this;
     }
 
@@ -208,15 +242,18 @@ public class UserData extends DataCache {
     @Override
     public void update() {
         // Create collection if it's not exist
-        if (!DatabaseHandler.collectionExists(DatabaseHandler.userDatabase, this.guildId))
-            DatabaseHandler.userDatabase.createCollection(this.guildId);
+        if (!DatabaseHandler.collectionExists(DATABASE.USER, this.guildId))
+            DatabaseHandler.getDatabase(DATABASE.USER).createCollection(this.guildId);
 
-        MongoCollection<UserData> collection = DatabaseHandler.userDatabase.getCollection(this.guildId,
+        MongoCollection<UserData> collection = DatabaseHandler.getDatabase(DATABASE.USER).getCollection(this.guildId,
                 UserData.class);
+
+        if (this.showLevel == BOOLEAN_STATE.UNSET)
+            this.showLevel = BOOLEAN_STATE.FALSE;
 
         // Filter for user id, user id is unique for each collection
         Bson filter = new Document().append("userId", this.userId);
         collection.replaceOne(filter, this, new ReplaceOptions().upsert(true));
-        DatabaseHandler.log(LOG_TYPE.DATABASE, "Update user id:" + userId + " | guild id:" + guildId);
+        DatabaseHandler.log(LOG_TYPE.DATABASE, "Update user : " + this.toDocument());
     }
 }
