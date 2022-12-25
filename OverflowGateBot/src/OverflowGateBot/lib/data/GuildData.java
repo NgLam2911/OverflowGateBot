@@ -15,7 +15,7 @@ import com.mongodb.client.model.ReplaceOptions;
 import OverflowGateBot.main.DatabaseHandler;
 import OverflowGateBot.main.DatabaseHandler.DATABASE;
 import OverflowGateBot.main.DatabaseHandler.LOG_TYPE;
-
+import arc.util.Log;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -40,7 +40,7 @@ public class GuildData extends DataCache {
     @Nonnull
     public String guildId = new String();
 
-    public BOOLEAN_STATE showLevel = BOOLEAN_STATE.UNSET;
+    public String showLevel = BOOLEAN_STATE.UNSET.name();
 
     public List<String> adminRoleId = new ArrayList<String>();
     // Schematic channel id, map channel id
@@ -61,30 +61,15 @@ public class GuildData extends DataCache {
         _getGuild();
     }
 
-    public boolean setShowLevel(BOOLEAN_STATE showLevel) {
-
-        if (_getGuild() == null)
-            throw new IllegalStateException("Guild id is invalid");
-
-        Member bot = guild.getMember(jda.getSelfUser());
-        if (bot == null)
-            throw new IllegalStateException("Bot not in guild " + guildId);
-
-        // Loop through guild members and modify their nickname
-        guild.getMembers().forEach(member -> {
-            if (member != null)
-                if (bot.canInteract(member)) {
-                    String name = member.getEffectiveName();
-                    String nickname = name.substring(name.indexOf("]") + 1, name.length());
-                    member.modifyNickname(nickname).queue();
-                }
-        });
-        this.showLevel = showLevel;
+    protected void finalize() {
         update();
-        return true;
     }
 
-    public BOOLEAN_STATE getShowLevel() {
+    public void setShowLevel(String showLevel) {
+        this.showLevel = showLevel;
+    }
+
+    public String getShowLevel() {
         return this.showLevel;
     }
 
@@ -114,17 +99,42 @@ public class GuildData extends DataCache {
 
     public Document toDocument() {
         return new Document().append("guildId", this.guildId).//
-                append("showLevel", this.showLevel.name()).//
+                append("showLevel", this.showLevel).//
                 append("adminRoleId", this.adminRoleId).//
                 append("channelId", this.channelId).//
                 append("levelRoleId", this.levelRoleId);
     }
 
-    public Guild _getGuild() {
+    public @Nonnull Guild _getGuild() {
         Guild guild = jda.getGuildById(this.guildId);
         if (guild == null)
             throw new IllegalStateException("Guild not found with id <" + guildId + ">");
+        this.guild = guild;
         return guild;
+    }
+
+    public boolean _displayLevel(String showLevel) {
+
+        Member bot = _getGuild().getMember(jda.getSelfUser());
+        if (bot == null)
+            throw new IllegalStateException("Bot not in guild " + guildId);
+
+        // Loop through guild members and modify their nickname
+        guild.getMembers().forEach(member -> {
+            if (member != null)
+                if (bot.canInteract(member)) {
+
+                    Log.info("Changing name " + member.getEffectiveName());
+                    UserData data = userHandler.getUserNoCache(member);
+                    if (data != null) {
+                        data.setName(member.getUser().getName());
+                        data._displayLevelName();
+                    }
+                }
+        });
+        this.showLevel = showLevel;
+        update();
+        return true;
     }
 
     public boolean _containsChannel(String channel_type, String channelId) {
@@ -144,7 +154,7 @@ public class GuildData extends DataCache {
         for (String c : channelIds) {
             if (c == null)
                 continue;
-            temp = guild.getTextChannelById(c);
+            temp = _getGuild().getTextChannelById(c);
             if (temp == null)
                 continue;
             channels.add(temp);
@@ -194,8 +204,8 @@ public class GuildData extends DataCache {
         MongoCollection<GuildData> collection = DatabaseHandler.getDatabase(DATABASE.GUILD).getCollection(
                 GUILD_COLLECTION,
                 GuildData.class);
-        if (this.showLevel == BOOLEAN_STATE.UNSET)
-            this.showLevel = BOOLEAN_STATE.FALSE;
+        if (this.showLevel == BOOLEAN_STATE.UNSET.name())
+            this.showLevel = BOOLEAN_STATE.FALSE.name();
 
         // Filter for guild id, guild id is unique for each collection
         Bson filter = new Document().append("guildId", this.guildId);

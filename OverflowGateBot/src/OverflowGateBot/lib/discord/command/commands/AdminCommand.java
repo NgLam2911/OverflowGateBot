@@ -10,7 +10,7 @@ import OverflowGateBot.lib.discord.command.commands.subcommands.AdminCommands.Re
 import OverflowGateBot.lib.discord.command.commands.subcommands.AdminCommands.SetAdminCommand;
 import OverflowGateBot.lib.discord.command.commands.subcommands.AdminCommands.SetChannelCommand;
 import OverflowGateBot.lib.discord.command.commands.subcommands.AdminCommands.SetLevelRoleCommand;
-import OverflowGateBot.lib.discord.command.commands.subcommands.AdminCommands.ShowLevelCommand;
+import OverflowGateBot.lib.discord.command.commands.subcommands.AdminCommands.GuildShowLevelCommand;
 
 public class AdminCommand extends BotCommandClass {
 
@@ -20,7 +20,7 @@ public class AdminCommand extends BotCommandClass {
         addSubcommands(new ReloadServerCommand());
         addSubcommands(new SetChannelCommand());
         addSubcommands(new SetLevelRoleCommand());
-        addSubcommands(new ShowLevelCommand());
+        addSubcommands(new GuildShowLevelCommand());
         addSubcommands(new SetAdminCommand());
     }
 

@@ -19,23 +19,28 @@ public class BotSubcommandClass extends SubcommandData {
 
     private final int MAX_OPTIONS = 10;
     private boolean threaded = false;
+    private boolean updateMessage = false;
 
     public BotSubcommandClass(@Nonnull String name, @Nonnull String description) {
         super(name, description);
     }
 
-    public BotSubcommandClass(@Nonnull String name, @Nonnull String description, boolean threaded) {
+    public BotSubcommandClass(@Nonnull String name, @Nonnull String description, boolean threaded,
+            boolean updateMessage) {
         super(name, description);
         this.threaded = threaded;
+        this.updateMessage = updateMessage;
     }
 
     // Override
     public String getHelpString() {
-        return "";
+        return getDescription();
     }
 
     // Override
     public void onCommand(SlashCommandInteractionEvent event) {
+        if (updateMessage)
+            reply(event, "Đang cập nhật", 60);
         if (this.threaded)
             networkHandler.run(name, 0, () -> runCommand(event));
         else

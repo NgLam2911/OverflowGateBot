@@ -5,7 +5,6 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import OverflowGateBot.lib.data.UserData;
-import OverflowGateBot.lib.data.GuildData.BOOLEAN_STATE;
 import OverflowGateBot.lib.discord.command.BotSubcommandClass;
 
 import static OverflowGateBot.OverflowGateBot.userHandler;
@@ -20,7 +19,6 @@ public class ShowLevelCommand extends BotSubcommandClass {
     public String getHelpString() {
         return "Ẩn/ tắt ẩn cấp độ của người dùng:\n\t<hide>: true để ẩn cấp, false để hiện cấp";
     }
-    // TODO
 
     @Override
     public void onCommand(SlashCommandInteractionEvent event) {
@@ -35,7 +33,8 @@ public class ShowLevelCommand extends BotSubcommandClass {
             return;
 
         UserData user = userHandler.getUserAwait(member);
-        user.showLevel = BOOLEAN_STATE.valueOf(String.valueOf(showLevel));
+        user.showLevel = String.valueOf(showLevel);
+        user._displayLevelName();
         if (showLevel)
             reply(event, "Đã ẩn level", 10);
         else

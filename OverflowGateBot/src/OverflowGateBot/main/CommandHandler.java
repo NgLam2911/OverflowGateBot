@@ -45,7 +45,7 @@ public class CommandHandler extends ListenerAdapter {
     }
 
     public void addCommand(BotCommandClass command) {
-        commands.put(command.name, command);
+        commands.put(command.getName(), command);
     }
 
     public void registerCommand(Guild guild) {
@@ -56,9 +56,12 @@ public class CommandHandler extends ListenerAdapter {
 
     @Override
     public void onSlashCommandInteraction(@Nonnull SlashCommandInteractionEvent event) {
-
-        event.deferReply().queue();
-        handleCommand(event);
+        try {
+            event.deferReply().queue();
+            handleCommand(event);
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -91,7 +94,6 @@ public class CommandHandler extends ListenerAdapter {
 
         if (commands.containsKey(command)) {
             // Call subcommand
-            reply(event, "Đang cập nhật", 30);
             commands.get(command).onCommand(event);
             // Print to terminal
             Log.info(messagesHandler.getMessageSender(event) + ": used " + event.getName() + " "

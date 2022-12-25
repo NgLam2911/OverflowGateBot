@@ -22,7 +22,7 @@ public class TransferCommand extends BotSubcommandClass {
     }
 
     public TransferCommand() {
-        super("transfer", "Chuyển chỉ số cho người khác", true);
+        super("transfer", "Chuyển chỉ số cho người khác", true, false);
         this.addOption(OptionType.STRING, "type", "Loại chỉ số muốn chuyển", true, true).//
                 addOption(OptionType.USER, "user", "Người muốn chuyển", true).//
                 addOption(OptionType.INTEGER, "point", "Số điểm muốn chuyển", true);
@@ -59,7 +59,7 @@ public class TransferCommand extends BotSubcommandClass {
             return;
         }
         UserData senderData = userHandler.getUserAwait(sender);
-        UserData receiverData = userHandler.getUserAwait(receiver);
+        UserData receiverData = userHandler.getUserNoCache(receiver);
         String result;
 
         switch (TYPE.valueOf(type)) {

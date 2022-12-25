@@ -3,10 +3,13 @@ package OverflowGateBot.lib.discord.command.commands.subcommands.BotCommands;
 import java.util.HashMap;
 import java.util.List;
 
+import OverflowGateBot.lib.data.GuildData;
 import OverflowGateBot.lib.discord.command.BotSubcommandClass;
+import OverflowGateBot.lib.discord.table.tables.PageUI;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -16,7 +19,7 @@ import static OverflowGateBot.OverflowGateBot.*;
 
 public class GuildCommand extends BotSubcommandClass {
     public GuildCommand() {
-        super("guild", "Hiển thị thông tin của máy chủ discord");
+        super("guild", "Hiển thị thông tin của máy chủ discord", false, true);
         this.addOption(OptionType.STRING, "guild", "Tên máy chủ", false, true);
     }
 
@@ -24,8 +27,6 @@ public class GuildCommand extends BotSubcommandClass {
     public String getHelpString() {
         return "Hiển thị thông tin của máy chủ discord mà bot đã gia nhập:\n\t<guild>: Tên máy chủ muốn xem, nếu không nhập guild thì sẽ hiện tất cả các máy chủ, ngược lại sẽ hiện thông tin máy chủ đã nhập";
     }
-
-    // TODO
 
     @Override
     public void onCommand(SlashCommandInteractionEvent event) {
@@ -35,10 +36,25 @@ public class GuildCommand extends BotSubcommandClass {
             List<Guild> guilds = jda.getGuilds();
             EmbedBuilder builder = new EmbedBuilder();
             StringBuilder field = new StringBuilder();
-            guilds.forEach(g -> field.append(g.getName() + "\n"));
-            builder.addField("_Máy chủ_", field.toString(), false);
-            replyEmbeds(event, builder, 30);
+            PageUI table = new PageUI(event);
 
+            for (int i = 0; i < guilds.size(); i++) {
+                Guild guild = guilds.get(i);
+                Member owner = guild.getOwner();
+                field.append("```Tên máy chủ: " + guild.getName() + "\n");
+                if (owner != null)
+                    field.append("Chủ máy chủ: " + owner.getEffectiveName() + "\n");
+                field.append("```");
+
+                if (i % 5 == 4) {
+                    builder.addField("_Máy chủ_", field.toString(), false);
+                    table.addPage(builder);
+                    builder.clear();
+                    field = new StringBuilder();
+                }
+            }
+            table.addPage(builder);
+            table.send();
         } else {
             // Get the guild base on name
             String guildId = guildOption.getAsString();
@@ -46,6 +62,7 @@ public class GuildCommand extends BotSubcommandClass {
             if (guild == null)
                 return;
 
+            GuildData guildData = guildHandler.getGuild(guild);
             EmbedBuilder builder = new EmbedBuilder();
             StringBuilder field = new StringBuilder();
 
@@ -53,10 +70,24 @@ public class GuildCommand extends BotSubcommandClass {
             Member owner = guild.getOwner();
             if (owner != null)
                 field.append("```Chủ máy chủ: " + owner.getEffectiveName() + "\n");
+            else
+                field.append("```Chủ máy chủ: Không rõ\n");
 
             field.append("Số thành viên: " + guild.getMemberCount() + "\n" + //
                     "```");
+
             builder.setDescription("Link: " + guild.getTextChannels().get(0).createInvite().complete().getUrl());
+
+            String roleString = "";
+            for (String roleId : guildData.levelRoleId.keySet()) {
+                if (roleId == null)
+                    return;
+                Role role = guild.getRoleById(roleId);
+                if (role != null)
+                    roleString += role.getName() + ": " + guildData.levelRoleId.get(roleId) + "\n";
+            }
+            if (!roleString.isEmpty())
+                field.append("\n" + roleString.substring(0, roleString.length() - 2));
             builder.addField("Thông tin cơ bản:", field.toString(), false);
             replyEmbeds(event, builder, 30);
         }

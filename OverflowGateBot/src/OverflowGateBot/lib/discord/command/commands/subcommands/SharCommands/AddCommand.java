@@ -33,7 +33,6 @@ public class AddCommand extends BotSubcommandClass {
     public String getHelpString() {
         return "";
     }
-    // TODO
 
     @Override
     public void onCommand(SlashCommandInteractionEvent event) {
@@ -59,8 +58,8 @@ public class AddCommand extends BotSubcommandClass {
         if (r == null || s == null)
             return;
 
-        UserData sender = userHandler.getUserAwait(s);
-        UserData receiver = userHandler.getUserAwait(r);
+        UserData sender = userHandler.getUserNoCache(s);
+        UserData receiver = userHandler.getUserNoCache(r);
 
         POINT_TYPE pt = POINT_TYPE.valueOf(type);
 

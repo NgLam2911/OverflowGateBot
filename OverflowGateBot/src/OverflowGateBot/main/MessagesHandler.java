@@ -125,12 +125,15 @@ public class MessagesHandler extends ListenerAdapter {
 
     @Override
     public void onGuildMemberUpdateNickname(@Nonnull GuildMemberUpdateNicknameEvent event) {
+        Member member = event.getMember();
+        Member bot = event.getGuild().getMember(jda.getSelfUser());
+        if (member == bot)
+            return;
         Member target = event.getEntity();
-        UserData userData = userHandler.getUserAwait(target);
+        UserData userData = userHandler.getUserNoCache(target);
         if (userData == null)
             throw new IllegalStateException("No user data found");
 
-        Member bot = event.getGuild().getMember(jda.getSelfUser());
         if (bot == null)
             throw new IllegalStateException("Bot not in guild");
         userData._displayLevelName();

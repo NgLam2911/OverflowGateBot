@@ -19,8 +19,8 @@ import com.mongodb.ServerApiVersion;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.MongoIterable;
 
 import arc.util.Log;
 
@@ -72,8 +72,10 @@ public class DatabaseHandler {
 
     // Check if collection exists
     public static boolean collectionExists(MongoDatabase database, final String collectionName) {
-        MongoIterable<String> collectionNames = database.listCollectionNames();
-        for (final String name : collectionNames) {
+        MongoCursor<String> collectionNames = database.listCollectionNames().iterator();
+        String name;
+        while (collectionNames.hasNext()) {
+            name = collectionNames.next();
             if (name.equalsIgnoreCase(collectionName)) {
                 return true;
             }

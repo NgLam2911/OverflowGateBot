@@ -14,7 +14,7 @@ import OverflowGateBot.lib.discord.command.BotSubcommandClass;
 
 public class SetNicknameCommand extends BotSubcommandClass {
     public SetNicknameCommand() {
-        super("setnickname", "Thay đổi tên của người dùng", true);
+        super("setnickname", "Thay đổi tên của người dùng", true, false);
         this.addOption(OptionType.STRING, "nickname", "Biệt danh muốn đặt", true).//
                 addOption(OptionType.USER, "user", "Tên người muốn đổi(Admin only");
     }
@@ -38,7 +38,7 @@ public class SetNicknameCommand extends BotSubcommandClass {
         if (target == null)
             throw new IllegalStateException("User not in guild");
 
-        UserData targetData = userHandler.getUserAwait(target);
+        UserData targetData = userHandler.getUserNoCache(target);
 
         if (bot == null)
             throw new IllegalStateException("Bot not in guild");
@@ -58,7 +58,7 @@ public class SetNicknameCommand extends BotSubcommandClass {
                 target = guild.getMember(user);
                 if (target == null)
                     throw new IllegalStateException("User not in guild");
-                targetData = userHandler.getUserAwait(target);
+                targetData = userHandler.getUserNoCache(target);
                 if (targetData == null)
                     throw new IllegalStateException("User data not found");
                 targetData.setName(nickname);

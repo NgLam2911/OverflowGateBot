@@ -20,7 +20,7 @@ import java.util.List;
 
 public class InfoCommand extends BotSubcommandClass {
     public InfoCommand() {
-        super("info", "Hiển thị thông tin người dùng", true);
+        super("info", "Hiển thị thông tin người dùng", true, false);
         this.addOption(OptionType.USER, "user", "Tên thành viên", false);
     }
 
@@ -71,8 +71,9 @@ public class InfoCommand extends BotSubcommandClass {
         if (!roleString.isEmpty())
             roleString = roleString.substring(0, roleString.length() - 2);
         // Display point
-        // TODO: Deadlock
-        UserData user = userHandler.getUserAwait(member);
+
+        UserData user = userHandler.getUserNoCache(member);
+        user._displayLevelName();
 
         builder.addField("Vai trò", roleString, false);
         builder.addField("Thông tin cơ bản",

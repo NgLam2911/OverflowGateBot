@@ -27,6 +27,10 @@ public class DataCache {
         time = ALIVE_LIMIT;
     }
 
+    public void kill() {
+        this.time = 0;
+    }
+
     public void update(int n) {
         updateTime += n;
         if (updateTime >= UPDATE_LIMIT) {

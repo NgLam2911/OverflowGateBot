@@ -52,7 +52,6 @@ public class GuildHandler {
     public GuildData addGuild(@Nonnull String guildId) {
         GuildData guildData = new GuildData(guildId);
         guildCache.put(guildId, guildData);
-        Log.info("Guild <" + guildId + "> online");
         return guildData;
     }
 
@@ -62,14 +61,13 @@ public class GuildHandler {
         if (guildCache.containsKey(guildId))
             return guildCache.get(guildId);
 
+        Log.info("Guild <" + guildId + "> online");
         // Create new guild cache to store temporary guild data
         if (!DatabaseHandler.collectionExists(DATABASE.GUILD, GUILD_COLLECTION)) {
             DatabaseHandler.createCollection(DATABASE.GUILD, GUILD_COLLECTION);
             return addGuild(guildId);
 
         }
-
-        addGuild(guildId);
 
         MongoCollection<GuildData> collection = DatabaseHandler.getDatabase(DATABASE.GUILD).getCollection(
                 GUILD_COLLECTION,
@@ -83,7 +81,7 @@ public class GuildHandler {
             guildCache.put(guildId, first);
             return first;
         } else {
-            return getGuild(guildId);
+            return addGuild(guildId);
         }
     }
 }

@@ -10,18 +10,19 @@ import OverflowGateBot.lib.discord.command.BotSubcommandClass;
 import OverflowGateBot.main.DatabaseHandler;
 import OverflowGateBot.main.DatabaseHandler.DATABASE;
 
-import org.bson.BsonDateTime;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
-import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
+
+import java.text.DateFormat;
+import java.util.Date;
 
 import static OverflowGateBot.OverflowGateBot.*;
 
 public class DailyCommand extends BotSubcommandClass {
     public DailyCommand() {
-        super("daily", "Điểm danh", true);
+        super("daily", "Điểm danh", true, false);
     }
 
     @Override
@@ -39,41 +40,49 @@ public class DailyCommand extends BotSubcommandClass {
         if (member == null)
             throw new IllegalStateException(BotException.MEMBER_IS_NULL.getMessage());
 
-        if (DatabaseHandler.collectionExists(DATABASE.DAILY, guild.getId()))
-            DatabaseHandler.getDatabase(DATABASE.GUILD).createCollection(guild.getId());
+        if (!DatabaseHandler.collectionExists(DATABASE.DAILY, guild.getId()))
+            DatabaseHandler.createCollection(DATABASE.DAILY, guild.getId());
 
         MongoCollection<Document> collection = DatabaseHandler.getDatabase(DATABASE.DAILY).getCollection(guild.getId());
 
         Bson filter = new Document().append("userId", member.getId());
-        FindIterable<Document> data = collection.find(filter).limit(1);
+        Document data = collection.find(filter).limit(1).first();
         UserData userData = userHandler.getUserAwait(member);
 
         int money = 0;
-        int time = 0;
-        if (data.first() == null) {
+        if (data == null || data.isEmpty()) {
             money = userData._addMoney(userData._getLevelCap());
-            collection.insertOne(new Document().append("userId", userData.userId).append(TIME_INSERT_STRING,
+            collection.insertOne(new Document().append("userId", userData.userId).append("time",
                     System.currentTimeMillis()));
         } else {
-            if (System.currentTimeMillis() - time >= 86400000) { // 1 Day
-                time = (int) data.first().get(TIME_INSERT_STRING);
-                money = userData._addMoney(userData._getLevelCap());
-                collection.replaceOne(filter,
-                        new Document().append("userId", userData.userId).append(TIME_INSERT_STRING,
-                                System.currentTimeMillis()));
+            if (data.containsKey("time")) {
+                Long time = (Long) data.get("time");
+                if (System.currentTimeMillis() - time >= 86400000l) { // 1 Day
+                    money = userData._addMoney(userData._getLevelCap());
+                    collection.replaceOne(filter,
+                            new Document().append("userId", userData.userId).append("time",
+                                    System.currentTimeMillis()));
+                }
             }
         }
-
         if (money > 0)
             reply(event, "Điểm dành thanh công\nĐiểm nhận được: " + money + " Alpha\nĐiểm hiện tại: " + userData.money,
                     30);
         else {
-            int sec = time / 1000;
-            int minute = sec / 60;
-            int hour = minute / 60;
-
-            reply(event, "Còn " + hour % 24 + "h" + minute % 60 + " nữa mới có thể điểm danh\n Lần điểm danh cuối: "
-                    + new BsonDateTime(time).asTimestamp(), 10);
+            if (data != null)
+                if (data.containsKey("time")) {
+                    Long lastTime = ((Long) data.get("time"));
+                    Long time = lastTime + 86400000l - System.currentTimeMillis();
+                    Long sec = time / 1000;
+                    Long minute = sec / 60;
+                    Long hour = minute / 60;
+                    Date date = new Date(lastTime);
+                    reply(event,
+                            "Còn " + hour % 24 + " giờ " + minute % 60
+                                    + " phút nữa mới có thể điểm danh\nLần điểm danh cuối: "
+                                    + DateFormat.getInstance().format(date),
+                            30);
+                }
         }
     }
 

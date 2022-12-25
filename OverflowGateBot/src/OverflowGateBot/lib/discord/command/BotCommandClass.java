@@ -15,8 +15,6 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
 public class BotCommandClass {
-    public String name;
-    public String description;
 
     @Nonnull
     public SlashCommandData command;
@@ -25,9 +23,15 @@ public class BotCommandClass {
     private final int MAX_OPTIONS = 10;
 
     public BotCommandClass(@Nonnull String name, @Nonnull String description) {
-        this.name = name;
-        this.description = description;
         command = Commands.slash(name, description);
+    }
+
+    public String getName() {
+        return this.command.getName();
+    }
+
+    public String getDescription() {
+        return this.command.getDescription();
     }
 
     // Override

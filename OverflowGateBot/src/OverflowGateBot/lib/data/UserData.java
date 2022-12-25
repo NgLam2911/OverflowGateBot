@@ -31,7 +31,7 @@ public class UserData extends DataCache {
     public Integer money = 0;
     public Integer pvpPoint = 0;
     public String name = new String();
-    public BOOLEAN_STATE showLevel = BOOLEAN_STATE.UNSET;
+    public String showLevel = BOOLEAN_STATE.UNSET.name();
 
     // For codec
     public UserData() {
@@ -44,6 +44,10 @@ public class UserData extends DataCache {
         super(USER_ALIVE_TIME, UPDATE_LIMIT);
         this.userId = userId;
         this.guildId = guildId;
+    }
+
+    protected void finalize() {
+        update();
     }
 
     public UserData modify(@Nonnull String guildId, @Nonnull String userId, String name, Integer point, Integer level,
@@ -99,11 +103,11 @@ public class UserData extends DataCache {
         return this.level;
     }
 
-    public void setshowLevel(BOOLEAN_STATE showLevel) {
+    public void setShowLevel(String showLevel) {
         this.showLevel = showLevel;
     }
 
-    public BOOLEAN_STATE getshowLevel() {
+    public String getShowLevel() {
         return this.showLevel;
     }
 
@@ -121,7 +125,7 @@ public class UserData extends DataCache {
                 append("guildId", this.guildId).//
                 append("point", this.point).//
                 append("level", this.level).//
-                append("showLevel", this.showLevel.name());
+                append("showLevel", this.showLevel);
     }
 
     public String _getHashId() {
@@ -168,9 +172,9 @@ public class UserData extends DataCache {
             String nickname = this.name;
             if (nickname.isBlank())
                 nickname = _getMember().getUser().getName();
-            if (showLevel == BOOLEAN_STATE.FALSE)
+            if (showLevel.equalsIgnoreCase(BOOLEAN_STATE.FALSE.name()))
                 nickname = "[Lv" + this.level + "] " + nickname;
-            member.modifyNickname(nickname).queue();
+            member.modifyNickname(nickname).complete();
         }
     }
 
@@ -234,7 +238,7 @@ public class UserData extends DataCache {
             return this;
         modify(guildId, userId, name, point, level, money + data.money, pvpPoint + data.pvpPoint)
                 ._addPoint(data._getTotalPoint());
-        if (this.showLevel == BOOLEAN_STATE.UNSET)
+        if (this.showLevel.equalsIgnoreCase(BOOLEAN_STATE.UNSET.name()))
             this.showLevel = data.showLevel;
 
         return this;
@@ -250,8 +254,9 @@ public class UserData extends DataCache {
         MongoCollection<UserData> collection = DatabaseHandler.getDatabase(DATABASE.USER).getCollection(this.guildId,
                 UserData.class);
 
-        if (this.showLevel == BOOLEAN_STATE.UNSET)
-            this.showLevel = BOOLEAN_STATE.FALSE;
+        if (this.showLevel.equalsIgnoreCase(BOOLEAN_STATE.UNSET.name())) {
+            this.showLevel = BOOLEAN_STATE.FALSE.name();
+        }
 
         // Filter for user id, user id is unique for each collection
         Bson filter = new Document().append("userId", this.userId);

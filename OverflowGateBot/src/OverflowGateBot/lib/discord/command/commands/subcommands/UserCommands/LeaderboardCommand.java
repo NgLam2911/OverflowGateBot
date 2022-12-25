@@ -39,7 +39,7 @@ public class LeaderboardCommand extends BotSubcommandClass {
     }
 
     public LeaderboardCommand() {
-        super("leaderboard", "Hiện thị bản xếp hạng của người dùng", true);
+        super("leaderboard", "Hiện thị bản xếp hạng của người dùng", true, true);
         this.addOptions(new OptionData(OptionType.STRING, "orderby", "Tên bảng xếp hạng", true, true)).//
                 addOptions(new OptionData(OptionType.STRING, "leaderboard", "Tên bảng xếp hạng", true, true));
     }
@@ -147,7 +147,7 @@ public class LeaderboardCommand extends BotSubcommandClass {
 
         }
 
-        UserData user = userHandler.getUserAwait(member);
+        UserData user = userHandler.getUserNoCache(member);
         int position = users.indexOf(user) + 1;
 
         // Display sender position if its not contained in the leaderboard

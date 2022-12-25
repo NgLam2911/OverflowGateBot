@@ -24,7 +24,7 @@ public class DeletedMessageCommand extends BotSubcommandClass {
     private final int MAX_RETRIEVE = 10;
 
     public DeletedMessageCommand() {
-        super("deletedmessage", "Hiển thị tin nhắn đã xóa gần đây nhất", true);
+        super("deletedmessage", "Hiển thị tin nhắn đã xóa gần đây nhất", true, true);
         this.addOption(OptionType.USER, "user", "Người xóa tin nhắn").//
                 addOption(OptionType.INTEGER, "amount", "Số lượng tin nhắn");
     }

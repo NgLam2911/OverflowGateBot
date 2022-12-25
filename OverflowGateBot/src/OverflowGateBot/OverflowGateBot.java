@@ -8,6 +8,7 @@ import OverflowGateBot.main.GuildHandler;
 import OverflowGateBot.main.MessagesHandler;
 import OverflowGateBot.main.NetworkHandler;
 import OverflowGateBot.main.ServerStatusHandler;
+import OverflowGateBot.main.TableEmbedMessageHandler;
 import OverflowGateBot.main.UserHandler;
 import arc.util.Log;
 import net.dv8tion.jda.api.JDA;
@@ -33,15 +34,16 @@ public class OverflowGateBot {
     public static final Long MAX_LOG_COUNT = 10000l;
     public static final String TIME_INSERT_STRING = "_timeInserted";
 
+    public static DatabaseHandler databaseHandler;
     public static MessagesHandler messagesHandler;
-    public static GuildHandler guildHandler;
     public static ContentHandler contentHandler;
     public static CommandHandler commandHandler;
     public static ContextMenuHandler contextMenuHandler;
     public static NetworkHandler networkHandler;
+    public static GuildHandler guildHandler;
     public static UserHandler userHandler;
     public static ServerStatusHandler serverStatusHandler;
-    public static DatabaseHandler databaseHandler;
+    public static TableEmbedMessageHandler tableEmbedMessageHandler;
 
     public static void main(String[] args) {
 
@@ -63,6 +65,7 @@ public class OverflowGateBot {
             commandHandler = new CommandHandler();
             contextMenuHandler = new ContextMenuHandler();
             serverStatusHandler = new ServerStatusHandler();
+            tableEmbedMessageHandler = new TableEmbedMessageHandler();
             // updateCommand();
 
             networkHandler.run("UPDATE", 0, UPDATE_PERIOD, () -> update());
@@ -70,7 +73,7 @@ public class OverflowGateBot {
             Log.info("Bot online");
 
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
 
@@ -78,6 +81,7 @@ public class OverflowGateBot {
         userHandler.update();
         guildHandler.update();
         serverStatusHandler.update();
+        tableEmbedMessageHandler.update();
         jda.getPresence()
                 .setActivity(Activity
                         .playing("with " + guildHandler.guildCache.size() + " servers | " + userHandler.userCache.size()
