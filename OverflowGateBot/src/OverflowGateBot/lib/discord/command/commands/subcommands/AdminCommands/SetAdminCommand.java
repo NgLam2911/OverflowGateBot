@@ -23,7 +23,7 @@ public class SetAdminCommand extends BotSubcommandClass {
     }
 
     @Override
-    public void onCommand(SlashCommandInteractionEvent event) {
+    public void runCommand(SlashCommandInteractionEvent event) {
         OptionMapping roleOption = event.getOption("role");
         if (roleOption == null)
             return;

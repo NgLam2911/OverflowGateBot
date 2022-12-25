@@ -42,10 +42,10 @@ public class TableEmbedMessageHandler extends ListenerAdapter {
     public void update() {
         Iterator<TableEmbedMessageClass> iterator = tableCache.values().iterator();
         while (iterator.hasNext()) {
-            TableEmbedMessageClass guild = iterator.next();
-            if (!guild.isAlive(1)) {
+            TableEmbedMessageClass table = iterator.next();
+            if (!table.isAlive(1)) {
+                table.delete();
                 iterator.remove();
-                guild.update();
             }
         }
     }

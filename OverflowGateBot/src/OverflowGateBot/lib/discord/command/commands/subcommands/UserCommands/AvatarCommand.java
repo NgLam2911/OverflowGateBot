@@ -20,7 +20,7 @@ public class AvatarCommand extends BotSubcommandClass {
     }
 
     @Override
-    public void onCommand(SlashCommandInteractionEvent event) {
+    public void runCommand(SlashCommandInteractionEvent event) {
         OptionMapping userOption = event.getOption("user");
         if (userOption == null)
             return;

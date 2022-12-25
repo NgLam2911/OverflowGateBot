@@ -20,7 +20,7 @@ public class PostMapCommand extends BotSubcommandClass {
     }
 
     @Override
-    public void onCommand(SlashCommandInteractionEvent event) {
+    public void runCommand(SlashCommandInteractionEvent event) {
         messagesHandler.sendMapPreview(event);
         reply(event, "Đăng bản đồ thành công", 10);
     }

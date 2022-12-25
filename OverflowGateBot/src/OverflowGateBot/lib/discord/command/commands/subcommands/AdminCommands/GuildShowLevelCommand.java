@@ -21,7 +21,7 @@ public class GuildShowLevelCommand extends BotSubcommandClass {
     }
 
     @Override
-    public void onCommand(SlashCommandInteractionEvent event) {
+    public void runCommand(SlashCommandInteractionEvent event) {
         OptionMapping showOption = event.getOption("show");
         if (showOption == null)
             throw new IllegalStateException("Invalid option");

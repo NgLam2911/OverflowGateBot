@@ -26,7 +26,7 @@ public class HelpCommand extends BotSubcommandClass {
 
     // TODO Helpppppppppp
     @Override
-    public void onCommand(SlashCommandInteractionEvent event) {
+    public void runCommand(SlashCommandInteractionEvent event) {
         OptionMapping commandOption = event.getOption("command");
         if (commandOption == null)
             return;

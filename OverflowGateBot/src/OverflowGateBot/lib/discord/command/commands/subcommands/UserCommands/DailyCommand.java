@@ -31,7 +31,7 @@ public class DailyCommand extends BotSubcommandClass {
     }
 
     @Override
-    public void onCommand(SlashCommandInteractionEvent event) {
+    public void runCommand(SlashCommandInteractionEvent event) {
         Member member = event.getMember();
         Guild guild = event.getGuild();
         if (guild == null)

@@ -12,7 +12,7 @@ public class UpdateCommand extends BotSubcommandClass {
     }
 
     @Override
-    public void onCommand(SlashCommandInteractionEvent event) {
+    public void runCommand(SlashCommandInteractionEvent event) {
         updateCommand();
     }
 }

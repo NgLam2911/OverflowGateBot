@@ -11,6 +11,7 @@ import OverflowGateBot.lib.data.DataCache;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -23,10 +24,9 @@ public class TableEmbedMessageClass extends DataCache {
 
     private List<EmbedBuilder> tables = new ArrayList<EmbedBuilder>();
     private List<TableButton> buttons = new ArrayList<TableButton>();
-    private int page = 0;
-    private boolean showPageNumber = true;
-
-    private final SlashCommandInteractionEvent event;
+    protected final SlashCommandInteractionEvent event;
+    protected int pageNumber = 0;
+    protected boolean showPageNumber = true;
 
     public TableEmbedMessageClass(SlashCommandInteractionEvent event, int aliveLimit) {
         super(aliveLimit, 0);
@@ -56,46 +56,56 @@ public class TableEmbedMessageClass extends DataCache {
     public boolean addPage(EmbedBuilder value) {
         if (value.isEmpty())
             return false;
-        return tables.add(value);
+        return tables.add(new EmbedBuilder(value));
     }
 
     public boolean addButton(@Nonnull String buttonName, @Nonnull Runnable r) {
         Button button = Button.primary(getId() + ":" + buttonName, buttonName);
-        TableButton newButton = new TableButton(button, r);
-        if (buttons.contains(newButton))
-            return false;
-        return buttons.add(newButton);
+        TableButton tableButton = new TableButton(button, r);
+
+        return buttons.add(tableButton);
     }
 
-    public @Nonnull EmbedBuilder getCurrentPage() {
-        EmbedBuilder value = this.tables.get(page);
-        if (value == null)
-            throw new IllegalStateException(BotException.TABLE_NO_CONTENT.name());
+    public @Nonnull MessageEmbed getCurrentPage() {
+        EmbedBuilder value = this.tables.get(pageNumber);
+        return addPageFooter(value).build();
+    }
+
+    public EmbedBuilder addPageFooter(EmbedBuilder value) {
         if (showPageNumber)
-            value.setFooter((page + 1) + "/" + (tables.size() + 1));
+            return value.setFooter("Trang " + (pageNumber + 1) + "\\" + getMaxPage());
         return value;
     }
 
+    public void setPageNumber(int pageNumber) {
+        this.pageNumber = pageNumber;
+        update();
+    }
+
+    public int getMaxPage() {
+        return this.tables.size();
+    }
+
     public void nextPage() {
-        this.page += 1;
-        this.page %= this.tables.size();
+        this.pageNumber += 1;
+        this.pageNumber %= getMaxPage();
         this.update();
     }
 
     public void previousPage() {
-        this.page -= 1;
-        if (this.page <= -1)
-            this.page = this.tables.size() - 1;
+        this.pageNumber -= 1;
+        if (this.pageNumber <= -1)
+            this.pageNumber = getMaxPage() - 1;
         this.update();
     }
 
     public void firstPage() {
-        this.page = 0;
+        this.pageNumber = 0;
         this.update();
     }
 
     public void lastPage() {
-        this.page = this.tables.size() - 1;
+        this.pageNumber = getMaxPage() - 1;
         this.update();
     }
 
@@ -105,21 +115,19 @@ public class TableEmbedMessageClass extends DataCache {
     }
 
     public void send() {
-
-        WebhookMessageAction<Message> action = event.getHook().sendMessageEmbeds(getCurrentPage().build());
-
+        WebhookMessageAction<Message> action = event.getHook().sendMessageEmbeds(getCurrentPage());
         Collection<Button> temp = new ArrayList<Button>();
         for (TableButton key : buttons)
             temp.add(key.getButton());
-
         action.addActionRow(temp).queue();
         tableEmbedMessageHandler.add(this);
 
     }
 
-    public void update(@Nonnull ButtonInteractionEvent event) {
+    @Override
+    public void update() {
         this.reset();
-        event.getHook().editOriginalEmbeds(getCurrentPage().build()).queue();
+        this.event.getHook().editOriginalEmbeds(getCurrentPage()).queue();
     }
 
     public void onCommand(@Nonnull ButtonInteractionEvent event) {
@@ -130,7 +138,6 @@ public class TableEmbedMessageClass extends DataCache {
                 continue;
             if (id.equals(key)) {
                 b.getRunnable().run();
-                update(event);
                 break;
             }
         }
@@ -154,7 +161,7 @@ public class TableEmbedMessageClass extends DataCache {
         }
 
         public String getId() {
-            return this.getButton().getId();
+            return this.getButton().getLabel();
         }
     }
 

@@ -31,7 +31,7 @@ public class SayCommand extends BotSubcommandClass {
     }
 
     @Override
-    public void onCommand(SlashCommandInteractionEvent event) {
+    public void runCommand(SlashCommandInteractionEvent event) {
         OptionMapping guildIdOption = event.getOption("guild");
         OptionMapping channelIdOption = event.getOption("channel");
         OptionMapping contentOption = event.getOption("content");

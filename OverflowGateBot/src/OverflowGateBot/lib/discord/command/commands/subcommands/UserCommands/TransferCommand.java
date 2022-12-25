@@ -34,7 +34,7 @@ public class TransferCommand extends BotSubcommandClass {
     }
 
     @Override
-    public void onCommand(SlashCommandInteractionEvent event) {
+    public void runCommand(SlashCommandInteractionEvent event) {
         Guild guild = event.getGuild();
         if (guild == null)
             return;

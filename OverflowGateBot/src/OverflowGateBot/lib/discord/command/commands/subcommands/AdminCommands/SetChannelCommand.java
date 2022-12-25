@@ -27,7 +27,7 @@ public class SetChannelCommand extends BotSubcommandClass {
     }
 
     @Override
-    public void onCommand(SlashCommandInteractionEvent event) {
+    public void runCommand(SlashCommandInteractionEvent event) {
         OptionMapping typeOption = event.getOption("type");
         if (typeOption == null)
             throw new IllegalStateException("Invalid option");

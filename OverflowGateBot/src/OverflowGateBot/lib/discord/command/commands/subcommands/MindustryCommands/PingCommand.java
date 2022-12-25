@@ -22,7 +22,7 @@ public class PingCommand extends BotSubcommandClass {
     }
 
     @Override
-    public void onCommand(SlashCommandInteractionEvent event) {
+    public void runCommand(SlashCommandInteractionEvent event) {
         OptionMapping ipOption = event.getOption("ip");
         if (ipOption == null)
             return;

@@ -35,7 +35,7 @@ public class DeletedMessageCommand extends BotSubcommandClass {
     }
 
     @Override
-    public void onCommand(SlashCommandInteractionEvent event) {
+    public void runCommand(SlashCommandInteractionEvent event) {
         OptionMapping userOption = event.getOption("user");
         OptionMapping amountOption = event.getOption("amount");
 

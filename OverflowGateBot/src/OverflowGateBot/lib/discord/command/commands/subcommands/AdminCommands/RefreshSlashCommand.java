@@ -18,7 +18,7 @@ public class RefreshSlashCommand extends BotSubcommandClass {
     }
 
     @Override
-    public void onCommand(SlashCommandInteractionEvent event) {
+    public void runCommand(SlashCommandInteractionEvent event) {
         contextMenuHandler.unregisterCommand(event.getGuild());
         commandHandler.registerCommand(event.getGuild());
         contextMenuHandler.registerCommand(event.getGuild());

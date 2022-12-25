@@ -5,7 +5,7 @@ import java.util.List;
 
 import OverflowGateBot.lib.data.GuildData;
 import OverflowGateBot.lib.discord.command.BotSubcommandClass;
-import OverflowGateBot.lib.discord.table.tables.PageUI;
+import OverflowGateBot.lib.discord.table.tables.PageTable;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -29,14 +29,14 @@ public class GuildCommand extends BotSubcommandClass {
     }
 
     @Override
-    public void onCommand(SlashCommandInteractionEvent event) {
+    public void runCommand(SlashCommandInteractionEvent event) {
         OptionMapping guildOption = event.getOption("guild");
         if (guildOption == null) {
             // Show all guild
             List<Guild> guilds = jda.getGuilds();
             EmbedBuilder builder = new EmbedBuilder();
             StringBuilder field = new StringBuilder();
-            PageUI table = new PageUI(event);
+            PageTable table = new PageTable(event);
 
             for (int i = 0; i < guilds.size(); i++) {
                 Guild guild = guilds.get(i);

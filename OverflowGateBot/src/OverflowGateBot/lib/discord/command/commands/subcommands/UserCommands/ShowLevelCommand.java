@@ -21,7 +21,7 @@ public class ShowLevelCommand extends BotSubcommandClass {
     }
 
     @Override
-    public void onCommand(SlashCommandInteractionEvent event) {
+    public void runCommand(SlashCommandInteractionEvent event) {
         Boolean showLevel;
         OptionMapping hideOption = event.getOption("hide");
         if (hideOption == null)

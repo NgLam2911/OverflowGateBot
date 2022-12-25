@@ -20,7 +20,7 @@ public class PostSchemCommand extends BotSubcommandClass {
     }
 
     @Override
-    public void onCommand(SlashCommandInteractionEvent event) {
+    public void runCommand(SlashCommandInteractionEvent event) {
         messagesHandler.sendSchematicPreview(event);
         reply(event, "Đăng bản thiết kế thành công", 10);
     }

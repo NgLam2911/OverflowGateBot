@@ -140,12 +140,9 @@ public class UserData extends DataCache {
         return ((level - 1) * level * (2 * (level - 1) + 1) / 6) + point;
     }
 
-    public @Nonnull Member _getMember() {
+    public Member _getMember() {
         Guild guild = _getGuild();
         Member member = guild.getMemberById(userId);
-        if (member == null)
-            throw new IllegalStateException(
-                    "Member not found with id <" + userId + "> in guild with guild id <" + guildId + ">");
         return member;
     }
 
@@ -166,13 +163,15 @@ public class UserData extends DataCache {
             throw new IllegalStateException("Bot not in guild " + guildId);
 
         Member member = _getMember();
+        if (member == null)
+            return;
         // Loop through guild members and modify their nickname
         if (bot.canInteract(member)) {
 
             String nickname = this.name;
             if (nickname.isBlank())
                 nickname = _getMember().getUser().getName();
-            if (showLevel.equalsIgnoreCase(BOOLEAN_STATE.FALSE.name()))
+            if (showLevel.equalsIgnoreCase(BOOLEAN_STATE.TRUE.name()))
                 nickname = "[Lv" + this.level + "] " + nickname;
             member.modifyNickname(nickname).complete();
         }
