@@ -1,7 +1,7 @@
 package OverflowGateBot.lib.discord.command.commands.subcommands.UserCommands;
 
 import OverflowGateBot.lib.data.UserData;
-import OverflowGateBot.lib.discord.command.BotSubcommandClass;
+import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
@@ -14,7 +14,7 @@ import java.util.HashMap;
 
 import static OverflowGateBot.OverflowGateBot.*;
 
-public class TransferCommand extends BotSubcommandClass {
+public class TransferCommand extends SimpleBotSubcommand {
 
     enum TYPE {
         PVP_POINT,

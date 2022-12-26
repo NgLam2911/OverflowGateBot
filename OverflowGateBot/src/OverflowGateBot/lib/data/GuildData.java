@@ -61,10 +61,6 @@ public class GuildData extends DataCache {
         _getGuild();
     }
 
-    protected void finalize() {
-        update();
-    }
-
     public void setShowLevel(String showLevel) {
         this.showLevel = showLevel;
     }

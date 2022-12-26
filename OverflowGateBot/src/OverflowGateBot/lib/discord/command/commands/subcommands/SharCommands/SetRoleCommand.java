@@ -1,6 +1,6 @@
 package OverflowGateBot.lib.discord.command.commands.subcommands.SharCommands;
 
-import OverflowGateBot.lib.discord.command.BotSubcommandClass;
+import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
@@ -9,7 +9,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 
-public class SetRoleCommand extends BotSubcommandClass {
+public class SetRoleCommand extends SimpleBotSubcommand {
 
     public SetRoleCommand() {
         super("setrole", "Shar only");

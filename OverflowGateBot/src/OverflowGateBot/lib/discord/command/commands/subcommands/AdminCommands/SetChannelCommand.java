@@ -12,9 +12,9 @@ import java.util.HashMap;
 
 import OverflowGateBot.lib.data.GuildData;
 import OverflowGateBot.lib.data.GuildData.CHANNEL_TYPE;
-import OverflowGateBot.lib.discord.command.BotSubcommandClass;
+import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
 
-public class SetChannelCommand extends BotSubcommandClass {
+public class SetChannelCommand extends SimpleBotSubcommand {
 
     public SetChannelCommand() {
         super("setchannel", "Cài đặt các kênh của máy chủ");

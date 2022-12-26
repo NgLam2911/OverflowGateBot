@@ -4,7 +4,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 
 import static OverflowGateBot.OverflowGateBot.*;
 
-import OverflowGateBot.lib.discord.command.BotCommandClass;
+import OverflowGateBot.lib.discord.command.SimpleBotCommand;
 import OverflowGateBot.lib.discord.command.commands.subcommands.AdminCommands.RefreshSlashCommand;
 import OverflowGateBot.lib.discord.command.commands.subcommands.AdminCommands.ReloadServerCommand;
 import OverflowGateBot.lib.discord.command.commands.subcommands.AdminCommands.SetAdminCommand;
@@ -12,7 +12,7 @@ import OverflowGateBot.lib.discord.command.commands.subcommands.AdminCommands.Se
 import OverflowGateBot.lib.discord.command.commands.subcommands.AdminCommands.SetLevelRoleCommand;
 import OverflowGateBot.lib.discord.command.commands.subcommands.AdminCommands.GuildShowLevelCommand;
 
-public class AdminCommand extends BotCommandClass {
+public class AdminCommand extends SimpleBotCommand {
 
     public AdminCommand() {
         super("admin", "Admin only");

@@ -1,14 +1,14 @@
 package OverflowGateBot.lib.discord.command.commands.subcommands.AdminCommands;
 
 import OverflowGateBot.lib.data.GuildData;
-import OverflowGateBot.lib.discord.command.BotSubcommandClass;
+import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 
 import static OverflowGateBot.OverflowGateBot.guildHandler;
 
-public class GuildShowLevelCommand extends BotSubcommandClass {
+public class GuildShowLevelCommand extends SimpleBotSubcommand {
 
     public GuildShowLevelCommand() {
         super("guildshowlevel", "Ẩn/Hiện cấp độ của toàn bộ thành viên server");

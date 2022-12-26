@@ -4,9 +4,9 @@ import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionE
 
 import static OverflowGateBot.OverflowGateBot.messagesHandler;
 
-import OverflowGateBot.lib.discord.context.BotContextMenuClass;
+import OverflowGateBot.lib.discord.context.SimpleBotContextMenu;
 
-public class PostMapContextMenu extends BotContextMenuClass {
+public class PostMapContextMenu extends SimpleBotContextMenu {
 
     public PostMapContextMenu() {
         super("Post Map");

@@ -11,57 +11,49 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
-import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 
-public class BotCommandClass {
+import static OverflowGateBot.OverflowGateBot.*;
 
-    @Nonnull
-    public SlashCommandData command;
-    public HashMap<String, BotSubcommandClass> subcommands = new HashMap<>();
+public class SimpleBotSubcommand extends SubcommandData {
 
     private final int MAX_OPTIONS = 10;
+    private boolean threaded = false;
+    private boolean updateMessage = false;
 
-    public BotCommandClass(@Nonnull String name, @Nonnull String description) {
-        command = Commands.slash(name, description);
+    public SimpleBotSubcommand(@Nonnull String name, @Nonnull String description) {
+        super(name, description);
     }
 
-    public String getName() {
-        return this.command.getName();
-    }
-
-    public String getDescription() {
-        return this.command.getDescription();
+    public SimpleBotSubcommand(@Nonnull String name, @Nonnull String description, boolean threaded,
+            boolean updateMessage) {
+        super(name, description);
+        this.threaded = threaded;
+        this.updateMessage = updateMessage;
     }
 
     // Override
     public String getHelpString() {
-        return "";
+        return getDescription();
     }
 
-    // Can be overridden
-    public String getHelpString(String subCommand) {
-        if (!subcommands.containsKey(subCommand))
-            return "Không tìm thấy lệnh " + subCommand;
-        return subcommands.get(subCommand).getHelpString();
-    }
-
-    // Can be overridden
+    // Override
     public void onCommand(SlashCommandInteractionEvent event) {
-        runCommand(event);
-    }
-
-    protected void runCommand(SlashCommandInteractionEvent event) {
-        if (subcommands.containsKey(event.getSubcommandName()))
-            subcommands.get(event.getSubcommandName()).onCommand(event);
+        if (updateMessage)
+            reply(event, "Đang cập nhật", 60);
+        if (this.threaded)
+            networkHandler.run(name, 0, () -> runCommand(event));
         else
-            reply(event, "Lệnh sai rồi kìa baka", 10);
+            runCommand(event);
     }
 
-    public BotSubcommandClass addSubcommands(BotSubcommandClass subcommand) {
-        subcommands.put(subcommand.getName(), subcommand);
-        command.addSubcommands(subcommand);
-        return subcommand;
+    // Override
+    protected void runCommand(SlashCommandInteractionEvent event) {
+    }
+
+    // Override
+    public void onAutoComplete(CommandAutoCompleteInteractionEvent event) {
+
     }
 
     // Auto complete handler
@@ -105,21 +97,13 @@ public class BotCommandClass {
             event.replyChoice(name, value).queue();
     }
 
-    // Can be overridden
-    public void onAutoComplete(CommandAutoCompleteInteractionEvent event) {
-        if (subcommands.containsKey(event.getSubcommandName())) {
-            subcommands.get(event.getSubcommandName()).onAutoComplete(event);
-        }
-    }
-
-    protected void replyEmbeds(SlashCommandInteractionEvent event, EmbedBuilder builder, int sec) {
+    public void replyEmbeds(SlashCommandInteractionEvent event, EmbedBuilder builder, int sec) {
         event.getHook().sendMessageEmbeds(builder.build())
                 .queue(_message -> _message.delete().queueAfter(sec, TimeUnit.SECONDS));
     }
 
-    protected void reply(SlashCommandInteractionEvent event, String content, int sec) {
+    public void reply(SlashCommandInteractionEvent event, String content, int sec) {
         event.getHook().sendMessage("```" + content + "```")
                 .queue(_message -> _message.delete().queueAfter(sec, TimeUnit.SECONDS));
     }
-
 }

@@ -6,9 +6,9 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 
 import static OverflowGateBot.OverflowGateBot.messagesHandler;
 
-import OverflowGateBot.lib.discord.command.BotSubcommandClass;
+import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
 
-public class PostSchemCommand extends BotSubcommandClass {
+public class PostSchemCommand extends SimpleBotSubcommand {
     public PostSchemCommand() {
         super("postschem", "Chuyển tập tin bản thiết kế thành hình ảnh");
         this.addOption(OptionType.ATTACHMENT, "schematicfile", "file to review", true);

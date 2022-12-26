@@ -4,9 +4,9 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 
 import static OverflowGateBot.OverflowGateBot.serverStatusHandler;
 
-import OverflowGateBot.lib.discord.command.BotSubcommandClass;
+import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
 
-public class RefreshServerCommand extends BotSubcommandClass {
+public class RefreshServerCommand extends SimpleBotSubcommand {
     public RefreshServerCommand() {
         super("refreshserver", "Làm mới các máy chủ mindustry");
     }

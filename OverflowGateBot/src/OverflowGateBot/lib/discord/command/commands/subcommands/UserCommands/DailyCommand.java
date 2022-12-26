@@ -6,7 +6,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 
 import OverflowGateBot.lib.BotException;
 import OverflowGateBot.lib.data.UserData;
-import OverflowGateBot.lib.discord.command.BotSubcommandClass;
+import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
 import OverflowGateBot.main.DatabaseHandler;
 import OverflowGateBot.main.DatabaseHandler.DATABASE;
 
@@ -20,7 +20,7 @@ import java.util.Date;
 
 import static OverflowGateBot.OverflowGateBot.*;
 
-public class DailyCommand extends BotSubcommandClass {
+public class DailyCommand extends SimpleBotSubcommand {
     public DailyCommand() {
         super("daily", "Điểm danh", true, false);
     }

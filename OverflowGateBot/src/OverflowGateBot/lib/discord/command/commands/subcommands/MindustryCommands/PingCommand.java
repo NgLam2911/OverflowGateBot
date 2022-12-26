@@ -8,9 +8,9 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import static OverflowGateBot.OverflowGateBot.networkHandler;
 import static OverflowGateBot.OverflowGateBot.serverStatusHandler;
 
-import OverflowGateBot.lib.discord.command.BotSubcommandClass;
+import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
 
-public class PingCommand extends BotSubcommandClass {
+public class PingCommand extends SimpleBotSubcommand {
     public PingCommand() {
         super("ping", "Ping máy chủ mindustry thông qua ip");
         this.addOption(OptionType.STRING, "ip", "Ip của máy chủ", true);

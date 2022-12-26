@@ -1,7 +1,7 @@
 package OverflowGateBot.lib.discord.command.commands.subcommands.AdminCommands;
 
 import OverflowGateBot.lib.data.GuildData;
-import OverflowGateBot.lib.discord.command.BotSubcommandClass;
+import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
 
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -10,7 +10,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 
 import static OverflowGateBot.OverflowGateBot.*;
 
-public class SetAdminCommand extends BotSubcommandClass {
+public class SetAdminCommand extends SimpleBotSubcommand {
 
     public SetAdminCommand() {
         super("setadmin", "Cài đặt vai trò admin cho máy chủ");

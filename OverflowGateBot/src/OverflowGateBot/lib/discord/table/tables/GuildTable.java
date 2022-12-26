@@ -2,12 +2,12 @@ package OverflowGateBot.lib.discord.table.tables;
 
 import javax.annotation.Nonnull;
 
-import OverflowGateBot.lib.discord.table.TableEmbedMessageClass;
+import OverflowGateBot.lib.discord.table.SimpleTable;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
-public class PageTable extends TableEmbedMessageClass {
+public class GuildTable extends SimpleTable {
 
-    public PageTable(@Nonnull SlashCommandInteractionEvent event) {
+    public GuildTable(@Nonnull SlashCommandInteractionEvent event) {
         super(event, 2);
         addButton("<<<", () -> this.firstPage());
         addButton("<", () -> this.previousPage());

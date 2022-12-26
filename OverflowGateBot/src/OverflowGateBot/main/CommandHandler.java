@@ -2,7 +2,7 @@ package OverflowGateBot.main;
 
 import org.jetbrains.annotations.NotNull;
 
-import OverflowGateBot.lib.discord.command.BotCommandClass;
+import OverflowGateBot.lib.discord.command.SimpleBotCommand;
 import OverflowGateBot.lib.discord.command.commands.AdminCommand;
 import OverflowGateBot.lib.discord.command.commands.BotCommand;
 import OverflowGateBot.lib.discord.command.commands.MindustryCommand;
@@ -27,7 +27,7 @@ import static OverflowGateBot.OverflowGateBot.*;
 
 public class CommandHandler extends ListenerAdapter {
 
-    public HashMap<String, BotCommandClass> commands = new HashMap<>();
+    public HashMap<String, SimpleBotCommand> commands = new HashMap<>();
 
     public List<Guild> guilds;
 
@@ -44,12 +44,12 @@ public class CommandHandler extends ListenerAdapter {
         Log.info("Command handler up");
     }
 
-    public void addCommand(BotCommandClass command) {
+    public void addCommand(SimpleBotCommand command) {
         commands.put(command.getName(), command);
     }
 
     public void registerCommand(Guild guild) {
-        for (BotCommandClass command : commands.values()) {
+        for (SimpleBotCommand command : commands.values()) {
             guild.upsertCommand(command.command).queue();
         }
     }

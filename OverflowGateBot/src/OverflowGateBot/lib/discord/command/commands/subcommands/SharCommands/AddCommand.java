@@ -12,11 +12,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import OverflowGateBot.lib.data.UserData;
-import OverflowGateBot.lib.discord.command.BotSubcommandClass;
+import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
 
 import static OverflowGateBot.OverflowGateBot.userHandler;
 
-public class AddCommand extends BotSubcommandClass {
+public class AddCommand extends SimpleBotSubcommand {
 
     private enum POINT_TYPE {
         MONEY, PVP

@@ -2,13 +2,13 @@ package OverflowGateBot.lib.discord.command.commands.subcommands.UserCommands;
 
 import java.util.concurrent.TimeUnit;
 
-import OverflowGateBot.lib.discord.command.BotSubcommandClass;
+import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 
-public class AvatarCommand extends BotSubcommandClass {
+public class AvatarCommand extends SimpleBotSubcommand {
     public AvatarCommand() {
         super("avatar", "Hiển thị ảnh của người dùng");
         this.addOption(OptionType.USER, "user", "Tên", true);

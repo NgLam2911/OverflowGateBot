@@ -109,9 +109,12 @@ public class MessagesHandler extends ListenerAdapter {
 
         // Update exp on message sent
         userHandler.onMessage(message);
-        DatabaseHandler.log(LOG_TYPE.MESSAGE, new Document().append("messageId", message.getId()).append("message",
-                getMessageSender(message) + ": " + message.getContentDisplay())
-                .append("userId", member == null ? null : member.getId()));
+        DatabaseHandler.log(LOG_TYPE.MESSAGE, new Document()//
+                .append("message",
+                        getMessageSender(message) + ": " + message.getContentDisplay())//
+                .append("messageId", message.getId())//
+                .append("userId", member == null ? null : member.getId())//
+                .append("guildId", message.getGuild().getId()));
 
         // Log member message/file/image url to terminals
         if (!message.getContentRaw().isEmpty())

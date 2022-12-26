@@ -6,9 +6,9 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 
 import static OverflowGateBot.OverflowGateBot.messagesHandler;
 
-import OverflowGateBot.lib.discord.command.BotSubcommandClass;
+import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
 
-public class PostMapCommand extends BotSubcommandClass {
+public class PostMapCommand extends SimpleBotSubcommand {
     public PostMapCommand() {
         super("postmap", "Chuyển tập tin bản đồ thành hình ảnh");
         this.addOption(OptionType.ATTACHMENT, "mapfile", "Tập tin map.msv", true);

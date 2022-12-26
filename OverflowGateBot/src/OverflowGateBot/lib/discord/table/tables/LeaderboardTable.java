@@ -12,7 +12,7 @@ import com.mongodb.client.MongoCollection;
 import OverflowGateBot.lib.data.UserData;
 import OverflowGateBot.lib.discord.command.commands.subcommands.UserCommands.LeaderboardCommand.LEADERBOARD;
 import OverflowGateBot.lib.discord.command.commands.subcommands.UserCommands.LeaderboardCommand.ORDER;
-import OverflowGateBot.lib.discord.table.TableEmbedMessageClass;
+import OverflowGateBot.lib.discord.table.SimpleTable;
 import OverflowGateBot.main.DatabaseHandler;
 import OverflowGateBot.main.DatabaseHandler.DATABASE;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -23,7 +23,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 
 import static OverflowGateBot.OverflowGateBot.*;
 
-public class LeaderboardTable extends TableEmbedMessageClass {
+public class LeaderboardTable extends SimpleTable {
 
     private final LEADERBOARD leaderboard;
     private final ORDER order;
@@ -35,6 +35,7 @@ public class LeaderboardTable extends TableEmbedMessageClass {
         super(event, 2);
         this.leaderboard = leaderboard;
         this.order = order;
+        
         addButton("<<<", () -> this.firstPage());
         addButton("<", () -> this.previousPage());
         addButton("X", () -> this.delete());

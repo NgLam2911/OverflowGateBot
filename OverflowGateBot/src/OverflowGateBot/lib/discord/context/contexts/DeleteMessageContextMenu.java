@@ -1,12 +1,12 @@
 package OverflowGateBot.lib.discord.context.contexts;
 
-import OverflowGateBot.lib.discord.context.BotContextMenuClass;
+import OverflowGateBot.lib.discord.context.SimpleBotContextMenu;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.MessageEmbed.AuthorInfo;
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent;
 
-public class DeleteMessageContextMenu extends BotContextMenuClass {
+public class DeleteMessageContextMenu extends SimpleBotContextMenu {
 
     public DeleteMessageContextMenu() {
         super("Delete Message");

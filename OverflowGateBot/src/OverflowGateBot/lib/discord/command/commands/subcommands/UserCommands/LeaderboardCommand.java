@@ -1,6 +1,6 @@
 package OverflowGateBot.lib.discord.command.commands.subcommands.UserCommands;
 
-import OverflowGateBot.lib.discord.command.BotSubcommandClass;
+import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
 import OverflowGateBot.lib.discord.table.tables.LeaderboardTable;
 
 import net.dv8tion.jda.api.entities.Member;
@@ -12,7 +12,7 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 
 import java.util.HashMap;
 
-public class LeaderboardCommand extends BotSubcommandClass {
+public class LeaderboardCommand extends SimpleBotSubcommand {
 
     public enum ORDER {
         LEVEL,

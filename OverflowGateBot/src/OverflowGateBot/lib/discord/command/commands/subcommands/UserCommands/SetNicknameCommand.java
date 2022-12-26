@@ -10,9 +10,9 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import static OverflowGateBot.OverflowGateBot.*;
 
 import OverflowGateBot.lib.data.UserData;
-import OverflowGateBot.lib.discord.command.BotSubcommandClass;
+import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
 
-public class SetNicknameCommand extends BotSubcommandClass {
+public class SetNicknameCommand extends SimpleBotSubcommand {
     public SetNicknameCommand() {
         super("setnickname", "Thay đổi tên của người dùng", true, false);
         this.addOption(OptionType.STRING, "nickname", "Biệt danh muốn đặt", true).//

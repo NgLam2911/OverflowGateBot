@@ -9,6 +9,7 @@ import javax.annotation.Nonnull;
 import OverflowGateBot.lib.BotException;
 import OverflowGateBot.lib.data.DataCache;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -20,7 +21,7 @@ import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
 
 import static OverflowGateBot.OverflowGateBot.*;
 
-public class TableEmbedMessageClass extends DataCache {
+public class SimpleTable extends DataCache {
 
     private List<EmbedBuilder> tables = new ArrayList<EmbedBuilder>();
     private List<TableButton> buttons = new ArrayList<TableButton>();
@@ -28,7 +29,7 @@ public class TableEmbedMessageClass extends DataCache {
     protected int pageNumber = 0;
     protected boolean showPageNumber = true;
 
-    public TableEmbedMessageClass(SlashCommandInteractionEvent event, int aliveLimit) {
+    public SimpleTable(SlashCommandInteractionEvent event, int aliveLimit) {
         super(aliveLimit, 0);
         this.event = event;
     }
@@ -61,6 +62,13 @@ public class TableEmbedMessageClass extends DataCache {
 
     public boolean addButton(@Nonnull String buttonName, @Nonnull Runnable r) {
         Button button = Button.primary(getId() + ":" + buttonName, buttonName);
+        TableButton tableButton = new TableButton(button, r);
+
+        return buttons.add(tableButton);
+    }
+
+    public boolean addButton(@Nonnull String buttonName, @Nonnull String emojiString, @Nonnull Runnable r) {
+        Button button = Button.success(getId() + ":" + buttonName, Emoji.fromMarkdown(emojiString));
         TableButton tableButton = new TableButton(button, r);
 
         return buttons.add(tableButton);
@@ -115,6 +123,10 @@ public class TableEmbedMessageClass extends DataCache {
     }
 
     public void send() {
+        if (getMaxPage() <= 0) {
+            event.getHook().editOriginal("Không có dữ liệu");
+            return;
+        }
         WebhookMessageAction<Message> action = event.getHook().sendMessageEmbeds(getCurrentPage());
         Collection<Button> temp = new ArrayList<Button>();
         for (TableButton key : buttons)

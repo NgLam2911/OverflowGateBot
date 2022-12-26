@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Nonnull;
 
-import OverflowGateBot.lib.discord.table.TableEmbedMessageClass;
+import OverflowGateBot.lib.discord.table.SimpleTable;
 import arc.util.Log;
 
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -15,14 +15,14 @@ import static OverflowGateBot.OverflowGateBot.*;
 
 public class TableEmbedMessageHandler extends ListenerAdapter {
 
-    public ConcurrentHashMap<String, TableEmbedMessageClass> tableCache = new ConcurrentHashMap<String, TableEmbedMessageClass>();
+    public ConcurrentHashMap<String, SimpleTable> tableCache = new ConcurrentHashMap<String, SimpleTable>();
 
     public TableEmbedMessageHandler() {
         jda.addEventListener(this);
         Log.info("Table embed message handler up");
     }
 
-    public void add(TableEmbedMessageClass table) {
+    public void add(SimpleTable table) {
         tableCache.put(table.getId(), table);
     }
 
@@ -40,9 +40,9 @@ public class TableEmbedMessageHandler extends ListenerAdapter {
     }
 
     public void update() {
-        Iterator<TableEmbedMessageClass> iterator = tableCache.values().iterator();
+        Iterator<SimpleTable> iterator = tableCache.values().iterator();
         while (iterator.hasNext()) {
-            TableEmbedMessageClass table = iterator.next();
+            SimpleTable table = iterator.next();
             if (!table.isAlive(1)) {
                 table.delete();
                 iterator.remove();

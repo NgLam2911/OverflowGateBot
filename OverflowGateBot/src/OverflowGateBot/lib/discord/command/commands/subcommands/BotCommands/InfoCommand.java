@@ -7,13 +7,13 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
-import OverflowGateBot.lib.discord.command.BotSubcommandClass;
+import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
 
 import static OverflowGateBot.OverflowGateBot.*;
 
 import java.time.format.DateTimeFormatter;
 
-public class InfoCommand extends BotSubcommandClass {
+public class InfoCommand extends SimpleBotSubcommand {
     public InfoCommand() {
         super("info", "Hiển thị thông tin cơ bản của bot");
     }

@@ -5,9 +5,9 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import static OverflowGateBot.OverflowGateBot.commandHandler;
 import static OverflowGateBot.OverflowGateBot.contextMenuHandler;
 
-import OverflowGateBot.lib.discord.command.BotSubcommandClass;
+import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
 
-public class RefreshSlashCommand extends BotSubcommandClass {
+public class RefreshSlashCommand extends SimpleBotSubcommand {
     public RefreshSlashCommand() {
         super("refreshslashcommand", "Làm mới lại tất cả các lệnh trong máy chủ");
     }

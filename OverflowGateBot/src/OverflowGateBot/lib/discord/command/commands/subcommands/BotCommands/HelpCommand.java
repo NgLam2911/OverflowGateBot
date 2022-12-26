@@ -9,10 +9,10 @@ import static OverflowGateBot.OverflowGateBot.commandHandler;
 
 import java.util.HashMap;
 
-import OverflowGateBot.lib.discord.command.BotCommandClass;
-import OverflowGateBot.lib.discord.command.BotSubcommandClass;
+import OverflowGateBot.lib.discord.command.SimpleBotCommand;
+import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
 
-public class HelpCommand extends BotSubcommandClass {
+public class HelpCommand extends SimpleBotSubcommand {
     public HelpCommand() {
         super("help", "Hiển thị thông tin các lệnh");
         this.addOption(OptionType.STRING, "command", "Tên lệnh", true, true).//
@@ -38,6 +38,7 @@ public class HelpCommand extends BotSubcommandClass {
         if (commandHandler.commands.containsKey(command))
             reply(event, "/" + command + " " + subcommand + "\n"
                     + commandHandler.commands.get(command).getHelpString(subcommand), 30);
+        else reply(event, "Lệnh " + command + " " + subcommand + " không tồn tại" , 30);
     }
 
     @Override
@@ -53,7 +54,7 @@ public class HelpCommand extends BotSubcommandClass {
             if (commandOption == null)
                 return;
             String command = commandOption.getAsString();
-            BotCommandClass subcommands = commandHandler.commands.get(command);
+            SimpleBotCommand subcommands = commandHandler.commands.get(command);
             if (subcommands == null)
                 return;
             HashMap<String, String> options = new HashMap<String, String>();

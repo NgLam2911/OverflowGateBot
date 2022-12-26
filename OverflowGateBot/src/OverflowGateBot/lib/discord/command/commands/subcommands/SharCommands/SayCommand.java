@@ -10,11 +10,11 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import java.util.HashMap;
 import java.util.List;
 
-import OverflowGateBot.lib.discord.command.BotSubcommandClass;
+import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
 
 import static OverflowGateBot.OverflowGateBot.*;
 
-public class SayCommand extends BotSubcommandClass {
+public class SayCommand extends SimpleBotSubcommand {
 
     public SayCommand() {
         super("say", "Shar only");

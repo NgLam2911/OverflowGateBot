@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
 
-import OverflowGateBot.lib.discord.context.BotContextMenuClass;
+import OverflowGateBot.lib.discord.context.SimpleBotContextMenu;
 import OverflowGateBot.lib.discord.context.contexts.DeleteMessageContextMenu;
 import OverflowGateBot.lib.discord.context.contexts.PostMapContextMenu;
 import OverflowGateBot.lib.discord.context.contexts.PostSchematicContextMenu;
@@ -23,7 +23,7 @@ import static OverflowGateBot.OverflowGateBot.*;
 
 public class ContextMenuHandler extends ListenerAdapter {
 
-    public HashMap<String, BotContextMenuClass> commands = new HashMap<>();
+    public HashMap<String, SimpleBotContextMenu> commands = new HashMap<>();
 
     public ContextMenuHandler() {
 
@@ -36,12 +36,12 @@ public class ContextMenuHandler extends ListenerAdapter {
         Log.info("Context menu handler up");
     }
 
-    public void addCommand(BotContextMenuClass command) {
+    public void addCommand(SimpleBotContextMenu command) {
         commands.put(command.name, command);
     }
 
     public void registerCommand(Guild guild) {
-        for (BotContextMenuClass command : commands.values()) {
+        for (SimpleBotContextMenu command : commands.values()) {
             guild.updateCommands().addCommands(command.command).complete();
         }
     }

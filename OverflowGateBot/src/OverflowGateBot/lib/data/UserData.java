@@ -46,10 +46,6 @@ public class UserData extends DataCache {
         this.guildId = guildId;
     }
 
-    protected void finalize() {
-        update();
-    }
-
     public UserData modify(@Nonnull String guildId, @Nonnull String userId, String name, Integer point, Integer level,
             Integer money, Integer pvpPoint) {
         this.userId = userId;

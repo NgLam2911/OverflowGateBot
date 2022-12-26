@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import OverflowGateBot.lib.data.GuildData;
-import OverflowGateBot.lib.discord.command.BotSubcommandClass;
-import OverflowGateBot.lib.discord.table.tables.PageTable;
+import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
+import OverflowGateBot.lib.discord.table.tables.GuildTable;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -17,9 +17,12 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 
 import static OverflowGateBot.OverflowGateBot.*;
 
-public class GuildCommand extends BotSubcommandClass {
+public class GuildCommand extends SimpleBotSubcommand {
+
+    private final int MAX_DISPLAY = 7;
+
     public GuildCommand() {
-        super("guild", "Hiển thị thông tin của máy chủ discord", false, true);
+        super("guild", "Hiển thị thông tin của máy chủ discord", false, false);
         this.addOption(OptionType.STRING, "guild", "Tên máy chủ", false, true);
     }
 
@@ -36,7 +39,7 @@ public class GuildCommand extends BotSubcommandClass {
             List<Guild> guilds = jda.getGuilds();
             EmbedBuilder builder = new EmbedBuilder();
             StringBuilder field = new StringBuilder();
-            PageTable table = new PageTable(event);
+            GuildTable table = new GuildTable(event);
 
             for (int i = 0; i < guilds.size(); i++) {
                 Guild guild = guilds.get(i);
@@ -44,9 +47,10 @@ public class GuildCommand extends BotSubcommandClass {
                 field.append("```Tên máy chủ: " + guild.getName() + "\n");
                 if (owner != null)
                     field.append("Chủ máy chủ: " + owner.getEffectiveName() + "\n");
+                field.append("Tổng số thành viên: " + guild.getMemberCount());
                 field.append("```");
 
-                if (i % 5 == 4) {
+                if (i % MAX_DISPLAY == MAX_DISPLAY - 1) {
                     builder.addField("_Máy chủ_", field.toString(), false);
                     table.addPage(builder);
                     builder.clear();
@@ -55,6 +59,7 @@ public class GuildCommand extends BotSubcommandClass {
             }
             table.addPage(builder);
             table.send();
+
         } else {
             // Get the guild base on name
             String guildId = guildOption.getAsString();

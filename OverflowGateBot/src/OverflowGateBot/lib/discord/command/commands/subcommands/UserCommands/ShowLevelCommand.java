@@ -5,11 +5,11 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import OverflowGateBot.lib.data.UserData;
-import OverflowGateBot.lib.discord.command.BotSubcommandClass;
+import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
 
 import static OverflowGateBot.OverflowGateBot.userHandler;
 
-public class ShowLevelCommand extends BotSubcommandClass {
+public class ShowLevelCommand extends SimpleBotSubcommand {
     public ShowLevelCommand() {
         super("showlevel", "Ẩn/ tắt ẩn cấp độ của người dùng");
         this.addOption(OptionType.BOOLEAN, "hide", "Ẩn", true);

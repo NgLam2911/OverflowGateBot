@@ -10,11 +10,11 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import java.util.HashMap;
 
 import OverflowGateBot.lib.data.GuildData;
-import OverflowGateBot.lib.discord.command.BotSubcommandClass;
+import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
 
 import static OverflowGateBot.OverflowGateBot.guildHandler;
 
-public class SetLevelRoleCommand extends BotSubcommandClass {
+public class SetLevelRoleCommand extends SimpleBotSubcommand {
     public SetLevelRoleCommand() {
         super("setlevelrole", "Cài đặt các vai trò của máy chủ");
         this.addOption(OptionType.ROLE, "role", "Vai trò muốn gán", true).//

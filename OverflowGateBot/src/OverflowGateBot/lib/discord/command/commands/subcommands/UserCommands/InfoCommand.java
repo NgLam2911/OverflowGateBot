@@ -12,13 +12,13 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import javax.annotation.Nonnull;
 
 import OverflowGateBot.lib.data.UserData;
-import OverflowGateBot.lib.discord.command.BotSubcommandClass;
+import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
 
 import static OverflowGateBot.OverflowGateBot.userHandler;
 
 import java.util.List;
 
-public class InfoCommand extends BotSubcommandClass {
+public class InfoCommand extends SimpleBotSubcommand {
     public InfoCommand() {
         super("info", "Hiển thị thông tin người dùng", true, false);
         this.addOption(OptionType.USER, "user", "Tên thành viên", false);
