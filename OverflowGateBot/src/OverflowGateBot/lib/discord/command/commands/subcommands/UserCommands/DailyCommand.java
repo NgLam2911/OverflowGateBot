@@ -3,10 +3,9 @@ package OverflowGateBot.lib.discord.command.commands.subcommands.UserCommands;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-
-import OverflowGateBot.lib.BotException;
 import OverflowGateBot.lib.data.UserData;
 import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
+import OverflowGateBot.main.BotException;
 import OverflowGateBot.main.DatabaseHandler;
 import OverflowGateBot.main.DatabaseHandler.DATABASE;
 

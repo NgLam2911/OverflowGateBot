@@ -6,8 +6,8 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
-import OverflowGateBot.lib.BotException;
 import OverflowGateBot.lib.data.DataCache;
+import OverflowGateBot.main.BotException;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.Guild;

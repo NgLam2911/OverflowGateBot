@@ -1,4 +1,4 @@
-package OverflowGateBot.lib;
+package OverflowGateBot.main;
 
 public enum BotException {
 

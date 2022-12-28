@@ -10,11 +10,11 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 
-import OverflowGateBot.lib.BotException;
 import OverflowGateBot.lib.data.SCHEMATIC_TAG;
 import OverflowGateBot.lib.data.SchematicInfo;
 import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
 import OverflowGateBot.lib.discord.table.tables.SchematicTable;
+import OverflowGateBot.main.BotException;
 import OverflowGateBot.main.DatabaseHandler;
 import OverflowGateBot.main.DatabaseHandler.DATABASE;
 

@@ -15,11 +15,11 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Predicate;
 
-import OverflowGateBot.lib.BotException;
 import OverflowGateBot.lib.data.SchematicData;
 import OverflowGateBot.lib.data.SchematicInfo;
 import OverflowGateBot.lib.data.SCHEMATIC_TAG;
 import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
+import OverflowGateBot.main.BotException;
 
 import static OverflowGateBot.OverflowGateBot.*;
 

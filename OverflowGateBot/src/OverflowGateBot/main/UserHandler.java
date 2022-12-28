@@ -12,7 +12,6 @@ import org.bson.conversions.Bson;
 
 import com.mongodb.client.MongoCollection;
 
-import OverflowGateBot.lib.BotException;
 import OverflowGateBot.lib.data.GuildData;
 import OverflowGateBot.lib.data.UserData;
 import OverflowGateBot.main.DatabaseHandler.DATABASE;
