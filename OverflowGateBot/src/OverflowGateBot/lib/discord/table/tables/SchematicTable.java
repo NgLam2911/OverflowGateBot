@@ -134,14 +134,14 @@ public class SchematicTable extends SimpleTable {
             if (authorId != null) {
                 User user = jda.getUserById(authorId);
                 if (user != null)
-                    field.append("Tác giả: " + user.getName() + "\n");
+                    field.append("- Tác giả: " + user.getName() + "\n");
             }
 
-            field.append("Nhãn: ");
+            field.append("- Nhãn: ");
             for (int i = 0; i < this.currentInfo.tag.size() - 1; i++)
                 field.append(this.currentInfo.tag.get(i).toLowerCase());
             field.append(this.currentInfo.tag.get(this.currentInfo.tag.size() - 1).toLowerCase() + "\n");
-            field.append("Sao: " + this.currentInfo.star);
+            field.append("- Sao: " + this.currentInfo.star);
 
             builder.addField("*Thông tin*", field.toString(), false);
 

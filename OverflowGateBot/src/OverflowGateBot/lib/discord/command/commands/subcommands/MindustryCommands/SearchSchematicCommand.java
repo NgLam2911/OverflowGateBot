@@ -67,8 +67,14 @@ public class SearchSchematicCommand extends SimpleBotSubcommand {
                 SCHEMATIC_INFO_COLLECTION,
                 SchematicInfo.class);
 
-        FindIterable<SchematicInfo> schematicInfo = collection.find(Filters.and(Filters.all("tag", tags), filter),
-                SchematicInfo.class).limit(SEARCH_LIMIT).sort(new Document().append("star", -1));
+        FindIterable<SchematicInfo> schematicInfo;
+        if (tags.length <= 0) {
+            schematicInfo = collection.find(filter,
+                    SchematicInfo.class).limit(SEARCH_LIMIT).sort(new Document().append("star", -1));
+        } else {
+            schematicInfo = collection.find(Filters.and(Filters.all("tag", tags), filter),
+                    SchematicInfo.class).limit(SEARCH_LIMIT).sort(new Document().append("star", -1));
+        }
 
         if (schematicInfo.first() == null) {
             if (tagOption == null)

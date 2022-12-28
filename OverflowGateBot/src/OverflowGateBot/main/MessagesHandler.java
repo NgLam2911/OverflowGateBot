@@ -358,8 +358,8 @@ public class MessagesHandler extends ListenerAdapter {
         StringBuilder field = new StringBuilder();
 
         // Schem heigh, width
-        field.append("Kích thước:" + String.valueOf(schem.width) + "x" + String.valueOf(schem.height) + "\n");
-        field.append("Tài nguyên cần: ");
+        field.append("- Kích thước:" + String.valueOf(schem.width) + "x" + String.valueOf(schem.height) + "\n");
+        field.append("- Tài nguyên cần: ");
         // Item requirements
         for (ItemStack stack : schem.requirements()) {
             String itemName = stack.item.name.replace("-", "");
@@ -376,10 +376,11 @@ public class MessagesHandler extends ListenerAdapter {
 
         int powerProduction = (int) Math.round(schem.powerProduction()) * 60;
         int powerConsumption = (int) Math.round(schem.powerConsumption()) * 60;
-        if (powerProduction != 0)
-            field.append("\nNăng lượng tạo ra: " + String.valueOf(powerProduction));
         if (powerConsumption != 0)
-            field.append("\nNăng lượng sử dụng: " + String.valueOf(powerConsumption));
+            field.append("\n- Năng lượng sử dụng: " + String.valueOf(powerConsumption));
+
+        if (powerProduction != 0)
+            field.append("\n- Năng lượng tạo ra: " + String.valueOf(powerProduction));
 
         builder.addField("*Thông tin*", field.toString(), true);
 
