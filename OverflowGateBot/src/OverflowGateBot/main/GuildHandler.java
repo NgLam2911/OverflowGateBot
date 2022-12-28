@@ -36,8 +36,10 @@ public class GuildHandler {
         while (iterator.hasNext()) {
             GuildData guild = iterator.next();
             if (!guild.isAlive(1)) {
-                iterator.remove();
+                Log.info("Guild <" + guild.guildId + "> offline");
                 guild.update();
+                iterator.remove();
+
             }
         }
     }

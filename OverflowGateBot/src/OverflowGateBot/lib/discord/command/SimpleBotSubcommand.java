@@ -17,7 +17,7 @@ import static OverflowGateBot.OverflowGateBot.*;
 
 public class SimpleBotSubcommand extends SubcommandData {
 
-    private final int MAX_OPTIONS = 10;
+    protected final int MAX_OPTIONS = 10;
     private boolean threaded = false;
     private boolean updateMessage = false;
 

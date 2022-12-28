@@ -1,6 +1,5 @@
 package OverflowGateBot.lib.discord.command.commands.subcommands.MindustryCommands;
 
-
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 
@@ -10,7 +9,7 @@ import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
 
 public class PostMapCommand extends SimpleBotSubcommand {
     public PostMapCommand() {
-        super("postmap", "Chuyển tập tin bản đồ thành hình ảnh");
+        super("postmap", "Chuyển tập tin bản đồ thành hình ảnh", false, true);
         this.addOption(OptionType.ATTACHMENT, "mapfile", "Tập tin map.msv", true);
     }
 

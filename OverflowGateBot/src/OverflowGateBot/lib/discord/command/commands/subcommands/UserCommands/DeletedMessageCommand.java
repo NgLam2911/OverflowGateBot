@@ -8,7 +8,7 @@ import com.mongodb.client.MongoCursor;
 
 import OverflowGateBot.lib.BotException;
 import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
-import OverflowGateBot.lib.discord.table.tables.DeletedMessageTable;
+import OverflowGateBot.lib.discord.table.SimpleTable;
 import OverflowGateBot.main.DatabaseHandler;
 import OverflowGateBot.main.DatabaseHandler.DATABASE;
 import OverflowGateBot.main.DatabaseHandler.LOG_TYPE;
@@ -27,7 +27,7 @@ public class DeletedMessageCommand extends SimpleBotSubcommand {
     private final int MAX_DISPLAY = 10;
 
     public DeletedMessageCommand() {
-        super("deletedmessage", "Hiển thị tin nhắn đã xóa gần đây nhất", true, true);
+        super("deletedmessage", "Hiển thị tin nhắn đã xóa gần đây nhất", true, false);
         this.addOption(OptionType.INTEGER, "amount", "Số lượng tin nhắn", true).//
                 addOption(OptionType.USER, "user", "Người xóa tin nhắn");
     }
@@ -64,33 +64,47 @@ public class DeletedMessageCommand extends SimpleBotSubcommand {
         MongoCollection<Document> messageCollection = DatabaseHandler.getDatabase(DATABASE.LOG)
                 .getCollection(LOG_TYPE.MESSAGE.name());
 
-        FindIterable<Document> data = deletedCollection.find().sort(new Document().append(TIME_INSERT_STRING, -1))
-                .limit(MAX_RETRIEVE);
+        FindIterable<Document> data = deletedCollection.find().sort(new Document().append(TIME_INSERT_STRING, -1));
 
         Document messageData;
         EmbedBuilder builder = new EmbedBuilder();
         StringBuilder field = new StringBuilder();
-        DeletedMessageTable table = new DeletedMessageTable(event, 2);
+        SimpleTable table = new SimpleTable(event, 2);
+        table.addButton("<<<", () -> table.firstPage())//
+                .addButton("<", () -> table.previousPage())//
+                .addButton("X", () -> table.delete())//
+                .addButton(">", () -> table.nextPage())//
+                .addButton(">>>", () -> table.lastPage());
+
         MongoCursor<Document> cursor = data.iterator();
         int i = 0;
         while (cursor.hasNext()) {
             messageData = cursor.next();
             if (messageData.containsKey("messageId")) {
                 filter.append("messageId", messageData.get("messageId"));
-                Document message = messageCollection.find(filter).limit(1).first();
+                Document message = messageCollection.find(filter).first();
+                String guildId = getGuildId(message);
+                if (!guild.getId().equals(guildId))
+                    continue;
                 String content = getMessage(message);
+                if (content == null)
+                    continue;
                 field.append(content + "\n");
-
                 if (i % MAX_DISPLAY == MAX_DISPLAY - 1) {
+                    builder.addField("Tin nhắn đã xóa", field.toString(),
+                            false);
                     table.addPage(builder);
                     field = new StringBuilder();
                     builder.clear();
                 }
                 i += 1;
+
             }
             if (i >= amount)
                 break;
         }
+        builder.addField("Tin nhắn đã xóa", field.toString(), false);
+        table.addPage(builder);
         table.send();
     }
 
@@ -100,5 +114,13 @@ public class DeletedMessageCommand extends SimpleBotSubcommand {
         if (!message.containsKey("message"))
             return null;
         return message.get("message").toString();
+    }
+
+    public String getGuildId(Document message) {
+        if (message == null)
+            return null;
+        if (!message.containsKey("guildId"))
+            return null;
+        return message.get("guildId").toString();
     }
 }

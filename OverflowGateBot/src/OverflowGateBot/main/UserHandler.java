@@ -43,8 +43,10 @@ public class UserHandler {
         while (iterator.hasNext()) {
             UserData user = iterator.next();
             if (!user.isAlive(1)) {
-                iterator.remove();
+                Log.info("User <" + user.userId + "> offline");
                 user.update();
+                iterator.remove();
+
             }
         }
     }

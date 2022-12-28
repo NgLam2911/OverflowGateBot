@@ -35,7 +35,7 @@ public class LeaderboardTable extends SimpleTable {
         super(event, 2);
         this.leaderboard = leaderboard;
         this.order = order;
-        
+
         addButton("<<<", () -> this.firstPage());
         addButton("<", () -> this.previousPage());
         addButton("X", () -> this.delete());
@@ -53,7 +53,7 @@ public class LeaderboardTable extends SimpleTable {
 
     @Override
     public void lastPage() {
-        this.pageNumber = getMaxPage();
+        this.pageNumber = getMaxPage() - 1;
         update();
     }
 

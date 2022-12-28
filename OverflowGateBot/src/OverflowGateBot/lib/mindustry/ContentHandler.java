@@ -46,6 +46,10 @@ public class ContentHandler {
 
     public ContentHandler() {
 
+        new Fi("cache").deleteDirectory();
+        new File("cache/").mkdir();
+        new File("cache/temp/").mkdir();
+
         Version.enabled = false;
         Vars.content = new ContentLoader();
         Vars.content.createBaseContent();
@@ -243,7 +247,6 @@ public class ContentHandler {
         });
 
         requests.each(req -> req.block.drawPlanConfigTop(req, requests));
-
         return image;
     }
 

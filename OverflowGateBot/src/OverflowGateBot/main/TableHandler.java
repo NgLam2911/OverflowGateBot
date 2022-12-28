@@ -13,13 +13,13 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 import static OverflowGateBot.OverflowGateBot.*;
 
-public class TableEmbedMessageHandler extends ListenerAdapter {
+public class TableHandler extends ListenerAdapter {
 
     public ConcurrentHashMap<String, SimpleTable> tableCache = new ConcurrentHashMap<String, SimpleTable>();
 
-    public TableEmbedMessageHandler() {
+    public TableHandler() {
         jda.addEventListener(this);
-        Log.info("Table embed message handler up");
+        Log.info("Table handler up");
     }
 
     public void add(SimpleTable table) {

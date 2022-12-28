@@ -32,7 +32,8 @@ public class DatabaseHandler {
         USER,
         GUILD,
         LOG,
-        DAILY
+        DAILY,
+        MINDUSTRY
     }
 
     public enum LOG_TYPE {
@@ -42,6 +43,7 @@ public class DatabaseHandler {
         MESSAGE_DELETED
     }
 
+    private static String DATABASE_URL = System.getenv("DATABASE_URL");
     private static ConnectionString connectionString = new ConnectionString(DATABASE_URL);
     private static MongoClientSettings settings = MongoClientSettings.builder()
             .applyConnectionString(connectionString)

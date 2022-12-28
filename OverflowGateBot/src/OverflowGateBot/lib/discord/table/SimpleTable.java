@@ -17,7 +17,6 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.requests.restaction.WebhookMessageAction;
 
 import static OverflowGateBot.OverflowGateBot.*;
 
@@ -28,6 +27,7 @@ public class SimpleTable extends DataCache {
     protected final SlashCommandInteractionEvent event;
     protected int pageNumber = 0;
     protected boolean showPageNumber = true;
+    protected Message message;
 
     public SimpleTable(SlashCommandInteractionEvent event, int aliveLimit) {
         super(aliveLimit, 0);
@@ -55,26 +55,47 @@ public class SimpleTable extends DataCache {
     }
 
     public boolean addPage(EmbedBuilder value) {
-        if (value.isEmpty())
+        if (value == null || value.isEmpty())
             return false;
         return tables.add(new EmbedBuilder(value));
     }
 
-    public boolean addButton(@Nonnull String buttonName, @Nonnull Runnable r) {
+    public SimpleTable addButton(@Nonnull String buttonName, @Nonnull Runnable r) {
         Button button = Button.primary(getId() + ":" + buttonName, buttonName);
         TableButton tableButton = new TableButton(button, r);
 
-        return buttons.add(tableButton);
+        buttons.add(tableButton);
+        return this;
     }
 
-    public boolean addButton(@Nonnull String buttonName, @Nonnull String emojiString, @Nonnull Runnable r) {
-        Button button = Button.success(getId() + ":" + buttonName, Emoji.fromMarkdown(emojiString));
+    public SimpleTable addButtonSuccess(@Nonnull String buttonName, @Nonnull Emoji emo, @Nonnull Runnable r) {
+        Button button = Button.success(getId() + ":" + buttonName, emo);
         TableButton tableButton = new TableButton(button, r);
 
-        return buttons.add(tableButton);
+        buttons.add(tableButton);
+        return this;
     }
 
-    public @Nonnull MessageEmbed getCurrentPage() {
+    public SimpleTable addButtonDeny(@Nonnull String buttonName, @Nonnull Runnable r) {
+        Button button = Button.danger(getId() + ":" + buttonName, buttonName);
+        TableButton tableButton = new TableButton(button, r);
+
+        buttons.add(tableButton);
+        return this;
+    }
+
+    public @Nonnull Collection<Button> getButton() {
+        Collection<Button> temp = new ArrayList<Button>();
+        for (TableButton key : buttons)
+            temp.add(key.getButton());
+        return temp;
+    }
+
+    public void clearButton() {
+        this.buttons.clear();
+    }
+
+    public MessageEmbed getCurrentPage() {
         EmbedBuilder value = this.tables.get(pageNumber);
         return addPageFooter(value).build();
     }
@@ -124,26 +145,40 @@ public class SimpleTable extends DataCache {
 
     public void send() {
         if (getMaxPage() <= 0) {
-            event.getHook().editOriginal("Không có dữ liệu");
+            event.getHook().editOriginal("```Không có dữ liệu```").queue();
             return;
         }
-        WebhookMessageAction<Message> action = event.getHook().sendMessageEmbeds(getCurrentPage());
+        MessageEmbed message = getCurrentPage();
+        if (message == null) {
+            event.getHook().editOriginal("```Đã hết dữ liệu```").queue();
+            return;
+        }
         Collection<Button> temp = new ArrayList<Button>();
         for (TableButton key : buttons)
             temp.add(key.getButton());
-        action.addActionRow(temp).queue();
+        event.getHook().sendMessageEmbeds(message).addActionRow(temp).queue();
         tableEmbedMessageHandler.add(this);
 
     }
 
-    @Override
     public void update() {
         this.reset();
-        this.event.getHook().editOriginalEmbeds(getCurrentPage()).queue();
+        if (getMaxPage() <= 0) {
+            event.getHook().editOriginal("```Không có dữ liệu```").queue();
+            return;
+        }
+        MessageEmbed message = getCurrentPage();
+        if (message == null) {
+            event.getHook().editOriginal("```Đã hết dữ liệu```").queue();
+            return;
+        }
+
+        this.event.getHook().editOriginalEmbeds(message).setActionRow(getButton()).queue();
     }
 
     public void onCommand(@Nonnull ButtonInteractionEvent event) {
-        String key = event.getComponentId().split(":")[1];
+        this.message = event.getMessage();
+        String key = event.getComponentId();
         for (TableButton b : buttons) {
             String id = b.getId();
             if (id == null)
@@ -173,7 +208,7 @@ public class SimpleTable extends DataCache {
         }
 
         public String getId() {
-            return this.getButton().getLabel();
+            return this.getButton().getId();
         }
     }
 

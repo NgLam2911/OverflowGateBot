@@ -145,7 +145,7 @@ public class MessagesHandler extends ListenerAdapter {
 
     @Override
     public void onMessageDelete(@Nonnull MessageDeleteEvent event) {
-        DatabaseHandler.log(LOG_TYPE.MESSAGE_DELETED, new Document("DELETED", event.getMessageId()));
+        DatabaseHandler.log(LOG_TYPE.MESSAGE_DELETED, new Document("messageId", event.getMessageId()));
     }
 
     @Override
@@ -336,65 +336,75 @@ public class MessagesHandler extends ListenerAdapter {
     }
 
     public void sendSchematicPreview(Schematic schem, Member member, MessageChannel channel) {
-        /*
-         * if (!inChannels(member.getGuild(), channel, schematicChannel) &&
-         * !(channel.getType() == ChannelType.GUILD_PUBLIC_THREAD)) {
-         * sendTempMessage(channel, "Không gửi bản thiết kế vào kênh này",
-         * messageAliveTime); return; }
-         */
         try {
-            BufferedImage preview = contentHandler.previewSchematic(schem);
-            String sname = schem.name().replace("/", "_").replace(" ", "_").replace(":", "_");
-            if (sname.isEmpty())
-                sname = "empty";
+            File schemFile = getSchematicFile(schem);
+            File previewFile = getSchematicPreviewFile(schem);
+            EmbedBuilder builder = getSchematicEmbedBuilder(schem, previewFile, member);
 
-            new File("cache").mkdir();
-            File previewFile = new File("cache/temp/img_" + UUID.randomUUID() + ".png");
-            File schemFile = new File("cache/temp/" + sname + "." + Vars.schematicExtension);
-            Schematics.write(schem, new Fi(schemFile));
-            ImageIO.write(preview, "png", previewFile);
-
-            EmbedBuilder builder = new EmbedBuilder().setImage("attachment://" + previewFile.getName())
-                    .setAuthor(member.getEffectiveName(), member.getEffectiveAvatarUrl(),
-                            member.getEffectiveAvatarUrl())
-                    .setTitle(schem.name());
-
-            if (!schem.description().isEmpty())
-                builder.setFooter(schem.description());
-            StringBuilder field = new StringBuilder();
-
-            // Schem heigh, width
-            field.append("Size:" + String.valueOf(schem.width) + "x" + String.valueOf(schem.height) + "\n");
-
-            // Item requirements
-            for (ItemStack stack : schem.requirements()) {
-                String itemName = stack.item.name.replace("-", "");
-                if (itemName == null)
-                    continue;
-                List<Emote> emotes = member.getGuild().getEmotesByName(itemName, true);
-                if (!emotes.isEmpty())
-                    field.append(emotes.get(0).getAsMention()).append(stack.amount).append("  ");
-                else
-                    field.append(stack.item.name + ": " + stack.amount + " ");
-            }
-
-            // Power input/output
-
-            int powerProduction = (int) Math.round(schem.powerProduction()) * 60;
-            int powerConsumption = (int) Math.round(schem.powerConsumption()) * 60;
-            if (powerProduction != 0)
-                field.append("\nNăng lượng tạo ra: " + String.valueOf(powerProduction));
-            if (powerConsumption != 0)
-                field.append("\nNăng lượng sử dụng: " + String.valueOf(powerConsumption));
-
-            builder.addField("*Thông tin:*", field.toString(), true);
-            // send embed
             channel.sendFile(schemFile).addFile(previewFile).setEmbeds(builder.build()).queue();
-
         } catch (Exception e) {
             e.printStackTrace();
-            sendTempMessage(channel, "Bản thiết kế lỗi: " + e.getMessage(), 30);
         }
+    }
+
+    public EmbedBuilder getSchematicEmbedBuilder(Schematic schem, File previewFile, Member member) {
+        EmbedBuilder builder = new EmbedBuilder().setImage("attachment://" + previewFile.getName())
+                .setAuthor(member.getEffectiveName(), member.getEffectiveAvatarUrl(),
+                        member.getEffectiveAvatarUrl())
+                .setTitle(schem.name());
+
+        if (!schem.description().isEmpty())
+            builder.setFooter(schem.description());
+        StringBuilder field = new StringBuilder();
+
+        // Schem heigh, width
+        field.append("Kích thước:" + String.valueOf(schem.width) + "x" + String.valueOf(schem.height) + "\n");
+        field.append("Tài nguyên cần: ");
+        // Item requirements
+        for (ItemStack stack : schem.requirements()) {
+            String itemName = stack.item.name.replace("-", "");
+            if (itemName == null)
+                continue;
+            List<Emote> emotes = member.getGuild().getEmotesByName(itemName, true);
+            if (!emotes.isEmpty())
+                field.append(emotes.get(0).getAsMention()).append(stack.amount).append("  ");
+            else
+                field.append(stack.item.name + ": " + stack.amount + " ");
+        }
+
+        // Power input/output
+
+        int powerProduction = (int) Math.round(schem.powerProduction()) * 60;
+        int powerConsumption = (int) Math.round(schem.powerConsumption()) * 60;
+        if (powerProduction != 0)
+            field.append("\nNăng lượng tạo ra: " + String.valueOf(powerProduction));
+        if (powerConsumption != 0)
+            field.append("\nNăng lượng sử dụng: " + String.valueOf(powerConsumption));
+
+        builder.addField("*Thông tin*", field.toString(), true);
+
+        return builder;
+    }
+
+    public @Nonnull File getSchematicFile(Schematic schem) throws IOException {
+        String sname = schem.name().replace("/", "_").replace(" ", "_").replace(":", "_");
+        new File("cache").mkdir();
+        if (sname.isEmpty())
+            sname = "empty";
+        File schemFile = new File("cache/temp/" + sname + "." + Vars.schematicExtension);
+        Schematics.write(schem, new Fi(schemFile));
+        return schemFile;
+    }
+
+    public @Nonnull File getSchematicPreviewFile(Schematic schem) throws Exception {
+
+        BufferedImage preview = contentHandler.previewSchematic(schem);
+        new File("cache").mkdir();
+        File previewFile = new File("cache/temp/img_" + UUID.randomUUID() + ".png");
+        ImageIO.write(preview, "png", previewFile);
+
+        return previewFile;
+
     }
 
     // Message send commands

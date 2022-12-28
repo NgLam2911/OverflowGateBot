@@ -5,7 +5,7 @@ import java.util.List;
 
 import OverflowGateBot.lib.data.GuildData;
 import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
-import OverflowGateBot.lib.discord.table.tables.GuildTable;
+import OverflowGateBot.lib.discord.table.SimpleTable;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -39,7 +39,7 @@ public class GuildCommand extends SimpleBotSubcommand {
             List<Guild> guilds = jda.getGuilds();
             EmbedBuilder builder = new EmbedBuilder();
             StringBuilder field = new StringBuilder();
-            GuildTable table = new GuildTable(event);
+            SimpleTable table = new SimpleTable(event, 2);
 
             for (int i = 0; i < guilds.size(); i++) {
                 Guild guild = guilds.get(i);

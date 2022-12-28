@@ -8,7 +8,7 @@ import static OverflowGateBot.OverflowGateBot.updateCommand;
 
 public class UpdateCommand extends SimpleBotSubcommand {
     public UpdateCommand() {
-        super("updatecommand", "Shar only");
+        super("updatecommand", "Shar only", false, true);
     }
 
     @Override
