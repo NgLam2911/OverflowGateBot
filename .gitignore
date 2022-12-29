@@ -25,6 +25,4 @@
 hs_err_pid*
 replay_pid*
 
-cache
-bin
-template
+ java -jar OverflowGateBot.jar
