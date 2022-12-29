@@ -1,7 +1,7 @@
 package OverflowGateBot.lib.discord.command.commands.subcommands.AdminCommands;
 
-import OverflowGateBot.lib.data.GuildData;
 import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
+import OverflowGateBot.lib.user.GuildData;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;

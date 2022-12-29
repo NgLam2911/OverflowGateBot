@@ -1,4 +1,4 @@
-package OverflowGateBot.lib.data;
+package OverflowGateBot.lib.user;
 
 import javax.annotation.Nonnull;
 
@@ -8,7 +8,7 @@ import org.bson.conversions.Bson;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.ReplaceOptions;
 
-import OverflowGateBot.lib.data.GuildData.BOOLEAN_STATE;
+import OverflowGateBot.lib.user.GuildData.BOOLEAN_STATE;
 import OverflowGateBot.main.DatabaseHandler;
 import OverflowGateBot.main.DatabaseHandler.DATABASE;
 import OverflowGateBot.main.DatabaseHandler.LOG_TYPE;

@@ -9,10 +9,10 @@ import javax.annotation.Nonnull;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 
-import OverflowGateBot.lib.data.UserData;
 import OverflowGateBot.lib.discord.command.commands.subcommands.UserCommands.LeaderboardCommand.LEADERBOARD;
 import OverflowGateBot.lib.discord.command.commands.subcommands.UserCommands.LeaderboardCommand.ORDER;
 import OverflowGateBot.lib.discord.table.SimpleTable;
+import OverflowGateBot.lib.user.UserData;
 import OverflowGateBot.main.DatabaseHandler;
 import OverflowGateBot.main.DatabaseHandler.DATABASE;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -94,6 +94,7 @@ public class LeaderboardTable extends SimpleTable {
                 FindIterable<UserData> data = collection.find();
                 data.forEach(d -> users.add(d));
                 break;
+                
             case ONLINE:
                 users.addAll(userHandler.userCache.values());
         }

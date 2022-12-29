@@ -12,8 +12,8 @@ import org.bson.conversions.Bson;
 
 import com.mongodb.client.MongoCollection;
 
-import OverflowGateBot.lib.data.GuildData;
-import OverflowGateBot.lib.data.UserData;
+import OverflowGateBot.lib.user.GuildData;
+import OverflowGateBot.lib.user.UserData;
 import OverflowGateBot.main.DatabaseHandler.DATABASE;
 import OverflowGateBot.main.DatabaseHandler.LOG_TYPE;
 import arc.util.Log;

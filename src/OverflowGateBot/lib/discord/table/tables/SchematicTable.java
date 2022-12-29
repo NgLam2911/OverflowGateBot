@@ -12,9 +12,9 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.Filters;
 
-import OverflowGateBot.lib.data.SchematicData;
-import OverflowGateBot.lib.data.SchematicInfo;
 import OverflowGateBot.lib.discord.table.SimpleTable;
+import OverflowGateBot.lib.mindustry.SchematicData;
+import OverflowGateBot.lib.mindustry.SchematicInfo;
 import OverflowGateBot.main.DatabaseHandler;
 import OverflowGateBot.main.DatabaseHandler.DATABASE;
 import mindustry.game.Schematic;

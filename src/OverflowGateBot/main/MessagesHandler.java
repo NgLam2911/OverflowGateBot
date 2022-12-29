@@ -23,10 +23,10 @@ import javax.imageio.*;
 
 import org.bson.Document;
 
-import OverflowGateBot.lib.data.GuildData;
-import OverflowGateBot.lib.data.UserData;
-import OverflowGateBot.lib.data.GuildData.CHANNEL_TYPE;
 import OverflowGateBot.lib.mindustry.ContentHandler;
+import OverflowGateBot.lib.user.GuildData;
+import OverflowGateBot.lib.user.UserData;
+import OverflowGateBot.lib.user.GuildData.CHANNEL_TYPE;
 import OverflowGateBot.main.DatabaseHandler.LOG_TYPE;
 
 import java.awt.image.*;

@@ -1,4 +1,4 @@
-package OverflowGateBot.lib.data;
+package OverflowGateBot.lib.user;
 
 public class DataCache {
 

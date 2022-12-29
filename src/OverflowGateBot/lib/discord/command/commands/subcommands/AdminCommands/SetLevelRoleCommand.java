@@ -9,8 +9,8 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 
 import java.util.HashMap;
 
-import OverflowGateBot.lib.data.GuildData;
 import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
+import OverflowGateBot.lib.user.GuildData;
 
 import static OverflowGateBot.OverflowGateBot.guildHandler;
 

@@ -15,5 +15,6 @@ public class PostSchematicContextMenu extends SimpleBotContextMenu {
     @Override
     protected void runCommand(MessageContextInteractionEvent event) {
         messagesHandler.sendSchematicPreview(event.getTarget(), event.getTextChannel());
+        event.getHook().deleteOriginal().queue();
     }
 }

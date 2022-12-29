@@ -1,7 +1,7 @@
 package OverflowGateBot.lib.discord.command.commands.subcommands.UserCommands;
 
-import OverflowGateBot.lib.data.UserData;
 import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
+import OverflowGateBot.lib.user.UserData;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;

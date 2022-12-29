@@ -15,5 +15,6 @@ public class PostMapContextMenu extends SimpleBotContextMenu {
     @Override
     protected void runCommand(MessageContextInteractionEvent event) {
         messagesHandler.sendMapPreview(event.getTarget(), event.getTextChannel());
+        event.getHook().deleteOriginal().queue();
     }
 }

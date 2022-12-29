@@ -3,9 +3,9 @@ package OverflowGateBot.lib.discord.command.commands.subcommands.BotCommands;
 import java.util.HashMap;
 import java.util.List;
 
-import OverflowGateBot.lib.data.GuildData;
 import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
 import OverflowGateBot.lib.discord.table.SimpleTable;
+import OverflowGateBot.lib.user.GuildData;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;

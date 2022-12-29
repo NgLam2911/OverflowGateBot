@@ -1,4 +1,4 @@
-package OverflowGateBot.lib.data;
+package OverflowGateBot.lib.mindustry;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;

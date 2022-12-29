@@ -1,4 +1,4 @@
-package OverflowGateBot.lib.data;
+package OverflowGateBot.lib.mindustry;
 
 import java.util.ArrayList;
 import java.util.List;

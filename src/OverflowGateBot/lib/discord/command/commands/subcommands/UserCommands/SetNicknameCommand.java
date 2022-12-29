@@ -9,8 +9,8 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 
 import static OverflowGateBot.OverflowGateBot.*;
 
-import OverflowGateBot.lib.data.UserData;
 import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
+import OverflowGateBot.lib.user.UserData;
 
 public class SetNicknameCommand extends SimpleBotSubcommand {
     public SetNicknameCommand() {

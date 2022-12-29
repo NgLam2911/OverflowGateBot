@@ -11,8 +11,8 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import OverflowGateBot.lib.data.UserData;
 import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
+import OverflowGateBot.lib.user.UserData;
 
 import static OverflowGateBot.OverflowGateBot.userHandler;
 

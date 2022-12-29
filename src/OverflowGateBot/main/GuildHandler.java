@@ -11,7 +11,7 @@ import org.bson.conversions.Bson;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 
-import OverflowGateBot.lib.data.GuildData;
+import OverflowGateBot.lib.user.GuildData;
 import OverflowGateBot.main.DatabaseHandler.DATABASE;
 import arc.util.Log;
 import net.dv8tion.jda.api.entities.Guild;

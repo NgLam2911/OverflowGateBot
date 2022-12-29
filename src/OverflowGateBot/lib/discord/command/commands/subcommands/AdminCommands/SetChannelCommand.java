@@ -10,9 +10,9 @@ import static OverflowGateBot.OverflowGateBot.guildHandler;
 
 import java.util.HashMap;
 
-import OverflowGateBot.lib.data.GuildData;
-import OverflowGateBot.lib.data.GuildData.CHANNEL_TYPE;
 import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
+import OverflowGateBot.lib.user.GuildData;
+import OverflowGateBot.lib.user.GuildData.CHANNEL_TYPE;
 
 public class SetChannelCommand extends SimpleBotSubcommand {
 

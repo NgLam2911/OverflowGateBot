@@ -15,10 +15,10 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Predicate;
 
-import OverflowGateBot.lib.data.SchematicData;
-import OverflowGateBot.lib.data.SchematicInfo;
-import OverflowGateBot.lib.data.SCHEMATIC_TAG;
 import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
+import OverflowGateBot.lib.mindustry.SCHEMATIC_TAG;
+import OverflowGateBot.lib.mindustry.SchematicData;
+import OverflowGateBot.lib.mindustry.SchematicInfo;
 import OverflowGateBot.main.BotException;
 
 import static OverflowGateBot.OverflowGateBot.*;
