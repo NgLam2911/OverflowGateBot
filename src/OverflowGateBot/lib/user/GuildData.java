@@ -49,6 +49,7 @@ public class GuildData extends DataCache {
     public ConcurrentHashMap<String, Integer> levelRoleId = new ConcurrentHashMap<String, Integer>();
 
     private Guild guild;
+    private boolean deleted = false;
 
     // For codec
     public GuildData() {
@@ -103,8 +104,10 @@ public class GuildData extends DataCache {
 
     public @Nonnull Guild _getGuild() {
         Guild guild = jda.getGuildById(this.guildId);
-        if (guild == null)
+        if (guild == null) {
+            delete();
             throw new IllegalStateException("Guild not found with id <" + guildId + ">");
+        }
         this.guild = guild;
         return guild;
     }
@@ -193,6 +196,9 @@ public class GuildData extends DataCache {
     // Update guild on database
     @Override
     public void update() {
+        // If this guild is deleted. don't save
+        if (deleted)
+            return;
         // Create collection if it's not exist
         if (!DatabaseHandler.collectionExists(DATABASE.GUILD, GUILD_COLLECTION)) {
             DatabaseHandler.createCollection(DATABASE.GUILD, GUILD_COLLECTION);
@@ -206,7 +212,23 @@ public class GuildData extends DataCache {
         // Filter for guild id, guild id is unique for each collection
         Bson filter = new Document().append("guildId", this.guildId);
         collection.replaceOne(filter, this, new ReplaceOptions().upsert(true));
-        DatabaseHandler.log(LOG_TYPE.DATABASE, new Document().append("UPDATE GUILD", this.toDocument()));
     }
 
+    public void delete() {
+        // Create collection if it's not exist
+        if (!DatabaseHandler.collectionExists(DATABASE.GUILD, GUILD_COLLECTION)) {
+            DatabaseHandler.createCollection(DATABASE.GUILD, GUILD_COLLECTION);
+        }
+        MongoCollection<GuildData> collection = DatabaseHandler.getDatabase(DATABASE.GUILD).getCollection(
+                GUILD_COLLECTION,
+                GuildData.class);
+        if (this.showLevel == BOOLEAN_STATE.UNSET.name())
+            this.showLevel = BOOLEAN_STATE.FALSE.name();
+
+        // Filter for guild id, guild id is unique for each collection
+        Bson filter = new Document().append("guildId", this.guildId);
+        collection.deleteOne(filter);
+        DatabaseHandler.log(LOG_TYPE.DATABASE, new Document().append("DELETE GUILD", this.toDocument()));
+        this.deleted = true;
+    }
 }

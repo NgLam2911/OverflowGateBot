@@ -36,9 +36,7 @@ public class ContextMenuHandler extends ListenerAdapter {
         Log.info("Context menu handler up");
     }
 
-    public void addCommand(SimpleBotContextMenu command) {
-        commands.put(command.name, command);
-    }
+    public void addCommand(SimpleBotContextMenu command) { commands.put(command.name, command); }
 
     public void registerCommand(Guild guild) {
         for (SimpleBotContextMenu command : commands.values()) {
@@ -82,13 +80,11 @@ public class ContextMenuHandler extends ListenerAdapter {
         }
 
         /*
-         * // Shar permission to use bot
-         * if (!guildHandler.guildConfigs.containsKey(guild.getId()) &&
-         * !member.getId().equals(SHAR_ID)) {
-         * reply(event,
+         * // Shar permission to use bot if
+         * (!guildHandler.guildConfigs.containsKey(guild.getId()) &&
+         * !member.getId().equals(SHAR_ID)) { reply(event,
          * "Máy chủ của bạn chưa được duyệt, liên hệ admin Shar để được duyệt", 30);
-         * return;
-         * }
+         * return; }
          */
 
         if (commands.containsKey(command)) {
@@ -97,13 +93,7 @@ public class ContextMenuHandler extends ListenerAdapter {
         }
     }
 
-    void replyEmbeds(MessageContextInteractionEvent event, EmbedBuilder builder, int sec) {
-        event.getHook().sendMessageEmbeds(builder.build())
-                .queue(_message -> _message.delete().queueAfter(sec, TimeUnit.SECONDS));
-    }
+    void replyEmbeds(MessageContextInteractionEvent event, EmbedBuilder builder, int sec) { event.getHook().sendMessageEmbeds(builder.build()).queue(_message -> _message.delete().queueAfter(sec, TimeUnit.SECONDS)); }
 
-    void reply(MessageContextInteractionEvent event, String content, int sec) {
-        event.getHook().sendMessage("```" + content + "```")
-                .queue(_message -> _message.delete().queueAfter(sec, TimeUnit.SECONDS));
-    }
+    void reply(MessageContextInteractionEvent event, String content, int sec) { event.getHook().sendMessage("```" + content + "```").queue(_message -> _message.delete().queueAfter(sec, TimeUnit.SECONDS)); }
 }

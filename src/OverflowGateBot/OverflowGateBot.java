@@ -55,9 +55,7 @@ public class OverflowGateBot {
         try {
             String TOKEN = System.getenv("TOKEN");
 
-            jda = JDABuilder.createDefault(TOKEN, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_EMOJIS,
-                    GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_PRESENCES, GatewayIntent.GUILD_MESSAGE_REACTIONS)
-                    .setMemberCachePolicy(MemberCachePolicy.ALL).disableCache(CacheFlag.VOICE_STATE).build();
+            jda = JDABuilder.createDefault(TOKEN, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_EMOJIS, GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_PRESENCES, GatewayIntent.GUILD_MESSAGE_REACTIONS).setMemberCachePolicy(MemberCachePolicy.ALL).disableCache(CacheFlag.VOICE_STATE).build();
 
             jda.awaitReady();
 
@@ -71,7 +69,6 @@ public class OverflowGateBot {
             contextMenuHandler = new ContextMenuHandler();
             serverStatusHandler = new ServerStatusHandler();
             tableEmbedMessageHandler = new TableHandler();
-            // updateCommand();
 
             networkHandler.run("UPDATE", 0, UPDATE_PERIOD, () -> update());
 
@@ -87,10 +84,7 @@ public class OverflowGateBot {
         guildHandler.update();
         serverStatusHandler.update();
         tableEmbedMessageHandler.update();
-        jda.getPresence()
-                .setActivity(Activity
-                        .playing("with " + guildHandler.guildCache.size() + " servers | " + userHandler.userCache.size()
-                                + " users"));
+        jda.getPresence().setActivity(Activity.playing("with " + guildHandler.guildCache.size() + " servers | " + userHandler.userCache.size() + " users"));
     }
 
     public static void updateCommand() {

@@ -9,6 +9,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.ReplaceOptions;
 
 import OverflowGateBot.lib.user.GuildData.BOOLEAN_STATE;
+import OverflowGateBot.main.BotException;
 import OverflowGateBot.main.DatabaseHandler;
 import OverflowGateBot.main.DatabaseHandler.DATABASE;
 import OverflowGateBot.main.DatabaseHandler.LOG_TYPE;
@@ -32,6 +33,7 @@ public class UserData extends DataCache {
     public Integer pvpPoint = 0;
     public String name = new String();
     public String showLevel = BOOLEAN_STATE.UNSET.name();
+    private boolean deleted = false;
 
     // For codec
     public UserData() {
@@ -139,13 +141,19 @@ public class UserData extends DataCache {
     public Member _getMember() {
         Guild guild = _getGuild();
         Member member = guild.getMemberById(userId);
+        if (member == null) {
+            delete();
+            throw new IllegalStateException(BotException.MEMBER_IS_NULL.getMessage());
+        }
         return member;
     }
 
     public Guild _getGuild() {
         Guild guild = jda.getGuildById(this.guildId);
-        if (guild == null)
-            throw new IllegalStateException("Guild not found with id <" + guildId + ">");
+        if (guild == null) {
+            delete();
+            throw new IllegalStateException(BotException.GUILD_IS_NULL.getMessage());
+        }
         return guild;
     }
 
@@ -242,6 +250,9 @@ public class UserData extends DataCache {
     // Update user on database
     @Override
     public void update() {
+        // If this user is deleted, don't save
+        if (deleted)
+            return;
         // Create collection if it's not exist
         if (!DatabaseHandler.collectionExists(DATABASE.USER, this.guildId))
             DatabaseHandler.createCollection(DATABASE.USER, this.guildId);
@@ -256,6 +267,20 @@ public class UserData extends DataCache {
         // Filter for user id, user id is unique for each collection
         Bson filter = new Document().append("userId", this.userId);
         collection.replaceOne(filter, this, new ReplaceOptions().upsert(true));
-        DatabaseHandler.log(LOG_TYPE.DATABASE, new Document().append("UPDATE USER", this.toDocument()));
+    }
+
+    public void delete() {
+        // Create collection if it's not exist
+        if (!DatabaseHandler.collectionExists(DATABASE.USER, this.guildId))
+            DatabaseHandler.createCollection(DATABASE.USER, this.guildId);
+
+        MongoCollection<UserData> collection = DatabaseHandler.getDatabase(DATABASE.USER).getCollection(this.guildId,
+                UserData.class);
+
+        // Filter for user id, user id is unique for each collection
+        Bson filter = new Document().append("userId", this.userId);
+        collection.deleteOne(filter);
+        DatabaseHandler.log(LOG_TYPE.DATABASE, new Document().append("DELETE USER", this.toDocument()));
+        this.deleted = true;
     }
 }
