@@ -13,8 +13,7 @@ import javax.annotation.Nonnull;
 
 import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
 import OverflowGateBot.lib.user.UserData;
-
-import static OverflowGateBot.OverflowGateBot.userHandler;
+import OverflowGateBot.main.UserHandler;
 
 import java.util.List;
 
@@ -25,9 +24,7 @@ public class InfoCommand extends SimpleBotSubcommand {
     }
 
     @Override
-    public String getHelpString() {
-        return "Hiển thị thông tin người dùng:\n\t<user>: Tên người dùng muốn xem thông tin, nếu không nhập thì hiển thị thông tin bản thân";
-    }
+    public String getHelpString() { return "Hiển thị thông tin người dùng:\n\t<user>: Tên người dùng muốn xem thông tin, nếu không nhập thì hiển thị thông tin bản thân"; }
 
     @Override
     public void runCommand(SlashCommandInteractionEvent event) {
@@ -72,14 +69,12 @@ public class InfoCommand extends SimpleBotSubcommand {
             roleString = roleString.substring(0, roleString.length() - 2);
         // Display point
 
-        UserData user = userHandler.getUserNoCache(member);
+        UserData user = UserHandler.getUserNoCache(member);
         user._displayLevelName();
 
         builder.addField("Vai trò", roleString, false);
-        builder.addField("Thông tin cơ bản",
-                "Cấp: " + user.level + " (" + user.point + "\\" + user._getLevelCap() + ")" + //
-                        "\nTổng kinh nghiệm: " + user._getTotalPoint(),
-                false);
+        builder.addField("Thông tin cơ bản", "Cấp: " + user.level + " (" + user.point + "\\" + user._getLevelCap() + ")" + //
+                "\nTổng kinh nghiệm: " + user._getTotalPoint(), false);
         builder.addField("Điểm", "Tổng điểm cống hiến: " + user.money + //
                 "\nTổng điểm pvp: " + user.pvpPoint, false);
 

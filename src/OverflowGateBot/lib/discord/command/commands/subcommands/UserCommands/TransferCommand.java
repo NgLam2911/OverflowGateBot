@@ -2,6 +2,8 @@ package OverflowGateBot.lib.discord.command.commands.subcommands.UserCommands;
 
 import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
 import OverflowGateBot.lib.user.UserData;
+import OverflowGateBot.main.UserHandler;
+
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
@@ -12,13 +14,10 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 
 import java.util.HashMap;
 
-import static OverflowGateBot.OverflowGateBot.*;
-
 public class TransferCommand extends SimpleBotSubcommand {
 
     enum TYPE {
-        PVP_POINT,
-        MONEY
+        PVP_POINT, MONEY
     }
 
     public TransferCommand() {
@@ -29,9 +28,7 @@ public class TransferCommand extends SimpleBotSubcommand {
     }
 
     @Override
-    public String getHelpString() {
-        return "Chuyển chỉ số cho người khác:\n\t<type>: Loại chỉ số muốn chuyển:\n\t\t- MONEY: chuyển tiền\n\t\t- PVPPoint: chuyển điểm pvp\n\t<user>: Tên người muốn chuyển cho\n\t<point>: số điểm muốn chuyển";
-    }
+    public String getHelpString() { return "Chuyển chỉ số cho người khác:\n\t<type>: Loại chỉ số muốn chuyển:\n\t\t- MONEY: chuyển tiền\n\t\t- PVPPoint: chuyển điểm pvp\n\t<user>: Tên người muốn chuyển cho\n\t<point>: số điểm muốn chuyển"; }
 
     @Override
     public void runCommand(SlashCommandInteractionEvent event) {
@@ -58,29 +55,29 @@ public class TransferCommand extends SimpleBotSubcommand {
             reply(event, "Người nhận không hợp lệ", 30);
             return;
         }
-        UserData senderData = userHandler.getUserAwait(sender);
-        UserData receiverData = userHandler.getUserNoCache(receiver);
+        UserData senderData = UserHandler.getUserAwait(sender);
+        UserData receiverData = UserHandler.getUserNoCache(receiver);
         String result;
 
         switch (TYPE.valueOf(type)) {
-            case MONEY:
-                if (senderData.money - point >= 0) {
-                    senderData._addMoney(-point);
-                    receiverData._addMoney(point);
-                    result = "Đã chuyển " + point + " điểm Alpha cho " + receiverData._getName();
-                } else
-                    result = "Không đủ điểm để chuyển";
-                break;
-            case PVP_POINT:
-                if (senderData.pvpPoint - point >= 0) {
-                    senderData._addPVPPoint(point);
-                    receiverData._addPVPPoint(point);
-                    result = "Đã chuyển " + point + " điểm PVP cho " + receiverData._getName();
-                } else
-                    result = "Không đủ điểm để chuyển";
-                break;
-            default:
-                result = "Giá trị <type> không hợp lệ: ";
+        case MONEY:
+            if (senderData.money - point >= 0) {
+                senderData._addMoney(-point);
+                receiverData._addMoney(point);
+                result = "Đã chuyển " + point + " điểm Alpha cho " + receiverData._getName();
+            } else
+                result = "Không đủ điểm để chuyển";
+            break;
+        case PVP_POINT:
+            if (senderData.pvpPoint - point >= 0) {
+                senderData._addPVPPoint(point);
+                receiverData._addPVPPoint(point);
+                result = "Đã chuyển " + point + " điểm PVP cho " + receiverData._getName();
+            } else
+                result = "Không đủ điểm để chuyển";
+            break;
+        default:
+            result = "Giá trị <type> không hợp lệ: ";
         }
         reply(event, result, 30);
 

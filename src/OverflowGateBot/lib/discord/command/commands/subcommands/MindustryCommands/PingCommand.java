@@ -5,10 +5,9 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 
-import static OverflowGateBot.OverflowGateBot.networkHandler;
-import static OverflowGateBot.OverflowGateBot.serverStatusHandler;
-
 import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
+import OverflowGateBot.main.NetworkHandler;
+import OverflowGateBot.main.ServerStatusHandler;
 
 public class PingCommand extends SimpleBotSubcommand {
     public PingCommand() {
@@ -17,9 +16,7 @@ public class PingCommand extends SimpleBotSubcommand {
     }
 
     @Override
-    public String getHelpString() {
-        return "Ping máy chủ mindustry thông qua ip:\n\t<IP>: là ip của máy chủ muốn ping (chỉ chấp nhận ipv4) ";
-    }
+    public String getHelpString() { return "Ping máy chủ mindustry thông qua ip:\n\t<IP>: là ip của máy chủ muốn ping (chỉ chấp nhận ipv4) "; }
 
     @Override
     public void runCommand(SlashCommandInteractionEvent event) {
@@ -27,8 +24,8 @@ public class PingCommand extends SimpleBotSubcommand {
         if (ipOption == null)
             return;
         String ip = ipOption.getAsString();
-        networkHandler.pingServer(ip, result -> {
-            EmbedBuilder builder = serverStatusHandler.serverStatusBuilder(ip, result);
+        NetworkHandler.pingServer(ip, result -> {
+            EmbedBuilder builder = ServerStatusHandler.serverStatusBuilder(ip, result);
             replyEmbeds(event, builder, 30);
         });
     }

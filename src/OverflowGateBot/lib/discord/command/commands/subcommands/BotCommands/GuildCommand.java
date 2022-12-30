@@ -6,6 +6,7 @@ import java.util.List;
 import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
 import OverflowGateBot.lib.discord.table.SimpleTable;
 import OverflowGateBot.lib.user.GuildData;
+import OverflowGateBot.main.GuildHandler;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -27,9 +28,7 @@ public class GuildCommand extends SimpleBotSubcommand {
     }
 
     @Override
-    public String getHelpString() {
-        return "Hiển thị thông tin của máy chủ discord mà bot đã gia nhập:\n\t<guild>: Tên máy chủ muốn xem, nếu không nhập guild thì sẽ hiện tất cả các máy chủ, ngược lại sẽ hiện thông tin máy chủ đã nhập";
-    }
+    public String getHelpString() { return "Hiển thị thông tin của máy chủ discord mà bot đã gia nhập:\n\t<guild>: Tên máy chủ muốn xem, nếu không nhập guild thì sẽ hiện tất cả các máy chủ, ngược lại sẽ hiện thông tin máy chủ đã nhập"; }
 
     @Override
     public void runCommand(SlashCommandInteractionEvent event) {
@@ -67,7 +66,7 @@ public class GuildCommand extends SimpleBotSubcommand {
             if (guild == null)
                 return;
 
-            GuildData guildData = guildHandler.getGuild(guild);
+            GuildData guildData = GuildHandler.getGuild(guild);
             EmbedBuilder builder = new EmbedBuilder();
             StringBuilder field = new StringBuilder();
 

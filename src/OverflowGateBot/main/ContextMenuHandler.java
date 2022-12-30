@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionE
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.Command;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -21,14 +22,16 @@ import arc.util.Log;
 
 import static OverflowGateBot.OverflowGateBot.*;
 
-public class ContextMenuHandler extends ListenerAdapter {
+public final class ContextMenuHandler extends ListenerAdapter {
 
-    public HashMap<String, SimpleBotContextMenu> commands = new HashMap<>();
+    private static ContextMenuHandler instance = new ContextMenuHandler();
+    private static HashMap<String, SimpleBotContextMenu> commands = new HashMap<>();
 
-    public ContextMenuHandler() {
+    private ContextMenuHandler() {
 
         jda.addEventListener(this);
 
+        commands = new HashMap<>();
         addCommand(new PostMapContextMenu());
         addCommand(new PostSchematicContextMenu());
         addCommand(new DeleteMessageContextMenu());
@@ -36,15 +39,19 @@ public class ContextMenuHandler extends ListenerAdapter {
         Log.info("Context menu handler up");
     }
 
-    public void addCommand(SimpleBotContextMenu command) { commands.put(command.name, command); }
+    public static ContextMenuHandler getInstance() { return instance; }
 
-    public void registerCommand(Guild guild) {
+    public static Collection<SimpleBotContextMenu> getCommands() { return commands.values(); }
+
+    public static void addCommand(SimpleBotContextMenu command) { commands.put(command.name, command); }
+
+    public static void registerCommand(Guild guild) {
         for (SimpleBotContextMenu command : commands.values()) {
             guild.updateCommands().addCommands(command.command).complete();
         }
     }
 
-    public void unregisterCommand(Guild guild) {
+    public static void unregisterCommand(Guild guild) {
         guild.retrieveCommands().queue(commands -> {
             for (Command command : commands) {
                 command.delete().complete();
@@ -58,7 +65,7 @@ public class ContextMenuHandler extends ListenerAdapter {
         handleCommand(event);
     }
 
-    public void handleCommand(MessageContextInteractionEvent event) {
+    public static void handleCommand(MessageContextInteractionEvent event) {
         String command = event.getName();
 
         Guild guild = event.getGuild();
@@ -89,11 +96,11 @@ public class ContextMenuHandler extends ListenerAdapter {
 
         if (commands.containsKey(command)) {
             commands.get(command).onCommand(event);
-            Log.info(messagesHandler.getMessageSender(event.getTarget()) + ": used " + event.getName());
+            Log.info(MessageHandler.getMessageSender(event.getTarget()) + ": used " + event.getName());
         }
     }
 
-    void replyEmbeds(MessageContextInteractionEvent event, EmbedBuilder builder, int sec) { event.getHook().sendMessageEmbeds(builder.build()).queue(_message -> _message.delete().queueAfter(sec, TimeUnit.SECONDS)); }
+    public static void replyEmbeds(MessageContextInteractionEvent event, EmbedBuilder builder, int sec) { event.getHook().sendMessageEmbeds(builder.build()).queue(_message -> _message.delete().queueAfter(sec, TimeUnit.SECONDS)); }
 
-    void reply(MessageContextInteractionEvent event, String content, int sec) { event.getHook().sendMessage("```" + content + "```").queue(_message -> _message.delete().queueAfter(sec, TimeUnit.SECONDS)); }
+    public static void reply(MessageContextInteractionEvent event, String content, int sec) { event.getHook().sendMessage("```" + content + "```").queue(_message -> _message.delete().queueAfter(sec, TimeUnit.SECONDS)); }
 }

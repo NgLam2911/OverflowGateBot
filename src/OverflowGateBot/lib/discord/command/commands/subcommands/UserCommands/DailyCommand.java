@@ -3,10 +3,12 @@ package OverflowGateBot.lib.discord.command.commands.subcommands.UserCommands;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+
 import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
 import OverflowGateBot.lib.user.UserData;
 import OverflowGateBot.main.BotException;
 import OverflowGateBot.main.DatabaseHandler;
+import OverflowGateBot.main.UserHandler;
 import OverflowGateBot.main.DatabaseHandler.DATABASE;
 
 import org.bson.Document;
@@ -17,17 +19,11 @@ import com.mongodb.client.MongoCollection;
 import java.text.DateFormat;
 import java.util.Date;
 
-import static OverflowGateBot.OverflowGateBot.*;
-
 public class DailyCommand extends SimpleBotSubcommand {
-    public DailyCommand() {
-        super("daily", "Điểm danh", true, false);
-    }
+    public DailyCommand() { super("daily", "Điểm danh", true, false); }
 
     @Override
-    public String getHelpString() {
-        return "Điểm danh mỗi ngày";
-    }
+    public String getHelpString() { return "Điểm danh mỗi ngày"; }
 
     @Override
     public void runCommand(SlashCommandInteractionEvent event) {
@@ -46,27 +42,24 @@ public class DailyCommand extends SimpleBotSubcommand {
 
         Bson filter = new Document().append("userId", member.getId());
         Document data = collection.find(filter).limit(1).first();
-        UserData userData = userHandler.getUserAwait(member);
+        UserData userData = UserHandler.getUserAwait(member);
 
         int money = 0;
         if (data == null || data.isEmpty()) {
             money = userData._addMoney(userData._getLevelCap());
-            collection.insertOne(new Document().append("userId", userData.userId).append("time",
-                    System.currentTimeMillis()));
+            collection.insertOne(new Document().append("userId", userData.userId).append("time", System.currentTimeMillis()));
+
         } else {
             if (data.containsKey("time")) {
                 Long time = (Long) data.get("time");
                 if (System.currentTimeMillis() - time >= 86400000l) { // 1 Day
                     money = userData._addMoney(userData._getLevelCap());
-                    collection.replaceOne(filter,
-                            new Document().append("userId", userData.userId).append("time",
-                                    System.currentTimeMillis()));
+                    collection.replaceOne(filter, new Document().append("userId", userData.userId).append("time", System.currentTimeMillis()));
                 }
             }
         }
         if (money > 0)
-            reply(event, "Điểm dành thanh công\nĐiểm nhận được: " + money + " Alpha\nĐiểm hiện tại: " + userData.money,
-                    30);
+            reply(event, "📝Điểm dành thanh công\n💰Điểm nhận được: " + money + " Alpha\n💰Điểm hiện tại: " + userData.money, 30);
         else {
             if (data != null)
                 if (data.containsKey("time")) {
@@ -76,11 +69,7 @@ public class DailyCommand extends SimpleBotSubcommand {
                     Long minute = sec / 60;
                     Long hour = minute / 60;
                     Date date = new Date(lastTime);
-                    reply(event,
-                            "Còn " + hour % 24 + " giờ " + minute % 60
-                                    + " phút nữa mới có thể điểm danh\nLần điểm danh cuối: "
-                                    + DateFormat.getInstance().format(date),
-                            30);
+                    reply(event, "📝Còn " + hour % 24 + " giờ " + minute % 60 + " phút nữa mới có thể điểm danh\n📝Lần điểm danh cuối: " + DateFormat.getInstance().format(date), 30);
                 }
         }
     }

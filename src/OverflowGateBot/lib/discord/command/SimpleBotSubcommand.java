@@ -21,35 +21,29 @@ public class SimpleBotSubcommand extends SubcommandData {
     private boolean threaded = false;
     private boolean updateMessage = false;
 
-    public SimpleBotSubcommand(@Nonnull String name, @Nonnull String description) {
-        super(name, description);
-    }
+    public SimpleBotSubcommand(@Nonnull String name, @Nonnull String description) { super(name, description); }
 
-    public SimpleBotSubcommand(@Nonnull String name, @Nonnull String description, boolean threaded,
-            boolean updateMessage) {
+    public SimpleBotSubcommand(@Nonnull String name, @Nonnull String description, boolean threaded, boolean updateMessage) {
         super(name, description);
         this.threaded = threaded;
         this.updateMessage = updateMessage;
     }
 
     // Override
-    public String getHelpString() {
-        return getDescription();
-    }
+    public String getHelpString() { return getDescription(); }
 
     // Override
     public void onCommand(SlashCommandInteractionEvent event) {
         if (updateMessage)
             reply(event, "Đang cập nhật", 60);
         if (this.threaded)
-            networkHandler.run(name, 0, () -> runCommand(event));
+            run(name, 0, () -> runCommand(event));
         else
             runCommand(event);
     }
 
     // Override
-    protected void runCommand(SlashCommandInteractionEvent event) {
-    }
+    protected void runCommand(SlashCommandInteractionEvent event) {}
 
     // Override
     public void onAutoComplete(CommandAutoCompleteInteractionEvent event) {
@@ -85,25 +79,16 @@ public class SimpleBotSubcommand extends SubcommandData {
         event.replyChoices(options).queue();
     }
 
-    public void sendAutoComplete(@Nonnull CommandAutoCompleteInteractionEvent event, @Nonnull String value) {
-        sendAutoComplete(event, value, value);
-    }
+    public void sendAutoComplete(@Nonnull CommandAutoCompleteInteractionEvent event, @Nonnull String value) { sendAutoComplete(event, value, value); }
 
-    public void sendAutoComplete(@Nonnull CommandAutoCompleteInteractionEvent event, @Nonnull String name,
-            @Nonnull String value) {
+    public void sendAutoComplete(@Nonnull CommandAutoCompleteInteractionEvent event, @Nonnull String name, @Nonnull String value) {
         if (value.isBlank())
             event.replyChoice("Không tìm thấy kết quả khớp", "Không tìm thấy kết quả khớp").queue();
         else
             event.replyChoice(name, value).queue();
     }
 
-    public void replyEmbeds(SlashCommandInteractionEvent event, EmbedBuilder builder, int sec) {
-        event.getHook().sendMessageEmbeds(builder.build())
-                .queue(_message -> _message.delete().queueAfter(sec, TimeUnit.SECONDS));
-    }
+    public void replyEmbeds(SlashCommandInteractionEvent event, EmbedBuilder builder, int sec) { event.getHook().sendMessageEmbeds(builder.build()).queue(_message -> _message.delete().queueAfter(sec, TimeUnit.SECONDS)); }
 
-    public void reply(SlashCommandInteractionEvent event, String content, int sec) {
-        event.getHook().sendMessage("```" + content + "```")
-                .queue(_message -> _message.delete().queueAfter(sec, TimeUnit.SECONDS));
-    }
+    public void reply(SlashCommandInteractionEvent event, String content, int sec) { event.getHook().sendMessage("```" + content + "```").queue(_message -> _message.delete().queueAfter(sec, TimeUnit.SECONDS)); }
 }

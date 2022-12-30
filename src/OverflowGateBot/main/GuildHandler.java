@@ -11,27 +11,27 @@ import org.bson.conversions.Bson;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 
+import OverflowGateBot.BotConfig;
 import OverflowGateBot.lib.user.GuildData;
 import OverflowGateBot.main.DatabaseHandler.DATABASE;
 import arc.util.Log;
 import net.dv8tion.jda.api.entities.Guild;
 
-import static OverflowGateBot.OverflowGateBot.*;
-
 public class GuildHandler {
 
-    public HashMap<String, GuildData> guildCache = new HashMap<>();
+    private static GuildHandler instance = new GuildHandler();
+    private static HashMap<String, GuildData> guildCache = new HashMap<>();
 
-    public GuildHandler() {
+    private GuildHandler() {
 
         Log.info("Guild handler up");
     }
 
-    public void update() {
-        updateGuildCache();
-    }
+    public static GuildHandler getInstance() { return instance; }
 
-    public void updateGuildCache() {
+    public static void update() { updateGuildCache(); }
+
+    public static void updateGuildCache() {
         Iterator<GuildData> iterator = guildCache.values().iterator();
         while (iterator.hasNext()) {
             GuildData guild = iterator.next();
@@ -44,36 +44,35 @@ public class GuildHandler {
         }
     }
 
-    public GuildData getGuild(Guild guild) {
+    public static int getActiveGuildCount() { return guildCache.size(); }
+
+    public static GuildData getGuild(Guild guild) {
         if (guild == null)
             return null;
         return getGuild(guild.getId());
     }
 
     // Add guild to cache
-    public GuildData addGuild(@Nonnull String guildId) {
+    public static GuildData addGuild(@Nonnull String guildId) {
         GuildData guildData = new GuildData(guildId);
         guildCache.put(guildId, guildData);
         return guildData;
     }
 
     // Get guild from cache/database
-    public GuildData getGuild(@Nonnull String guildId) {
+    public static GuildData getGuild(@Nonnull String guildId) {
         // If guild exist in cache then return, else query guild from database
         if (guildCache.containsKey(guildId))
             return guildCache.get(guildId);
 
         Log.info("Guild <" + guildId + "> online");
         // Create new guild cache to store temporary guild data
-        if (!DatabaseHandler.collectionExists(DATABASE.GUILD, GUILD_COLLECTION)) {
-            DatabaseHandler.createCollection(DATABASE.GUILD, GUILD_COLLECTION);
+        if (!DatabaseHandler.collectionExists(DATABASE.GUILD, BotConfig.GUILD_COLLECTION)) {
+            DatabaseHandler.createCollection(DATABASE.GUILD, BotConfig.GUILD_COLLECTION);
             return addGuild(guildId);
-
         }
 
-        MongoCollection<GuildData> collection = DatabaseHandler.getDatabase(DATABASE.GUILD).getCollection(
-                GUILD_COLLECTION,
-                GuildData.class);
+        MongoCollection<GuildData> collection = DatabaseHandler.getDatabase(DATABASE.GUILD).getCollection(BotConfig.GUILD_COLLECTION, GuildData.class);
 
         // Get guild from database
         Bson filter = new Document().append("guildId", guildId);

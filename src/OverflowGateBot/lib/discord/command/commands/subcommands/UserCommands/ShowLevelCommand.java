@@ -6,8 +6,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
 import OverflowGateBot.lib.user.UserData;
-
-import static OverflowGateBot.OverflowGateBot.userHandler;
+import OverflowGateBot.main.UserHandler;
 
 public class ShowLevelCommand extends SimpleBotSubcommand {
     public ShowLevelCommand() {
@@ -16,9 +15,7 @@ public class ShowLevelCommand extends SimpleBotSubcommand {
     }
 
     @Override
-    public String getHelpString() {
-        return "Ẩn/ tắt ẩn cấp độ của người dùng:\n\t<hide>: true để ẩn cấp, false để hiện cấp";
-    }
+    public String getHelpString() { return "Ẩn/ tắt ẩn cấp độ của người dùng:\n\t<hide>: true để ẩn cấp, false để hiện cấp"; }
 
     @Override
     public void runCommand(SlashCommandInteractionEvent event) {
@@ -32,7 +29,7 @@ public class ShowLevelCommand extends SimpleBotSubcommand {
         if (member == null)
             return;
 
-        UserData user = userHandler.getUserAwait(member);
+        UserData user = UserHandler.getUserAwait(member);
         user.showLevel = String.valueOf(showLevel);
         user._displayLevelName();
         if (showLevel)

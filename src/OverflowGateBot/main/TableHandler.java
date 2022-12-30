@@ -13,18 +13,19 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 import static OverflowGateBot.OverflowGateBot.*;
 
-public class TableHandler extends ListenerAdapter {
+public final class TableHandler extends ListenerAdapter {
 
-    public ConcurrentHashMap<String, SimpleTable> tableCache = new ConcurrentHashMap<String, SimpleTable>();
+    private static TableHandler instance = new TableHandler();
+    private static ConcurrentHashMap<String, SimpleTable> tableCache = new ConcurrentHashMap<String, SimpleTable>();
 
-    public TableHandler() {
+    private TableHandler() {
         jda.addEventListener(this);
         Log.info("Table handler up");
     }
 
-    public void add(SimpleTable table) {
-        tableCache.put(table.getId(), table);
-    }
+    public static TableHandler getInstance() { return instance; }
+
+    public static void add(SimpleTable table) { tableCache.put(table.getId(), table); }
 
     @Override
     public void onButtonInteraction(@Nonnull ButtonInteractionEvent event) {
@@ -39,7 +40,7 @@ public class TableHandler extends ListenerAdapter {
         }
     }
 
-    public void update() {
+    public static void update() {
         Iterator<SimpleTable> iterator = tableCache.values().iterator();
         while (iterator.hasNext()) {
             SimpleTable table = iterator.next();

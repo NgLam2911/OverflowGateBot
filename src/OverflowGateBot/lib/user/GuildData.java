@@ -12,7 +12,9 @@ import org.bson.conversions.Bson;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.ReplaceOptions;
 
+import OverflowGateBot.BotConfig;
 import OverflowGateBot.main.DatabaseHandler;
+import OverflowGateBot.main.UserHandler;
 import OverflowGateBot.main.DatabaseHandler.DATABASE;
 import OverflowGateBot.main.DatabaseHandler.LOG_TYPE;
 import arc.util.Log;
@@ -25,16 +27,11 @@ import static OverflowGateBot.OverflowGateBot.*;
 public class GuildData extends DataCache {
 
     public enum CHANNEL_TYPE {
-        SCHEMATIC,
-        MAP,
-        SERVER_STATUS,
-        BOT_LOG
+        SCHEMATIC, MAP, SERVER_STATUS, BOT_LOG
     }
 
     public enum BOOLEAN_STATE {
-        TRUE,
-        FALSE,
-        UNSET
+        TRUE, FALSE, UNSET
     }
 
     @Nonnull
@@ -52,47 +49,29 @@ public class GuildData extends DataCache {
     private boolean deleted = false;
 
     // For codec
-    public GuildData() {
-        super(GUILD_ALIVE_TIME, UPDATE_LIMIT);
-    }
+    public GuildData() { super(BotConfig.GUILD_ALIVE_TIME, BotConfig.UPDATE_LIMIT); }
 
     public GuildData(@Nonnull String guildId) {
-        super(GUILD_ALIVE_TIME, UPDATE_LIMIT);
+        super(BotConfig.GUILD_ALIVE_TIME, BotConfig.UPDATE_LIMIT);
         this.guildId = guildId;
         _getGuild();
     }
 
-    public void setShowLevel(String showLevel) {
-        this.showLevel = showLevel;
-    }
+    public void setShowLevel(String showLevel) { this.showLevel = showLevel; }
 
-    public String getShowLevel() {
-        return this.showLevel;
-    }
+    public String getShowLevel() { return this.showLevel; }
 
-    public void setAdminRoleId(List<String> adminRoleId) {
-        this.adminRoleId = adminRoleId;
-    }
+    public void setAdminRoleId(List<String> adminRoleId) { this.adminRoleId = adminRoleId; }
 
-    public List<String> getAdminRoleId() {
-        return this.adminRoleId;
-    }
+    public List<String> getAdminRoleId() { return this.adminRoleId; }
 
-    public void setChannelId(ConcurrentHashMap<String, List<String>> channelId) {
-        this.channelId = channelId;
-    }
+    public void setChannelId(ConcurrentHashMap<String, List<String>> channelId) { this.channelId = channelId; }
 
-    public ConcurrentHashMap<String, List<String>> getChannelId() {
-        return this.channelId;
-    }
+    public ConcurrentHashMap<String, List<String>> getChannelId() { return this.channelId; }
 
-    public void setLevelRoleId(ConcurrentHashMap<String, Integer> levelRoleId) {
-        this.levelRoleId = levelRoleId;
-    }
+    public void setLevelRoleId(ConcurrentHashMap<String, Integer> levelRoleId) { this.levelRoleId = levelRoleId; }
 
-    public ConcurrentHashMap<String, Integer> getLevelRoleId() {
-        return this.levelRoleId;
-    }
+    public ConcurrentHashMap<String, Integer> getLevelRoleId() { return this.levelRoleId; }
 
     public Document toDocument() {
         return new Document().append("guildId", this.guildId).//
@@ -124,7 +103,7 @@ public class GuildData extends DataCache {
                 if (bot.canInteract(member)) {
 
                     Log.info("Changing name " + member.getEffectiveName());
-                    UserData data = userHandler.getUserNoCache(member);
+                    UserData data = UserHandler.getUserNoCache(member);
                     if (data != null) {
                         data.setName(member.getUser().getName());
                         data._displayLevelName();
@@ -200,12 +179,10 @@ public class GuildData extends DataCache {
         if (deleted)
             return;
         // Create collection if it's not exist
-        if (!DatabaseHandler.collectionExists(DATABASE.GUILD, GUILD_COLLECTION)) {
-            DatabaseHandler.createCollection(DATABASE.GUILD, GUILD_COLLECTION);
+        if (!DatabaseHandler.collectionExists(DATABASE.GUILD, BotConfig.GUILD_COLLECTION)) {
+            DatabaseHandler.createCollection(DATABASE.GUILD, BotConfig.GUILD_COLLECTION);
         }
-        MongoCollection<GuildData> collection = DatabaseHandler.getDatabase(DATABASE.GUILD).getCollection(
-                GUILD_COLLECTION,
-                GuildData.class);
+        MongoCollection<GuildData> collection = DatabaseHandler.getDatabase(DATABASE.GUILD).getCollection(BotConfig.GUILD_COLLECTION, GuildData.class);
         if (this.showLevel == BOOLEAN_STATE.UNSET.name())
             this.showLevel = BOOLEAN_STATE.FALSE.name();
 
@@ -216,12 +193,10 @@ public class GuildData extends DataCache {
 
     public void delete() {
         // Create collection if it's not exist
-        if (!DatabaseHandler.collectionExists(DATABASE.GUILD, GUILD_COLLECTION)) {
-            DatabaseHandler.createCollection(DATABASE.GUILD, GUILD_COLLECTION);
+        if (!DatabaseHandler.collectionExists(DATABASE.GUILD, BotConfig.GUILD_COLLECTION)) {
+            DatabaseHandler.createCollection(DATABASE.GUILD, BotConfig.GUILD_COLLECTION);
         }
-        MongoCollection<GuildData> collection = DatabaseHandler.getDatabase(DATABASE.GUILD).getCollection(
-                GUILD_COLLECTION,
-                GuildData.class);
+        MongoCollection<GuildData> collection = DatabaseHandler.getDatabase(DATABASE.GUILD).getCollection(BotConfig.GUILD_COLLECTION, GuildData.class);
         if (this.showLevel == BOOLEAN_STATE.UNSET.name())
             this.showLevel = BOOLEAN_STATE.FALSE.name();
 

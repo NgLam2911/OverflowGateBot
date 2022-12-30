@@ -7,38 +7,39 @@ import mindustry.net.*;
 import java.io.*;
 import java.net.*;
 import java.nio.*;
-import java.util.Timer;
-import java.util.*;
 import java.util.function.*;
+
+import static OverflowGateBot.OverflowGateBot.*;
 
 public class NetworkHandler {
 
-    public NetworkHandler() {
-    }
+    private static NetworkHandler instance = new NetworkHandler();
 
-    public InputStream download(String url) {
+    private NetworkHandler() {}
+
+    public static NetworkHandler getInstance() { return instance; }
+
+    public static InputStream download(String url) {
         try {
             HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
-            connection.setRequestProperty("User-Agent",
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36");
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36");
             return connection.getInputStream();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public String downloadContent(String url) {
+    public static String downloadContent(String url) {
         try {
             HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
-            connection.setRequestProperty("User-Agent",
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36");
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36");
             return Base64Coder.encodeLines(connection.getInputStream().readAllBytes()).replaceAll("\n", "");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void pingServer(String ip, Consumer<Host> listener) {
+    public static void pingServer(String ip, Consumer<Host> listener) {
         run("PING", 0, () -> {
             try {
                 String resultIP = ip;
@@ -68,25 +69,7 @@ public class NetworkHandler {
         });
     }
 
-    public void run(String name, long delay, long period, Runnable r) {
-        new Timer(name, true).schedule(new TimerTask() {
-            @Override
-            public void run() {
-                r.run();
-            }
-        }, delay, period);
-    }
-
-    public void run(String name, long delay, Runnable r) {
-        new Timer(name, true).schedule(new TimerTask() {
-            @Override
-            public void run() {
-                r.run();
-            }
-        }, delay);
-    }
-
-    public Host readServerData(ByteBuffer buffer, String ip, int ping) {
+    public static Host readServerData(ByteBuffer buffer, String ip, int ping) {
         Host host = NetworkIO.readServerData(ping, ip, buffer);
         host.ping = ping;
         return host;

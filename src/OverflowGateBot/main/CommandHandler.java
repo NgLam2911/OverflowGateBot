@@ -16,9 +16,10 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.Command;
 
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
@@ -26,13 +27,13 @@ import javax.annotation.Nonnull;
 import static OverflowGateBot.OverflowGateBot.*;
 
 public class CommandHandler extends ListenerAdapter {
+    private static CommandHandler instance = new CommandHandler();
 
-    public HashMap<String, SimpleBotCommand> commands = new HashMap<>();
+    private static HashMap<String, SimpleBotCommand> commands = new HashMap<>();
 
-    public List<Guild> guilds;
+    private CommandHandler() {
 
-    public CommandHandler() {
-
+        commands = new HashMap<>();
         addCommand(new AdminCommand());
         addCommand(new BotCommand());
         addCommand(new MindustryCommand());
@@ -44,14 +45,26 @@ public class CommandHandler extends ListenerAdapter {
         Log.info("Command handler up");
     }
 
-    public void addCommand(SimpleBotCommand command) {
-        commands.put(command.getName(), command);
-    }
+    public static CommandHandler getInstance() { return instance; }
 
-    public void registerCommand(Guild guild) {
+    public static Collection<SimpleBotCommand> getCommands() { return commands.values(); }
+
+    public static HashMap<String, SimpleBotCommand> getCommandHashMap() { return commands; }
+
+    public static void addCommand(SimpleBotCommand command) { commands.put(command.getName(), command); }
+
+    public static void registerCommand(Guild guild) {
         for (SimpleBotCommand command : commands.values()) {
             guild.upsertCommand(command.command).queue();
         }
+    }
+
+    public static void unregisterCommand(Guild guild) {
+        guild.retrieveCommands().queue(commands -> {
+            for (Command command : commands) {
+                command.delete().complete();
+            }
+        });
     }
 
     @Override
@@ -71,7 +84,7 @@ public class CommandHandler extends ListenerAdapter {
             commands.get(command).onAutoComplete(event);
     }
 
-    public void handleCommand(@NotNull SlashCommandInteractionEvent event) {
+    public static void handleCommand(@NotNull SlashCommandInteractionEvent event) {
         String command = event.getName();
 
         Guild guild = event.getGuild();
@@ -96,25 +109,17 @@ public class CommandHandler extends ListenerAdapter {
             // Call subcommand
             commands.get(command).onCommand(event);
             // Print to terminal
-            Log.info(messagesHandler.getMessageSender(event) + ": used " + event.getName() + " "
-                    + event.getSubcommandName() + " " + event.getOptions().toString());
+            Log.info(MessageHandler.getMessageSender(event) + ": used " + event.getName() + " " + event.getSubcommandName() + " " + event.getOptions().toString());
             // Send to discord log channel
             if (!command.equals("shar")) {
-                messagesHandler.log(guild,
-                        member.getEffectiveName() + " đã sử dụng " + command + " " + event.getSubcommandName());
+                MessageHandler.log(guild, member.getEffectiveName() + " đã sử dụng " + command + " " + event.getSubcommandName());
             }
         } else
             reply(event, "Lệnh sai rồi kìa baka", 10);
 
     }
 
-    void replyEmbeds(SlashCommandInteractionEvent event, EmbedBuilder builder, int sec) {
-        event.getHook().sendMessageEmbeds(builder.build())
-                .queue(_message -> _message.delete().queueAfter(sec, TimeUnit.SECONDS));
-    }
+    public static void replyEmbeds(SlashCommandInteractionEvent event, EmbedBuilder builder, int sec) { event.getHook().sendMessageEmbeds(builder.build()).queue(_message -> _message.delete().queueAfter(sec, TimeUnit.SECONDS)); }
 
-    void reply(SlashCommandInteractionEvent event, String content, int sec) {
-        event.getHook().sendMessage("```" + content + "```")
-                .queue(_message -> _message.delete().queueAfter(sec, TimeUnit.SECONDS));
-    }
+    public static void reply(SlashCommandInteractionEvent event, String content, int sec) { event.getHook().sendMessage("```" + content + "```").queue(_message -> _message.delete().queueAfter(sec, TimeUnit.SECONDS)); }
 }

@@ -6,13 +6,12 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 
-import static OverflowGateBot.OverflowGateBot.guildHandler;
-
 import java.util.HashMap;
 
 import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
 import OverflowGateBot.lib.user.GuildData;
 import OverflowGateBot.lib.user.GuildData.CHANNEL_TYPE;
+import OverflowGateBot.main.GuildHandler;
 
 public class SetChannelCommand extends SimpleBotSubcommand {
 
@@ -22,9 +21,7 @@ public class SetChannelCommand extends SimpleBotSubcommand {
     }
 
     @Override
-    public String getHelpString() {
-        return "Cài đặt các kênh của máy chủ:\n\t<type>: loại kênh muốn đặt\n\tThêm lần nữa để xóa";
-    }
+    public String getHelpString() { return "Cài đặt các kênh của máy chủ:\n\t<type>: loại kênh muốn đặt\n\tThêm lần nữa để xóa"; }
 
     @Override
     public void runCommand(SlashCommandInteractionEvent event) {
@@ -34,7 +31,7 @@ public class SetChannelCommand extends SimpleBotSubcommand {
         String type = typeOption.getAsString();
 
         TextChannel channel = event.getTextChannel();
-        GuildData guildData = guildHandler.getGuild(event.getGuild());
+        GuildData guildData = GuildHandler.getGuild(event.getGuild());
         if (guildData == null)
             throw new IllegalStateException("Guild data not found with <" + event.getGuild() + ">");
 

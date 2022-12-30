@@ -5,12 +5,11 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 
-import static OverflowGateBot.OverflowGateBot.commandHandler;
-
 import java.util.HashMap;
 
 import OverflowGateBot.lib.discord.command.SimpleBotCommand;
 import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
+import OverflowGateBot.main.CommandHandler;
 
 public class HelpCommand extends SimpleBotSubcommand {
     public HelpCommand() {
@@ -20,9 +19,7 @@ public class HelpCommand extends SimpleBotSubcommand {
     }
 
     @Override
-    public String getHelpString() {
-        return "Help";
-    }
+    public String getHelpString() { return "Help"; }
 
     // TODO Helpppppppppp
     @Override
@@ -35,10 +32,10 @@ public class HelpCommand extends SimpleBotSubcommand {
             return;
         String command = commandOption.getAsString();
         String subcommand = subcommandOption.getAsString();
-        if (commandHandler.commands.containsKey(command))
-            reply(event, "/" + command + " " + subcommand + "\n"
-                    + commandHandler.commands.get(command).getHelpString(subcommand), 30);
-        else reply(event, "Lệnh " + command + " " + subcommand + " không tồn tại" , 30);
+        if (CommandHandler.getCommandHashMap().containsKey(command))
+            reply(event, "/" + command + " " + subcommand + "\n" + CommandHandler.getCommandHashMap().get(command).getHelpString(subcommand), 30);
+        else
+            reply(event, "Lệnh " + command + " " + subcommand + " không tồn tại", 30);
     }
 
     @Override
@@ -46,7 +43,7 @@ public class HelpCommand extends SimpleBotSubcommand {
         String focus = event.getFocusedOption().getName();
         if (focus.equals("command")) {
             HashMap<String, String> options = new HashMap<String, String>();
-            commandHandler.commands.keySet().forEach(t -> options.put(t, t));
+            CommandHandler.getCommandHashMap().keySet().forEach(t -> options.put(t, t));
             sendAutoComplete(event, options);
 
         } else if (focus.equals("subcommand")) {
@@ -54,7 +51,7 @@ public class HelpCommand extends SimpleBotSubcommand {
             if (commandOption == null)
                 return;
             String command = commandOption.getAsString();
-            SimpleBotCommand subcommands = commandHandler.commands.get(command);
+            SimpleBotCommand subcommands = CommandHandler.getCommandHashMap().get(command);
             if (subcommands == null)
                 return;
             HashMap<String, String> options = new HashMap<String, String>();

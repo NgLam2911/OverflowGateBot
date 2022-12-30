@@ -25,26 +25,31 @@ import mindustry.world.blocks.legacy.*;
 
 import javax.imageio.*;
 
-import OverflowGateBot.OverflowGateBot;
-
 import java.awt.*;
 import java.awt.geom.*;
 import java.awt.image.*;
 import java.io.*;
 import java.util.zip.*;
 
+import OverflowGateBot.main.NetworkHandler;
+
 import static mindustry.Vars.*;
 
 public class ContentHandler {
+
     public static final String schemHeader = schematicBaseStart;
 
-    Color co = new Color();
-    Graphics2D currentGraphics;
-    BufferedImage currentImage;
-    ObjectMap<String, Fi> imageFiles = new ObjectMap<>();
-    ObjectMap<String, BufferedImage> regions = new ObjectMap<>();
+    private static Color co = new Color();
+    private static Graphics2D currentGraphics;
+    private static BufferedImage currentImage;
+    private static ObjectMap<String, Fi> imageFiles = new ObjectMap<>();
+    private static ObjectMap<String, BufferedImage> regions = new ObjectMap<>();
 
-    public ContentHandler() {
+    private static ContentHandler instance = new ContentHandler();
+
+    public static ContentHandler getInstance() { return instance; }
+
+    private ContentHandler() {
 
         new Fi("cache").deleteDirectory();
         new File("cache/").mkdir();
@@ -65,8 +70,7 @@ public class ContentHandler {
         String assets = "../Mindustry/core/assets/";
         Vars.state = new GameState();
 
-        TextureAtlasData data = new TextureAtlasData(new Fi(assets + "sprites/sprites.aatls"),
-                new Fi(assets + "sprites"), false);
+        TextureAtlasData data = new TextureAtlasData(new Fi(assets + "sprites/sprites.aatls"), new Fi(assets + "sprites"), false);
         Core.atlas = new TextureAtlas();
 
         new Fi("../Mindustry/core/assets-raw/sprites_out").walk(f -> {
@@ -81,21 +85,19 @@ public class ContentHandler {
             page.texture.height = page.height;
         });
 
-        data.getRegions().each(reg -> Core.atlas.addRegion(reg.name,
-                new AtlasRegion(reg.page.texture, reg.left, reg.top, reg.width, reg.height) {
-                    {
-                        name = reg.name;
-                        texture = reg.page.texture;
-                    }
-                }));
+        data.getRegions().each(reg -> Core.atlas.addRegion(reg.name, new AtlasRegion(reg.page.texture, reg.left, reg.top, reg.width, reg.height) {
+            {
+                name = reg.name;
+                texture = reg.page.texture;
+            }
+        }));
 
         Lines.useLegacyLine = true;
         Core.atlas.setErrorRegion("error");
         Draw.scl = 1f / 4f;
         Core.batch = new SpriteBatch(0) {
             @Override
-            protected void draw(TextureRegion region, float x, float y, float originX, float originY, float width,
-                    float height, float rotation) {
+            protected void draw(TextureRegion region, float x, float y, float originX, float originY, float width, float height, float rotation) {
                 x += 4;
                 y += 4;
 
@@ -148,14 +150,10 @@ public class ContentHandler {
             throw new RuntimeException(e);
         }
 
-        world = new World() {
-            public Tile tile(int x, int y) {
-                return new Tile(x, y);
-            }
-        };
+        world = new World() { public Tile tile(int x, int y) { return new Tile(x, y); } };
     }
 
-    private BufferedImage getImage(String name) {
+    private static BufferedImage getImage(String name) {
         return regions.get(name, () -> {
             try {
                 return ImageIO.read(imageFiles.get(name, imageFiles.get("error")).file());
@@ -165,7 +163,7 @@ public class ContentHandler {
         });
     }
 
-    private BufferedImage tint(BufferedImage image, Color color) {
+    private static BufferedImage tint(BufferedImage image, Color color) {
         BufferedImage copy = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
         Color tmp = new Color();
         for (int x = 0; x < copy.getWidth(); x++) {
@@ -179,15 +177,11 @@ public class ContentHandler {
         return copy;
     }
 
-    public Schematic parseSchematic(String text) throws IOException {
-        return read(new ByteArrayInputStream(Base64Coder.decode(text)));
-    }
+    public static Schematic parseSchematic(String text) throws IOException { return read(new ByteArrayInputStream(Base64Coder.decode(text))); }
 
-    public Schematic parseSchematicURL(String text) throws Exception {
-        return read(OverflowGateBot.networkHandler.download(text));
-    }
+    public static Schematic parseSchematicURL(String text) throws Exception { return read(NetworkHandler.download(text)); }
 
-    static Schematic read(InputStream input) throws IOException {
+    public static Schematic read(InputStream input) throws IOException {
         byte[] header = { 'm', 's', 'c', 'h' };
         for (byte b : header) {
             if (input.read() != b) {
@@ -231,7 +225,7 @@ public class ContentHandler {
         }
     }
 
-    public BufferedImage previewSchematic(Schematic schem) throws Exception {
+    public static BufferedImage previewSchematic(Schematic schem) throws Exception {
 
         BufferedImage image = new BufferedImage(schem.width * 32, schem.height * 32, BufferedImage.TYPE_INT_ARGB);
 
@@ -250,10 +244,8 @@ public class ContentHandler {
         return image;
     }
 
-    public Map readMap(InputStream is) throws IOException {
-        try (InputStream ifs = new InflaterInputStream(is);
-                CounterInputStream counter = new CounterInputStream(ifs);
-                DataInputStream stream = new DataInputStream(counter)) {
+    public static Map readMap(InputStream is) throws IOException {
+        try (InputStream ifs = new InflaterInputStream(is); CounterInputStream counter = new CounterInputStream(ifs); DataInputStream stream = new DataInputStream(counter)) {
             Map out = new Map();
 
             SaveIO.readHeader(stream);
@@ -293,23 +285,16 @@ public class ContentHandler {
             ver.region("content", stream, counter, ver::readContentHeader);
             ver.region("preview_map", stream, counter, in -> ver.readMap(in, new WorldContext() {
                 @Override
-                public void resize(int width, int height) {
-                }
+                public void resize(int width, int height) {}
 
                 @Override
-                public boolean isGenerating() {
-                    return false;
-                }
+                public boolean isGenerating() { return false; }
 
                 @Override
-                public void begin() {
-                    world.setGenerating(true);
-                }
+                public void begin() { world.setGenerating(true); }
 
                 @Override
-                public void end() {
-                    world.setGenerating(false);
-                }
+                public void end() { world.setGenerating(false); }
 
                 @Override
                 public void onReadBuilding() {
@@ -338,11 +323,9 @@ public class ContentHandler {
                 @Override
                 public Tile create(int x, int y, int floorID, int overlayID, int wallID) {
                     if (overlayID != 0) {
-                        floors.setRGB(x, floors.getHeight() - 1 - y,
-                                conv(MapIO.colorFor(Blocks.air, Blocks.air, content.block(overlayID), Team.derelict)));
+                        floors.setRGB(x, floors.getHeight() - 1 - y, conv(MapIO.colorFor(Blocks.air, Blocks.air, content.block(overlayID), Team.derelict)));
                     } else {
-                        floors.setRGB(x, floors.getHeight() - 1 - y,
-                                conv(MapIO.colorFor(Blocks.air, content.block(floorID), Blocks.air, Team.derelict)));
+                        floors.setRGB(x, floors.getHeight() - 1 - y, conv(MapIO.colorFor(Blocks.air, content.block(floorID), Blocks.air, Team.derelict)));
                     }
                     return tile;
                 }
@@ -360,9 +343,7 @@ public class ContentHandler {
         }
     }
 
-    int conv(int rgba) {
-        return co.set(rgba).argb8888();
-    }
+    static int conv(int rgba) { return co.set(rgba).argb8888(); }
 
     public static class Map {
         public String name, author, description;

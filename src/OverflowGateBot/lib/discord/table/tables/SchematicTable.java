@@ -12,10 +12,14 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.Filters;
 
+import OverflowGateBot.BotConfig;
 import OverflowGateBot.lib.discord.table.SimpleTable;
+import OverflowGateBot.lib.mindustry.ContentHandler;
 import OverflowGateBot.lib.mindustry.SchematicData;
 import OverflowGateBot.lib.mindustry.SchematicInfo;
 import OverflowGateBot.main.DatabaseHandler;
+import OverflowGateBot.main.MessageHandler;
+import OverflowGateBot.main.TableHandler;
 import OverflowGateBot.main.DatabaseHandler.DATABASE;
 import mindustry.game.Schematic;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -43,12 +47,10 @@ public class SchematicTable extends SimpleTable {
             schematicInfoList.add(cursor.next());
         }
 
-        if (!DatabaseHandler.collectionExists(DATABASE.MINDUSTRY, SCHEMATIC_DATA_COLLECTION)) {
-            DatabaseHandler.createCollection(DATABASE.MINDUSTRY, SCHEMATIC_DATA_COLLECTION);
+        if (!DatabaseHandler.collectionExists(DATABASE.MINDUSTRY, BotConfig.SCHEMATIC_DATA_COLLECTION)) {
+            DatabaseHandler.createCollection(DATABASE.MINDUSTRY, BotConfig.SCHEMATIC_DATA_COLLECTION);
         }
-        this.collection = DatabaseHandler.getDatabase(DATABASE.MINDUSTRY).getCollection(
-                SCHEMATIC_DATA_COLLECTION,
-                SchematicData.class);
+        this.collection = DatabaseHandler.getDatabase(DATABASE.MINDUSTRY).getCollection(BotConfig.SCHEMATIC_DATA_COLLECTION, SchematicData.class);
 
         addButton("<", () -> this.previousPage());
         addButtonDeny("X", () -> this.delete());
@@ -59,13 +61,11 @@ public class SchematicTable extends SimpleTable {
     }
 
     @Override
-    public int getMaxPage() {
-        return this.schematicInfoList.size();
-    }
+    public int getMaxPage() { return this.schematicInfoList.size(); }
 
     @Override
     public void send() {
-        tableEmbedMessageHandler.add(this);
+        TableHandler.add(this);
         update();
     }
 
@@ -104,7 +104,7 @@ public class SchematicTable extends SimpleTable {
             this.event.getHook().sendMessage("```" + data + "```").queue(m -> this.currentCode = m);
         else {
             try {
-                File schematicFile = messagesHandler.getSchematicFile(contentHandler.parseSchematic(data));
+                File schematicFile = MessageHandler.getSchematicFile(ContentHandler.parseSchematic(data));
                 this.event.getHook().sendFile(schematicFile).queue(m -> this.currentCode = m);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -125,9 +125,9 @@ public class SchematicTable extends SimpleTable {
                 return;
             }
 
-            Schematic schem = contentHandler.parseSchematic(this.currentData.getData());
-            File previewFile = messagesHandler.getSchematicPreviewFile(schem);
-            EmbedBuilder builder = messagesHandler.getSchematicEmbedBuilder(schem, previewFile, event.getMember());
+            Schematic schem = ContentHandler.parseSchematic(this.currentData.getData());
+            File previewFile = MessageHandler.getSchematicPreviewFile(schem);
+            EmbedBuilder builder = MessageHandler.getSchematicEmbedBuilder(schem, previewFile, event.getMember());
             StringBuilder field = new StringBuilder();
             builder = addPageFooter(builder);
             String authorId = this.currentInfo.authorId;
@@ -150,8 +150,7 @@ public class SchematicTable extends SimpleTable {
             if (message != null)
                 action.retainFiles(message.getAttachments());
 
-            action.setEmbeds(builder.build())
-                    .setActionRow(getButton()).queue();
+            action.setEmbeds(builder.build()).setActionRow(getButton()).queue();
 
         } catch (Exception e) {
             this.event.getHook().editOriginal("Lỗi").queue();

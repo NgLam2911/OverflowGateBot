@@ -6,8 +6,10 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-
+import OverflowGateBot.BotConfig;
 import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
+import OverflowGateBot.main.GuildHandler;
+import OverflowGateBot.main.UserHandler;
 
 import static OverflowGateBot.OverflowGateBot.*;
 
@@ -30,7 +32,7 @@ public class InfoCommand extends SimpleBotSubcommand {
             return;
         EmbedBuilder builder = new EmbedBuilder();
         StringBuilder field = new StringBuilder();
-        Member shar = guild.getMemberById(SHAR_ID);
+        Member shar = guild.getMemberById(BotConfig.SHAR_ID);
 
         Long totalMember = 0l;
         User bot = jda.getSelfUser();
@@ -43,8 +45,8 @@ public class InfoCommand extends SimpleBotSubcommand {
         else
             field.append("Chủ nhân: " + shar.getEffectiveName() + "\n");
 
-        field.append("Máy chủ: " + guildHandler.guildCache.size() + "\\" + jda.getGuilds().size() + " trực tuyến\n");
-        field.append("Thành viên: " + userHandler.userCache.size() + "\\" + totalMember + " hoạt động\n");
+        field.append("Máy chủ: " + GuildHandler.getActiveGuildCount() + "\\" + jda.getGuilds().size() + " trực tuyến\n");
+        field.append("Thành viên: " + UserHandler.getActiveUserCount() + "\\" + totalMember + " hoạt động\n");
         field.append("Ngày sinh: " + bot.getTimeCreated().format(DateTimeFormatter.ofPattern("dd/MM/yyyy-hh:mm:ss"))
                 + "\n");
         builder.addField("Thông tin", "```" + field.toString() + "```", false);

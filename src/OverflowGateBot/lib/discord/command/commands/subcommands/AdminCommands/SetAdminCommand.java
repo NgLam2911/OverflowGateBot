@@ -2,12 +2,11 @@ package OverflowGateBot.lib.discord.command.commands.subcommands.AdminCommands;
 
 import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
 import OverflowGateBot.lib.user.GuildData;
+import OverflowGateBot.main.GuildHandler;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-
-import static OverflowGateBot.OverflowGateBot.*;
 
 public class SetAdminCommand extends SimpleBotSubcommand {
 
@@ -17,9 +16,7 @@ public class SetAdminCommand extends SimpleBotSubcommand {
     }
 
     @Override
-    public String getHelpString() {
-        return "Cài đặt vai trò của máy chủ:\n\t<role>: vai trò admin\n\tThêm lần nữa để xóa";
-    }
+    public String getHelpString() { return "Cài đặt vai trò của máy chủ:\n\t<role>: vai trò admin\n\tThêm lần nữa để xóa"; }
 
     @Override
     public void runCommand(SlashCommandInteractionEvent event) {
@@ -30,7 +27,7 @@ public class SetAdminCommand extends SimpleBotSubcommand {
         Role role = roleOption.getAsRole();
         String roleId = role.getId();
 
-        GuildData guildData = guildHandler.getGuild(event.getGuild());
+        GuildData guildData = GuildHandler.getGuild(event.getGuild());
         if (guildData == null)
             throw new IllegalStateException("Guild data not found with <" + event.getGuild() + ">");
 

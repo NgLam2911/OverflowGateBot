@@ -8,6 +8,7 @@ import javax.annotation.Nonnull;
 
 import OverflowGateBot.lib.user.DataCache;
 import OverflowGateBot.main.BotException;
+import OverflowGateBot.main.TableHandler;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.Guild;
@@ -17,8 +18,6 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-
-import static OverflowGateBot.OverflowGateBot.*;
 
 public class SimpleTable extends DataCache {
 
@@ -34,9 +33,7 @@ public class SimpleTable extends DataCache {
         this.event = event;
     }
 
-    public void finalize() {
-        this.delete();
-    }
+    public void finalize() { this.delete(); }
 
     public Guild getGuild() {
         Guild guild = event.getGuild();
@@ -50,9 +47,7 @@ public class SimpleTable extends DataCache {
         return channel;
     }
 
-    public String getId() {
-        return this.event.getId();
-    }
+    public String getId() { return this.event.getId(); }
 
     public boolean addPage(EmbedBuilder value) {
         if (value == null || value.isEmpty())
@@ -91,9 +86,7 @@ public class SimpleTable extends DataCache {
         return temp;
     }
 
-    public void clearButton() {
-        this.buttons.clear();
-    }
+    public void clearButton() { this.buttons.clear(); }
 
     public MessageEmbed getCurrentPage() {
         EmbedBuilder value = this.tables.get(pageNumber);
@@ -111,9 +104,7 @@ public class SimpleTable extends DataCache {
         update();
     }
 
-    public int getMaxPage() {
-        return this.tables.size();
-    }
+    public int getMaxPage() { return this.tables.size(); }
 
     public void nextPage() {
         this.pageNumber += 1;
@@ -157,7 +148,7 @@ public class SimpleTable extends DataCache {
         for (TableButton key : buttons)
             temp.add(key.getButton());
         event.getHook().sendMessageEmbeds(message).addActionRow(temp).queue();
-        tableEmbedMessageHandler.add(this);
+        TableHandler.add(this);
 
     }
 
@@ -199,17 +190,11 @@ public class SimpleTable extends DataCache {
             this.button = button;
         }
 
-        public Runnable getRunnable() {
-            return this.r;
-        }
+        public Runnable getRunnable() { return this.r; }
 
-        public Button getButton() {
-            return this.button;
-        }
+        public Button getButton() { return this.button; }
 
-        public String getId() {
-            return this.getButton().getId();
-        }
+        public String getId() { return this.getButton().getId(); }
     }
 
 }

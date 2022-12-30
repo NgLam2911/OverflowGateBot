@@ -2,11 +2,10 @@ package OverflowGateBot.lib.discord.command.commands.subcommands.AdminCommands;
 
 import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
 import OverflowGateBot.lib.user.GuildData;
+import OverflowGateBot.main.GuildHandler;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-
-import static OverflowGateBot.OverflowGateBot.guildHandler;
 
 public class GuildShowLevelCommand extends SimpleBotSubcommand {
 
@@ -16,9 +15,7 @@ public class GuildShowLevelCommand extends SimpleBotSubcommand {
     }
 
     @Override
-    public String getHelpString() {
-        return "Ẩn/Hiện cấp độ của toàn bộ thành viên server\n\tTrue: hiện\n\tFalse: ẩn";
-    }
+    public String getHelpString() { return "Ẩn/Hiện cấp độ của toàn bộ thành viên server\n\tTrue: hiện\n\tFalse: ẩn"; }
 
     @Override
     public void runCommand(SlashCommandInteractionEvent event) {
@@ -28,7 +25,7 @@ public class GuildShowLevelCommand extends SimpleBotSubcommand {
 
         String show = String.valueOf(showOption.getAsBoolean());
 
-        GuildData guildCache = guildHandler.getGuild(event.getGuild());
+        GuildData guildCache = GuildHandler.getGuild(event.getGuild());
         if (guildCache == null)
             throw new IllegalStateException("No guild data found");
 

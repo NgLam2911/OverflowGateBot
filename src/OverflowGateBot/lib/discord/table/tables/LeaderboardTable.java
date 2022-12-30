@@ -14,6 +14,7 @@ import OverflowGateBot.lib.discord.command.commands.subcommands.UserCommands.Lea
 import OverflowGateBot.lib.discord.table.SimpleTable;
 import OverflowGateBot.lib.user.UserData;
 import OverflowGateBot.main.DatabaseHandler;
+import OverflowGateBot.main.UserHandler;
 import OverflowGateBot.main.DatabaseHandler.DATABASE;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
@@ -58,82 +59,69 @@ public class LeaderboardTable extends SimpleTable {
     }
 
     @Override
-    public int getMaxPage() {
-        return (Integer) ((users.size() - 1) / MAX_DISPLAY) + 1;
-    }
+    public int getMaxPage() { return (Integer) ((users.size() - 1) / MAX_DISPLAY) + 1; }
 
     public void getLeaderboardData(LEADERBOARD leaderboard, ORDER order) {
 
         switch (leaderboard) {
-            case ALL:
-                jda.getGuilds().forEach(guild -> {
-                    String guildId = guild.getId();
-                    if (!DatabaseHandler.collectionExists(DATABASE.USER, guildId))
-                        DatabaseHandler.createCollection(DATABASE.USER, guildId);
-
-                    MongoCollection<UserData> collection = DatabaseHandler.getDatabase(DATABASE.USER).getCollection(
-                            guildId,
-                            UserData.class);
-
-                    FindIterable<UserData> data = collection.find();
-                    data.forEach(d -> users.add(d));
-                });
-                break;
-
-            case GUILD:
-                Guild guild = event.getGuild();
-                if (guild == null)
-                    throw new IllegalStateException("Guild not found");
+        case ALL:
+            jda.getGuilds().forEach(guild -> {
                 String guildId = guild.getId();
                 if (!DatabaseHandler.collectionExists(DATABASE.USER, guildId))
                     DatabaseHandler.createCollection(DATABASE.USER, guildId);
 
-                MongoCollection<UserData> collection = DatabaseHandler.getDatabase(DATABASE.USER).getCollection(guildId,
-                        UserData.class);
+                MongoCollection<UserData> collection = DatabaseHandler.getDatabase(DATABASE.USER).getCollection(guildId, UserData.class);
 
                 FindIterable<UserData> data = collection.find();
                 data.forEach(d -> users.add(d));
-                break;
-                
-            case ONLINE:
-                users.addAll(userHandler.userCache.values());
+            });
+            break;
+
+        case GUILD:
+            Guild guild = event.getGuild();
+            if (guild == null)
+                throw new IllegalStateException("Guild not found");
+            String guildId = guild.getId();
+            if (!DatabaseHandler.collectionExists(DATABASE.USER, guildId))
+                DatabaseHandler.createCollection(DATABASE.USER, guildId);
+
+            MongoCollection<UserData> collection = DatabaseHandler.getDatabase(DATABASE.USER).getCollection(guildId, UserData.class);
+
+            FindIterable<UserData> data = collection.find();
+            data.forEach(d -> users.add(d));
+            break;
+
+        case ONLINE:
+            users.addAll(UserHandler.getCachedUser());
         }
         switch (order) {
-            case LEVEL:
-                users.sort(new Comparator<UserData>() {
-                    @Override
-                    public int compare(UserData a, UserData b) {
-                        return b._getTotalPoint() - a._getTotalPoint();
-                    }
-                });
-                break;
+        case LEVEL:
+            users.sort(new Comparator<UserData>() {
+                @Override
+                public int compare(UserData a, UserData b) { return b._getTotalPoint() - a._getTotalPoint(); }
+            });
+            break;
 
-            case MONEY:
-                users.sort(new Comparator<UserData>() {
-                    @Override
-                    public int compare(UserData a, UserData b) {
-                        return b.money - a.money;
-                    }
-                });
-                break;
+        case MONEY:
+            users.sort(new Comparator<UserData>() {
+                @Override
+                public int compare(UserData a, UserData b) { return b.money - a.money; }
+            });
+            break;
 
-            case PVP_POINT:
-                users.sort(new Comparator<UserData>() {
-                    @Override
-                    public int compare(UserData a, UserData b) {
-                        return b.pvpPoint - a.point;
-                    }
-                });
-                break;
+        case PVP_POINT:
+            users.sort(new Comparator<UserData>() {
+                @Override
+                public int compare(UserData a, UserData b) { return b.pvpPoint - a.point; }
+            });
+            break;
 
-            default:
-                users.sort(new Comparator<UserData>() {
-                    @Override
-                    public int compare(UserData a, UserData b) {
-                        return b._getTotalPoint() - a._getTotalPoint();
-                    }
-                });
-                break;
+        default:
+            users.sort(new Comparator<UserData>() {
+                @Override
+                public int compare(UserData a, UserData b) { return b._getTotalPoint() - a._getTotalPoint(); }
+            });
+            break;
         }
     }
 
@@ -146,7 +134,7 @@ public class LeaderboardTable extends SimpleTable {
         EmbedBuilder builder = new EmbedBuilder();
         builder.setTitle("BẢNG XẾP HẠNG (" + leaderboard + ")");
 
-        UserData user = userHandler.getUserNoCache(member);
+        UserData user = UserHandler.getUserNoCache(member);
         int position = users.indexOf(user);
 
         int length = Math.min((pageNumber + 1) * MAX_DISPLAY, users.size());
@@ -168,14 +156,14 @@ public class LeaderboardTable extends SimpleTable {
             data += user._getName() + ":               ";
 
             switch (order) {
-                case LEVEL:
-                    data += "cấp " + user.getLevel() + " (" + user._getTotalPoint() + " kinh nghiệm)";
-                    break;
-                case MONEY:
-                    data += user.money + " Alpha";
-                    break;
-                case PVP_POINT:
-                    data += user.pvpPoint + " điểm";
+            case LEVEL:
+                data += "cấp " + user.getLevel() + " (" + user._getTotalPoint() + " kinh nghiệm)";
+                break;
+            case MONEY:
+                data += user.money + " Alpha";
+                break;
+            case PVP_POINT:
+                data += user.pvpPoint + " điểm";
             }
             data += "\nMáy chủ:           " + user._getGuild().getName();
             return data;

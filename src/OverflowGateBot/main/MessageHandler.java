@@ -38,27 +38,30 @@ import mindustry.type.ItemStack;
 
 import static OverflowGateBot.OverflowGateBot.*;
 
-public class MessagesHandler extends ListenerAdapter {
+public final class MessageHandler extends ListenerAdapter {
+
+    private static MessageHandler instance = new MessageHandler();
 
     public final Integer messageAliveTime = 30;
 
     public HashMap<String, TextChannel> serverChatChannel = new HashMap<String, TextChannel>();
 
-    public MessagesHandler() {
+    private MessageHandler() {
 
         jda.addEventListener(this);
         Log.info("Message handler up");
     }
 
-    public String getMessageSender(Message message) {
+    public static MessageHandler getInstance() { return instance; }
+
+    public static String getMessageSender(Message message) {
         Member member = message.getMember();
         if (member == null)
             return "[" + message.getGuild().getName() + "] " + " <" + message.getChannel().getName() + "> " + "Unknown";
-        return "[" + message.getGuild().getName() + "] " + " <" + message.getChannel().getName() + "> "
-                + member.getEffectiveName();
+        return "[" + message.getGuild().getName() + "] " + " <" + message.getChannel().getName() + "> " + member.getEffectiveName();
     }
 
-    public String getMessageSender(@Nonnull SlashCommandInteractionEvent event) {
+    public static String getMessageSender(@Nonnull SlashCommandInteractionEvent event) {
         Member member = event.getMember();
         Guild guild = event.getGuild();
         String guildName;
@@ -81,7 +84,7 @@ public class MessagesHandler extends ListenerAdapter {
 
     }
 
-    public void handleMessage(Message message) {
+    public static void handleMessage(Message message) {
         // Log all message that has been sent
         List<Attachment> attachments = message.getAttachments();
         Member member = message.getMember();
@@ -97,7 +100,7 @@ public class MessagesHandler extends ListenerAdapter {
         }
 
         // Delete in channel that it should not be
-        GuildData guildData = guildHandler.getGuild(message.getGuild());
+        GuildData guildData = GuildHandler.getGuild(message.getGuild());
 
         if (guildData._containsChannel(CHANNEL_TYPE.SCHEMATIC.name(), message.getTextChannel().getId()) || //
                 guildData._containsChannel(CHANNEL_TYPE.MAP.name(), message.getTextChannel().getId())) {
@@ -108,10 +111,9 @@ public class MessagesHandler extends ListenerAdapter {
         }
 
         // Update exp on message sent
-        userHandler.onMessage(message);
+        UserHandler.onMessage(message);
         DatabaseHandler.log(LOG_TYPE.MESSAGE, new Document()//
-                .append("message",
-                        getMessageSender(message) + ": " + message.getContentDisplay())//
+                .append("message", getMessageSender(message) + ": " + message.getContentDisplay())//
                 .append("messageId", message.getId())//
                 .append("userId", member == null ? null : member.getId())//
                 .append("guildId", message.getGuild().getId()));
@@ -133,7 +135,7 @@ public class MessagesHandler extends ListenerAdapter {
         if (member == bot)
             return;
         Member target = event.getEntity();
-        UserData userData = userHandler.getUserNoCache(target);
+        UserData userData = UserHandler.getUserNoCache(target);
         if (userData == null)
             throw new IllegalStateException("No user data found");
 
@@ -144,9 +146,7 @@ public class MessagesHandler extends ListenerAdapter {
     }
 
     @Override
-    public void onMessageDelete(@Nonnull MessageDeleteEvent event) {
-        DatabaseHandler.log(LOG_TYPE.MESSAGE_DELETED, new Document("messageId", event.getMessageId()));
-    }
+    public void onMessageDelete(@Nonnull MessageDeleteEvent event) { DatabaseHandler.log(LOG_TYPE.MESSAGE_DELETED, new Document("messageId", event.getMessageId())); }
 
     @Override
     public void onGuildMemberRemove(@Nonnull GuildMemberRemoveEvent event) {
@@ -162,12 +162,12 @@ public class MessagesHandler extends ListenerAdapter {
 
     @Override
     public void onGuildMemberJoin(@Nonnull GuildMemberJoinEvent event) {
-        userHandler.addUser(event.getMember());
+        UserHandler.addUser(event.getMember());
         log(event.getGuild(), event.getMember().getEffectiveName() + " tham gia máy chủ");
     }
 
-    public void log(Guild guild, @Nonnull String content) {
-        GuildData guildData = guildHandler.getGuild(guild);
+    public static void log(Guild guild, @Nonnull String content) {
+        GuildData guildData = GuildHandler.getGuild(guild);
         if (guildData == null)
             throw new IllegalStateException("No guild data found");
 
@@ -178,18 +178,16 @@ public class MessagesHandler extends ListenerAdapter {
             botLogChannel.forEach(c -> c.sendMessage("```" + content + "```").queue());
     }
 
-    public boolean isSchematicText(Message message) {
-        return message.getContentRaw().startsWith(ContentHandler.schemHeader) && message.getAttachments().isEmpty();
-    }
+    public static boolean isSchematicText(Message message) { return message.getContentRaw().startsWith(ContentHandler.schemHeader) && message.getAttachments().isEmpty(); }
 
-    public boolean isSchematicFile(Attachment attachment) {
+    public static boolean isSchematicFile(Attachment attachment) {
         String fileExtension = attachment.getFileExtension();
         if (fileExtension == null)
             return true;
         return fileExtension.equals(Vars.schematicExtension);
     }
 
-    public boolean isSchematicFile(List<Attachment> attachments) {
+    public static boolean isSchematicFile(List<Attachment> attachments) {
         for (Attachment a : attachments) {
             if (isSchematicFile(a))
                 return true;
@@ -197,11 +195,9 @@ public class MessagesHandler extends ListenerAdapter {
         return false;
     }
 
-    public boolean isMapFile(Attachment attachment) {
-        return attachment.getFileName().endsWith(".msav") || attachment.getFileExtension() == null;
-    }
+    public static boolean isMapFile(Attachment attachment) { return attachment.getFileName().endsWith(".msav") || attachment.getFileExtension() == null; }
 
-    public boolean isMapFile(Message message) {
+    public static boolean isMapFile(Message message) {
         for (Attachment a : message.getAttachments()) {
             if (isMapFile(a))
                 return true;
@@ -209,7 +205,7 @@ public class MessagesHandler extends ListenerAdapter {
         return false;
     }
 
-    public boolean isMapFile(List<Attachment> attachments) {
+    public static boolean isMapFile(List<Attachment> attachments) {
         for (Attachment a : attachments) {
             if (isMapFile(a))
                 return true;
@@ -218,11 +214,9 @@ public class MessagesHandler extends ListenerAdapter {
     }
 
     // Its bad lol
-    public String capitalize(String text) {
-        return Character.toUpperCase(text.charAt(0)) + text.substring(1);
-    }
+    public static String capitalize(String text) { return Character.toUpperCase(text.charAt(0)) + text.substring(1); }
 
-    public boolean isChannel(Guild guild, Channel channel, HashMap<String, HashMap<String, String>> guildChannelIds) {
+    public static boolean isChannel(Guild guild, Channel channel, HashMap<String, HashMap<String, String>> guildChannelIds) {
         if (guildChannelIds.containsKey(guild.getId())) {
             if (guildChannelIds.get(guild.getId()).containsKey(channel.getId()))
                 return true;
@@ -230,7 +224,7 @@ public class MessagesHandler extends ListenerAdapter {
         return false;
     }
 
-    public boolean hasChannel(@Nonnull String guildId, @Nonnull String channelId) {
+    public static boolean hasChannel(@Nonnull String guildId, @Nonnull String channelId) {
         Guild guild = jda.getGuildById(guildId);
         if (guild == null)
             return false;
@@ -242,21 +236,18 @@ public class MessagesHandler extends ListenerAdapter {
         return false;
     }
 
-    public void sendMapPreview(Attachment attachment, Member member, MessageChannel channel) {
+    public static void sendMapPreview(Attachment attachment, Member member, MessageChannel channel) {
         try {
 
-            ContentHandler.Map map = contentHandler.readMap(networkHandler.download(attachment.getUrl()));
+            ContentHandler.Map map = ContentHandler.readMap(NetworkHandler.download(attachment.getUrl()));
             new File("cache/").mkdir();
             new File("cache/temp/").mkdir();
             File mapFile = new File("cache/temp/" + attachment.getFileName());
             Fi imageFile = Fi.get("cache/temp/image_" + attachment.getFileName().replace(".msav", ".png"));
-            Streams.copy(networkHandler.download(attachment.getUrl()), new FileOutputStream(mapFile));
+            Streams.copy(NetworkHandler.download(attachment.getUrl()), new FileOutputStream(mapFile));
             ImageIO.write(map.image, "png", imageFile.file());
 
-            EmbedBuilder builder = new EmbedBuilder().setImage("attachment://" + imageFile.name())
-                    .setAuthor(member.getEffectiveName(), member.getEffectiveAvatarUrl(),
-                            member.getEffectiveAvatarUrl())
-                    .setTitle(map.name == null ? attachment.getFileName().replace(".msav", "") : map.name);
+            EmbedBuilder builder = new EmbedBuilder().setImage("attachment://" + imageFile.name()).setAuthor(member.getEffectiveName(), member.getEffectiveAvatarUrl(), member.getEffectiveAvatarUrl()).setTitle(map.name == null ? attachment.getFileName().replace(".msav", "") : map.name);
             builder.addField("Size: ", map.image.getWidth() + "x" + map.image.getHeight(), false);
             if (map.description != null)
                 builder.setFooter(map.description);
@@ -271,7 +262,7 @@ public class MessagesHandler extends ListenerAdapter {
         }
     }
 
-    public void sendMapPreview(Message message, MessageChannel channel) {
+    public static void sendMapPreview(Message message, MessageChannel channel) {
         for (int i = 0; i < message.getAttachments().size(); i++) {
             Attachment attachment = message.getAttachments().get(i);
             if (isMapFile(attachment)) {
@@ -281,7 +272,7 @@ public class MessagesHandler extends ListenerAdapter {
         }
     }
 
-    public void sendMapPreview(SlashCommandInteractionEvent event) {
+    public static void sendMapPreview(SlashCommandInteractionEvent event) {
         OptionMapping fileOption = event.getOption("mapfile");
         if (fileOption == null)
             return;
@@ -297,7 +288,7 @@ public class MessagesHandler extends ListenerAdapter {
         event.reply("Gửi thành công.");
     }
 
-    public void sendSchematicPreview(SlashCommandInteractionEvent event) {
+    public static void sendSchematicPreview(SlashCommandInteractionEvent event) {
         OptionMapping fileOption = event.getOption("mapfile");
         if (fileOption == null)
             return;
@@ -309,23 +300,21 @@ public class MessagesHandler extends ListenerAdapter {
         }
         Member member = event.getMember();
         try {
-            sendSchematicPreview(contentHandler.parseSchematicURL(attachment.getUrl()), member, event.getChannel());
+            sendSchematicPreview(ContentHandler.parseSchematicURL(attachment.getUrl()), member, event.getChannel());
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public void sendSchematicPreview(Message message, MessageChannel channel) {
+    public static void sendSchematicPreview(Message message, MessageChannel channel) {
         try {
             if (isSchematicText(message)) {
-                sendSchematicPreview(contentHandler.parseSchematic(message.getContentRaw()), message.getMember(),
-                        channel);
+                sendSchematicPreview(ContentHandler.parseSchematic(message.getContentRaw()), message.getMember(), channel);
             } else {
                 for (int i = 0; i < message.getAttachments().size(); i++) {
                     Attachment attachment = message.getAttachments().get(i);
                     if (isSchematicFile(attachment)) {
-                        sendSchematicPreview(contentHandler.parseSchematicURL(attachment.getUrl()), message.getMember(),
-                                channel);
+                        sendSchematicPreview(ContentHandler.parseSchematicURL(attachment.getUrl()), message.getMember(), channel);
                     }
                 }
             }
@@ -335,7 +324,7 @@ public class MessagesHandler extends ListenerAdapter {
         message.delete().queue();
     }
 
-    public void sendSchematicPreview(Schematic schem, Member member, MessageChannel channel) {
+    public static void sendSchematicPreview(Schematic schem, Member member, MessageChannel channel) {
         try {
             File schemFile = getSchematicFile(schem);
             File previewFile = getSchematicPreviewFile(schem);
@@ -347,11 +336,8 @@ public class MessagesHandler extends ListenerAdapter {
         }
     }
 
-    public EmbedBuilder getSchematicEmbedBuilder(Schematic schem, File previewFile, Member member) {
-        EmbedBuilder builder = new EmbedBuilder().setImage("attachment://" + previewFile.getName())
-                .setAuthor(member.getEffectiveName(), member.getEffectiveAvatarUrl(),
-                        member.getEffectiveAvatarUrl())
-                .setTitle(schem.name());
+    public static EmbedBuilder getSchematicEmbedBuilder(Schematic schem, File previewFile, Member member) {
+        EmbedBuilder builder = new EmbedBuilder().setImage("attachment://" + previewFile.getName()).setAuthor(member.getEffectiveName(), member.getEffectiveAvatarUrl(), member.getEffectiveAvatarUrl()).setTitle(schem.name());
 
         if (!schem.description().isEmpty())
             builder.setFooter(schem.description());
@@ -387,7 +373,7 @@ public class MessagesHandler extends ListenerAdapter {
         return builder;
     }
 
-    public @Nonnull File getSchematicFile(Schematic schem) throws IOException {
+    public static @Nonnull File getSchematicFile(Schematic schem) throws IOException {
         String sname = schem.name().replace("/", "_").replace(" ", "_").replace(":", "_");
         new File("cache").mkdir();
         if (sname.isEmpty())
@@ -397,9 +383,9 @@ public class MessagesHandler extends ListenerAdapter {
         return schemFile;
     }
 
-    public @Nonnull File getSchematicPreviewFile(Schematic schem) throws Exception {
+    public static @Nonnull File getSchematicPreviewFile(Schematic schem) throws Exception {
 
-        BufferedImage preview = contentHandler.previewSchematic(schem);
+        BufferedImage preview = ContentHandler.previewSchematic(schem);
         new File("cache").mkdir();
         File previewFile = new File("cache/temp/img_" + UUID.randomUUID() + ".png");
         ImageIO.write(preview, "png", previewFile);
@@ -409,21 +395,17 @@ public class MessagesHandler extends ListenerAdapter {
     }
 
     // Message send commands
-    public void sendTempMessage(Message message, String content, int sec) {
-        sendTempMessage(message.getChannel(), content, sec);
-    }
+    public static void sendTempMessage(Message message, String content, int sec) { sendTempMessage(message.getChannel(), content, sec); }
 
-    public void sendTempMessage(SlashCommandInteractionEvent event, String content, int sec) {
-        sendTempMessage(event.getChannel(), content, sec);
-    }
+    public static void sendTempMessage(SlashCommandInteractionEvent event, String content, int sec) { sendTempMessage(event.getChannel(), content, sec); }
 
-    public void sendTempMessage(MessageChannel channel, String content, int sec) {
+    public static void sendTempMessage(MessageChannel channel, String content, int sec) {
         channel.sendMessage("```" + content + "```").queue(m -> {
             m.delete().queueAfter(sec, TimeUnit.SECONDS);
         });
     }
 
-    public void replyTempMessage(Message message, String content, int sec) {
+    public static void replyTempMessage(Message message, String content, int sec) {
         message.reply("```" + content + "```").queue(m -> {
             m.delete().queueAfter(sec, TimeUnit.SECONDS);
         });

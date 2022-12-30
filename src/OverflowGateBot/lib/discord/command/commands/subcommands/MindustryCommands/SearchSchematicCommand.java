@@ -10,6 +10,7 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 
+import OverflowGateBot.BotConfig;
 import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
 import OverflowGateBot.lib.discord.table.tables.SchematicTable;
 import OverflowGateBot.lib.mindustry.SCHEMATIC_TAG;
@@ -25,8 +26,6 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-
-import static OverflowGateBot.OverflowGateBot.*;
 
 public class SearchSchematicCommand extends SimpleBotSubcommand {
 
@@ -60,20 +59,16 @@ public class SearchSchematicCommand extends SimpleBotSubcommand {
                 filter.append("authorId", member.getId());
         }
 
-        if (!DatabaseHandler.collectionExists(DATABASE.MINDUSTRY, SCHEMATIC_INFO_COLLECTION)) {
-            DatabaseHandler.createCollection(DATABASE.MINDUSTRY, SCHEMATIC_INFO_COLLECTION);
+        if (!DatabaseHandler.collectionExists(DATABASE.MINDUSTRY, BotConfig.SCHEMATIC_INFO_COLLECTION)) {
+            DatabaseHandler.createCollection(DATABASE.MINDUSTRY, BotConfig.SCHEMATIC_INFO_COLLECTION);
         }
-        MongoCollection<SchematicInfo> collection = DatabaseHandler.getDatabase(DATABASE.MINDUSTRY).getCollection(
-                SCHEMATIC_INFO_COLLECTION,
-                SchematicInfo.class);
+        MongoCollection<SchematicInfo> collection = DatabaseHandler.getDatabase(DATABASE.MINDUSTRY).getCollection(BotConfig.SCHEMATIC_INFO_COLLECTION, SchematicInfo.class);
 
         FindIterable<SchematicInfo> schematicInfo;
         if (tags.length <= 0) {
-            schematicInfo = collection.find(filter,
-                    SchematicInfo.class).limit(SEARCH_LIMIT).sort(new Document().append("star", -1));
+            schematicInfo = collection.find(filter, SchematicInfo.class).limit(SEARCH_LIMIT).sort(new Document().append("star", -1));
         } else {
-            schematicInfo = collection.find(Filters.and(Filters.all("tag", tags), filter),
-                    SchematicInfo.class).limit(SEARCH_LIMIT).sort(new Document().append("star", -1));
+            schematicInfo = collection.find(Filters.and(Filters.all("tag", tags), filter), SchematicInfo.class).limit(SEARCH_LIMIT).sort(new Document().append("star", -1));
         }
 
         if (schematicInfo.first() == null) {
@@ -110,9 +105,7 @@ public class SearchSchematicCommand extends SimpleBotSubcommand {
             int c = 0;
             for (String i : temp) {
                 if (i.startsWith(t.toUpperCase())) {
-                    String value = tagValue.substring(0,
-                            tagValue.lastIndexOf(SEPARATOR) + 1)
-                            + i;
+                    String value = tagValue.substring(0, tagValue.lastIndexOf(SEPARATOR) + 1) + i;
                     String display = value.toLowerCase();
                     options.add(new Command.Choice(display == null ? value : display, value));
                     c += 1;

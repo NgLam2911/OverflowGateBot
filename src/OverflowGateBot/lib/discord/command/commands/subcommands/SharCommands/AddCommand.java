@@ -13,8 +13,7 @@ import java.util.HashMap;
 
 import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
 import OverflowGateBot.lib.user.UserData;
-
-import static OverflowGateBot.OverflowGateBot.userHandler;
+import OverflowGateBot.main.UserHandler;
 
 public class AddCommand extends SimpleBotSubcommand {
 
@@ -30,9 +29,7 @@ public class AddCommand extends SimpleBotSubcommand {
     }
 
     @Override
-    public String getHelpString() {
-        return "";
-    }
+    public String getHelpString() { return ""; }
 
     @Override
     public void runCommand(SlashCommandInteractionEvent event) {
@@ -58,27 +55,27 @@ public class AddCommand extends SimpleBotSubcommand {
         if (r == null || s == null)
             return;
 
-        UserData sender = userHandler.getUserNoCache(s);
-        UserData receiver = userHandler.getUserNoCache(r);
+        UserData sender = UserHandler.getUserNoCache(s);
+        UserData receiver = UserHandler.getUserNoCache(r);
 
         POINT_TYPE pt = POINT_TYPE.valueOf(type);
 
         switch (pt) {
-            case MONEY:
-                if (sender.money >= point) {
-                    sender.money -= point;
-                    receiver.money += point;
-                }
-                break;
-            case PVP:
-                if (sender.pvpPoint >= point) {
-                    sender.pvpPoint -= point;
-                    receiver.pvpPoint += point;
-                }
-                break;
-            default:
-                reply(event, "Chuyển không thành công, giá trị " + type + " không hợp lệ", 30);
-                return;
+        case MONEY:
+            if (sender.money >= point) {
+                sender.money -= point;
+                receiver.money += point;
+            }
+            break;
+        case PVP:
+            if (sender.pvpPoint >= point) {
+                sender.pvpPoint -= point;
+                receiver.pvpPoint += point;
+            }
+            break;
+        default:
+            reply(event, "Chuyển không thành công, giá trị " + type + " không hợp lệ", 30);
+            return;
         }
         reply(event, "Chuyển thành công " + point + " " + type + " đến " + r.getEffectiveName(), 30);
     }

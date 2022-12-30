@@ -20,8 +20,8 @@ import OverflowGateBot.lib.mindustry.SCHEMATIC_TAG;
 import OverflowGateBot.lib.mindustry.SchematicData;
 import OverflowGateBot.lib.mindustry.SchematicInfo;
 import OverflowGateBot.main.BotException;
-
-import static OverflowGateBot.OverflowGateBot.*;
+import OverflowGateBot.main.MessageHandler;
+import OverflowGateBot.main.NetworkHandler;
 
 public class PostSchemCommand extends SimpleBotSubcommand {
 
@@ -36,9 +36,7 @@ public class PostSchemCommand extends SimpleBotSubcommand {
     }
 
     @Override
-    public String getHelpString() {
-        return "Chuyển tập tin bản thiết kế thành hình ảnh:\n\t<schematicfile>: Tập tin chứ bản thiết kế muốn gửi, tập tin phải có định dạng (đuôi) .msch";
-    }
+    public String getHelpString() { return "Chuyển tập tin bản thiết kế thành hình ảnh:\n\t<schematicfile>: Tập tin chứ bản thiết kế muốn gửi, tập tin phải có định dạng (đuôi) .msch"; }
 
     @Override
     public void runCommand(SlashCommandInteractionEvent event) {
@@ -55,7 +53,7 @@ public class PostSchemCommand extends SimpleBotSubcommand {
             throw new IllegalStateException(BotException.MEMBER_IS_NULL.getMessage());
 
         Attachment a = fileOption.getAsAttachment();
-        String data = networkHandler.downloadContent(a.getUrl());
+        String data = NetworkHandler.downloadContent(a.getUrl());
 
         List<String> temp = Arrays.asList(tagOption.getAsString().toUpperCase().split(SEPARATOR));
         LinkedList<String> tag = new LinkedList<String>(temp);
@@ -70,7 +68,7 @@ public class PostSchemCommand extends SimpleBotSubcommand {
             String uuid = UUID.randomUUID().toString();
             new SchematicData(uuid, data).update();
             new SchematicInfo(uuid, member.getId(), tag).update();
-            messagesHandler.sendSchematicPreview(event);
+            MessageHandler.sendSchematicPreview(event);
             reply(event, "Đăng bản thiết kế thành công", 10);
         }
     }
@@ -96,9 +94,7 @@ public class PostSchemCommand extends SimpleBotSubcommand {
                 int c = 0;
                 for (String i : temp) {
                     if (i.startsWith(t.toUpperCase())) {
-                        String value = tagValue.substring(0,
-                                tagValue.lastIndexOf(SEPARATOR) + 1)
-                                + i;
+                        String value = tagValue.substring(0, tagValue.lastIndexOf(SEPARATOR) + 1) + i;
                         String display = value.toLowerCase();
                         options.add(new Command.Choice(display == null ? value : display, value));
                         c += 1;

@@ -11,8 +11,7 @@ import java.util.HashMap;
 
 import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
 import OverflowGateBot.lib.user.GuildData;
-
-import static OverflowGateBot.OverflowGateBot.guildHandler;
+import OverflowGateBot.main.GuildHandler;
 
 public class SetLevelRoleCommand extends SimpleBotSubcommand {
     public SetLevelRoleCommand() {
@@ -22,9 +21,7 @@ public class SetLevelRoleCommand extends SimpleBotSubcommand {
     }
 
     @Override
-    public String getHelpString() {
-        return "Cài đặt các vai trò của máy chủ:\n\t<type>: loại vai trò muốn đặt\n\t<role>: vai trò muốn gán\n\t<level>: cấp độ cần thiết để có được vai trò(-1 để xóa)";
-    }
+    public String getHelpString() { return "Cài đặt các vai trò của máy chủ:\n\t<type>: loại vai trò muốn đặt\n\t<role>: vai trò muốn gán\n\t<level>: cấp độ cần thiết để có được vai trò(-1 để xóa)"; }
 
     @Override
     public void runCommand(SlashCommandInteractionEvent event) {
@@ -42,7 +39,7 @@ public class SetLevelRoleCommand extends SimpleBotSubcommand {
             throw new IllegalStateException("Invalid option");
 
         int level = levelOption.getAsInt();
-        GuildData guildData = guildHandler.getGuild(guild);
+        GuildData guildData = GuildHandler.getGuild(guild);
         if (guildData == null)
             throw new IllegalStateException("No guild data found");
         if (level <= -1) {
@@ -66,7 +63,7 @@ public class SetLevelRoleCommand extends SimpleBotSubcommand {
             if (guild == null)
                 return;
 
-            GuildData guildData = guildHandler.getGuild(guild);
+            GuildData guildData = GuildHandler.getGuild(guild);
             HashMap<String, String> options = new HashMap<String, String>();
             guildData.levelRoleId.keySet().forEach(t -> {
                 if (t == null)

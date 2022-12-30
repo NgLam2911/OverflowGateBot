@@ -11,6 +11,7 @@ import static OverflowGateBot.OverflowGateBot.*;
 
 import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
 import OverflowGateBot.lib.user.UserData;
+import OverflowGateBot.main.UserHandler;
 
 public class SetNicknameCommand extends SimpleBotSubcommand {
     public SetNicknameCommand() {
@@ -20,9 +21,7 @@ public class SetNicknameCommand extends SimpleBotSubcommand {
     }
 
     @Override
-    public String getHelpString() {
-        return "Thay đổi tên của người dùng:\n\t<nickname>: Tên mới\n\t<user>: Tên người dùng muốn đổi tên (chỉ dành cho admin)";
-    }
+    public String getHelpString() { return "Thay đổi tên của người dùng:\n\t<nickname>: Tên mới\n\t<user>: Tên người dùng muốn đổi tên (chỉ dành cho admin)"; }
 
     @Override
     public void runCommand(SlashCommandInteractionEvent event) {
@@ -38,7 +37,7 @@ public class SetNicknameCommand extends SimpleBotSubcommand {
         if (target == null)
             throw new IllegalStateException("User not in guild");
 
-        UserData targetData = userHandler.getUserNoCache(target);
+        UserData targetData = UserHandler.getUserNoCache(target);
 
         if (bot == null)
             throw new IllegalStateException("Bot not in guild");
@@ -53,12 +52,12 @@ public class SetNicknameCommand extends SimpleBotSubcommand {
             reply(event, "Đổi biệt danh thành " + nickname, 10);
 
         } else {
-            if (userHandler.isAdmin(event.getMember())) {
+            if (UserHandler.isAdmin(event.getMember())) {
                 User user = userOption.getAsUser();
                 target = guild.getMember(user);
                 if (target == null)
                     throw new IllegalStateException("User not in guild");
-                targetData = userHandler.getUserNoCache(target);
+                targetData = UserHandler.getUserNoCache(target);
                 if (targetData == null)
                     throw new IllegalStateException("User data not found");
                 targetData.setName(nickname);

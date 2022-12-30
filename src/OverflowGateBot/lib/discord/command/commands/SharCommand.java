@@ -8,8 +8,7 @@ import OverflowGateBot.lib.discord.command.commands.subcommands.SharCommands.Add
 import OverflowGateBot.lib.discord.command.commands.subcommands.SharCommands.SayCommand;
 import OverflowGateBot.lib.discord.command.commands.subcommands.SharCommands.SetRoleCommand;
 import OverflowGateBot.lib.discord.command.commands.subcommands.SharCommands.UpdateCommand;
-
-import static OverflowGateBot.OverflowGateBot.userHandler;
+import OverflowGateBot.main.UserHandler;
 
 public class SharCommand extends SimpleBotCommand {
 
@@ -23,7 +22,7 @@ public class SharCommand extends SimpleBotCommand {
 
     @Override
     public void onCommand(SlashCommandInteractionEvent event) {
-        if (!userHandler.isShar(event.getMember())) {
+        if (!UserHandler.isShar(event.getMember())) {
             reply(event, "Bạn không có quyền để sử dụng lệnh này", 10);
             return;
         }
@@ -33,7 +32,7 @@ public class SharCommand extends SimpleBotCommand {
     @Override
     public void onAutoComplete(CommandAutoCompleteInteractionEvent event) {
 
-        if (!userHandler.isShar(event.getMember())) {
+        if (!UserHandler.isShar(event.getMember())) {
             sendAutoComplete(event, "Bạn không có quyền để sử dụng lệnh này");
             return;
         }

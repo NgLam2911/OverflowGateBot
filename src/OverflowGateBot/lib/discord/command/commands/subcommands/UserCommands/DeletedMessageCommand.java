@@ -6,6 +6,7 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 
+import OverflowGateBot.BotConfig;
 import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
 import OverflowGateBot.lib.discord.table.SimpleTable;
 import OverflowGateBot.main.BotException;
@@ -19,8 +20,6 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 
-import static OverflowGateBot.OverflowGateBot.*;
-
 public class DeletedMessageCommand extends SimpleBotSubcommand {
 
     private final int MAX_RETRIEVE = 100;
@@ -33,9 +32,7 @@ public class DeletedMessageCommand extends SimpleBotSubcommand {
     }
 
     @Override
-    public String getHelpString() {
-        return "Hiển thị thông tin người dùng:\n\t<user>: Tên người dùng muốn xem thông tin, nếu không nhập thì hiển thị thông tin bản thân";
-    }
+    public String getHelpString() { return "Hiển thị thông tin người dùng:\n\t<user>: Tên người dùng muốn xem thông tin, nếu không nhập thì hiển thị thông tin bản thân"; }
 
     @Override
     public void runCommand(SlashCommandInteractionEvent event) {
@@ -58,13 +55,11 @@ public class DeletedMessageCommand extends SimpleBotSubcommand {
         else
             amount = Math.min(amountOption.getAsInt(), MAX_RETRIEVE);
 
-        MongoCollection<Document> deletedCollection = DatabaseHandler.getDatabase(DATABASE.LOG)
-                .getCollection(LOG_TYPE.MESSAGE_DELETED.name());
+        MongoCollection<Document> deletedCollection = DatabaseHandler.getDatabase(DATABASE.LOG).getCollection(LOG_TYPE.MESSAGE_DELETED.name());
 
-        MongoCollection<Document> messageCollection = DatabaseHandler.getDatabase(DATABASE.LOG)
-                .getCollection(LOG_TYPE.MESSAGE.name());
+        MongoCollection<Document> messageCollection = DatabaseHandler.getDatabase(DATABASE.LOG).getCollection(LOG_TYPE.MESSAGE.name());
 
-        FindIterable<Document> data = deletedCollection.find().sort(new Document().append(TIME_INSERT_STRING, -1));
+        FindIterable<Document> data = deletedCollection.find().sort(new Document().append(BotConfig.TIME_INSERT_STRING, -1));
 
         Document messageData;
         EmbedBuilder builder = new EmbedBuilder();
@@ -91,8 +86,7 @@ public class DeletedMessageCommand extends SimpleBotSubcommand {
                     continue;
                 field.append(content + "\n");
                 if (i % MAX_DISPLAY == MAX_DISPLAY - 1) {
-                    builder.addField("Tin nhắn đã xóa", field.toString(),
-                            false);
+                    builder.addField("Tin nhắn đã xóa", field.toString(), false);
                     table.addPage(builder);
                     field = new StringBuilder();
                     builder.clear();
