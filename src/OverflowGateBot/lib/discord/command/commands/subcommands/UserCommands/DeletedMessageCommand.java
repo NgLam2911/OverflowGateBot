@@ -65,11 +65,11 @@ public class DeletedMessageCommand extends SimpleBotSubcommand {
         EmbedBuilder builder = new EmbedBuilder();
         StringBuilder field = new StringBuilder();
         SimpleTable table = new SimpleTable(event, 2);
-        table.addButton("<<<", () -> table.firstPage())//
-                .addButton("<", () -> table.previousPage())//
-                .addButton("X", () -> table.delete())//
-                .addButton(">", () -> table.nextPage())//
-                .addButton(">>>", () -> table.lastPage());
+        table.addButtonPrimary("<<<", () -> table.firstPage())//
+                .addButtonPrimary("<", () -> table.previousPage())//
+                .addButtonDeny("X", () -> table.delete())//
+                .addButtonPrimary(">", () -> table.nextPage())//
+                .addButtonPrimary(">>>", () -> table.lastPage());
 
         MongoCursor<Document> cursor = data.iterator();
         int i = 0;
@@ -99,7 +99,7 @@ public class DeletedMessageCommand extends SimpleBotSubcommand {
         }
         builder.addField("Tin nhắn đã xóa", field.toString(), false);
         table.addPage(builder);
-        table.send();
+        table.sendTable();
     }
 
     public String getMessage(Document message) {

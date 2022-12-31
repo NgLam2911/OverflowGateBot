@@ -19,9 +19,10 @@ import OverflowGateBot.lib.mindustry.SchematicData;
 import OverflowGateBot.lib.mindustry.SchematicInfo;
 import OverflowGateBot.main.DatabaseHandler;
 import OverflowGateBot.main.MessageHandler;
-import OverflowGateBot.main.TableHandler;
 import OverflowGateBot.main.DatabaseHandler.DATABASE;
+
 import mindustry.game.Schematic;
+
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.Message;
@@ -38,6 +39,7 @@ public class SchematicTable extends SimpleTable {
     private SchematicInfo currentInfo;
     private SchematicData currentData;
     private Message currentCode;
+    private List<String> voted = new ArrayList<String>();
 
     public SchematicTable(@Nonnull SlashCommandInteractionEvent event, FindIterable<SchematicInfo> schematicInfo) {
         super(event, 10);
@@ -52,9 +54,9 @@ public class SchematicTable extends SimpleTable {
         }
         this.collection = DatabaseHandler.getDatabase(DATABASE.MINDUSTRY).getCollection(BotConfig.SCHEMATIC_DATA_COLLECTION, SchematicData.class);
 
-        addButton("<", () -> this.previousPage());
+        addButtonPrimary("<", () -> this.previousPage());
         addButtonDeny("X", () -> this.delete());
-        addButton(">", () -> this.nextPage());
+        addButtonPrimary(">", () -> this.nextPage());
         addButtonSuccess("data", Emoji.fromMarkdown("📁"), () -> this.sendCode());
         addButtonSuccess("star", Emoji.fromMarkdown("⭐"), () -> this.star());
 
@@ -64,24 +66,26 @@ public class SchematicTable extends SimpleTable {
     public int getMaxPage() { return this.schematicInfoList.size(); }
 
     @Override
-    public void send() {
-        TableHandler.add(this);
-        update();
-    }
+    public void sendTable() { updateTable(); }
 
     @Override
     public void delete() {
         this.event.getHook().deleteOriginal().queue();
         if (this.currentCode != null)
             this.currentCode.delete().queue();
-        this.kill();
+        this.killTimer();
     }
 
     public void star() {
+
+        if (voted.contains(getTriggerMember().getId()))
+            return;
+
         if (this.currentInfo != null) {
             this.currentInfo.star += 1;
+            this.voted.add(getTriggerMember().getId());
             this.currentInfo.update();
-            update();
+            updateTable();
         }
     }
 
@@ -113,7 +117,7 @@ public class SchematicTable extends SimpleTable {
     }
 
     @Override
-    public void update() {
+    public void updateTable() {
         try {
             if (this.currentCode != null)
                 this.currentCode.delete().queue();
@@ -139,7 +143,7 @@ public class SchematicTable extends SimpleTable {
 
             field.append("- Nhãn: ");
             for (int i = 0; i < this.currentInfo.tag.size() - 1; i++)
-                field.append(this.currentInfo.tag.get(i).toLowerCase());
+                field.append(this.currentInfo.tag.get(i).toLowerCase() + ", ");
             field.append(this.currentInfo.tag.get(this.currentInfo.tag.size() - 1).toLowerCase() + "\n");
             field.append("- Sao: " + this.currentInfo.star);
 
@@ -147,10 +151,10 @@ public class SchematicTable extends SimpleTable {
 
             WebhookMessageUpdateAction<Message> action = this.event.getHook().editOriginal(previewFile);
 
-            if (message != null)
-                action.retainFiles(message.getAttachments());
+            if (getTriggerMessage() != null)
+                action.retainFiles(getTriggerMessage().getAttachments());
 
-            action.setEmbeds(builder.build()).setActionRow(getButton()).queue();
+            action.setEmbeds(builder.build()).setActionRows(getButton()).queue();
 
         } catch (Exception e) {
             this.event.getHook().editOriginal("Lỗi").queue();

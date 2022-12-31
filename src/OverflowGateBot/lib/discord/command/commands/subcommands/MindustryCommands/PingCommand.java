@@ -26,7 +26,7 @@ public class PingCommand extends SimpleBotSubcommand {
         String ip = ipOption.getAsString();
         NetworkHandler.pingServer(ip, result -> {
             EmbedBuilder builder = ServerStatusHandler.serverStatusBuilder(ip, result);
-            replyEmbeds(event, builder, 30);
+            replyEmbed(event, builder, 30);
         });
     }
 

@@ -46,7 +46,7 @@ public final class ServerStatusHandler {
 
     public void addServerIP(Host host) { servers.put(host.address, null); }
 
-    public static void displayServerStatus(Guild guild, MessageChannel channel, String ip) { run("AUTO REFRESH SERVER", 0l, SERVER_RELOAD_PEROID, () -> sendServerStatus(guild, channel, ip)); }
+    public static void displayServerStatus(Guild guild, MessageChannel channel, String ip) { UpdatableHandler.run("AUTO REFRESH SERVER", 0l, SERVER_RELOAD_PEROID, () -> sendServerStatus(guild, channel, ip)); }
 
     public static void refreshServerStat(Guild guild, MessageChannel channel) {
         for (String ip : serverStatus.keySet()) {

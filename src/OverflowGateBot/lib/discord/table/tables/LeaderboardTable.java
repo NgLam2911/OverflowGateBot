@@ -37,11 +37,11 @@ public class LeaderboardTable extends SimpleTable {
         this.leaderboard = leaderboard;
         this.order = order;
 
-        addButton("<<<", () -> this.firstPage());
-        addButton("<", () -> this.previousPage());
-        addButton("X", () -> this.delete());
-        addButton(">", () -> this.nextPage());
-        addButton(">>>", () -> this.lastPage());
+        addButtonPrimary("<<<", () -> this.firstPage());
+        addButtonPrimary("<", () -> this.previousPage());
+        addButtonDeny("X", () -> this.delete());
+        addButtonPrimary(">", () -> this.nextPage());
+        addButtonPrimary(">>>", () -> this.lastPage());
     }
 
     @Override
@@ -55,7 +55,7 @@ public class LeaderboardTable extends SimpleTable {
     @Override
     public void lastPage() {
         this.pageNumber = getMaxPage() - 1;
-        update();
+        updateTable();
     }
 
     @Override

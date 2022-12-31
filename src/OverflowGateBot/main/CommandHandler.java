@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import OverflowGateBot.lib.discord.command.SimpleBotCommand;
 import OverflowGateBot.lib.discord.command.commands.AdminCommand;
 import OverflowGateBot.lib.discord.command.commands.BotCommand;
+import OverflowGateBot.lib.discord.command.commands.GameCommand;
 import OverflowGateBot.lib.discord.command.commands.MindustryCommand;
 import OverflowGateBot.lib.discord.command.commands.SharCommand;
 import OverflowGateBot.lib.discord.command.commands.UserCommand;
@@ -29,7 +30,7 @@ import static OverflowGateBot.OverflowGateBot.*;
 public class CommandHandler extends ListenerAdapter {
     private static CommandHandler instance = new CommandHandler();
 
-    private static HashMap<String, SimpleBotCommand> commands = new HashMap<>();
+    private static HashMap<String, SimpleBotCommand> commands;
 
     private CommandHandler() {
 
@@ -39,9 +40,9 @@ public class CommandHandler extends ListenerAdapter {
         addCommand(new MindustryCommand());
         addCommand(new UserCommand());
         addCommand(new SharCommand());
+        addCommand(new GameCommand());
 
         jda.addEventListener(this);
-
         Log.info("Command handler up");
     }
 
@@ -119,7 +120,7 @@ public class CommandHandler extends ListenerAdapter {
 
     }
 
-    public static void replyEmbeds(SlashCommandInteractionEvent event, EmbedBuilder builder, int sec) { event.getHook().sendMessageEmbeds(builder.build()).queue(_message -> _message.delete().queueAfter(sec, TimeUnit.SECONDS)); }
+    public static void replyEmbed(SlashCommandInteractionEvent event, EmbedBuilder builder, int deleteAfter) { event.getHook().sendMessageEmbeds(builder.build()).queue(_message -> _message.delete().queueAfter(deleteAfter, TimeUnit.SECONDS)); }
 
-    public static void reply(SlashCommandInteractionEvent event, String content, int sec) { event.getHook().sendMessage("```" + content + "```").queue(_message -> _message.delete().queueAfter(sec, TimeUnit.SECONDS)); }
+    public static void reply(SlashCommandInteractionEvent event, String content, int deleteAfter) { event.getHook().sendMessage("```" + content + "```").queue(_message -> _message.delete().queueAfter(deleteAfter, TimeUnit.SECONDS)); }
 }

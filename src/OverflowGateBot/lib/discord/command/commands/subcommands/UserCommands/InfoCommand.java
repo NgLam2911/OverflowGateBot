@@ -38,7 +38,7 @@ public class InfoCommand extends SimpleBotSubcommand {
                 return;
             }
 
-            replyEmbeds(event, getDisplayedUserInformation(member), 30);
+            replyEmbed(event, getDisplayedUserInformation(member), 30);
 
         } else {
             // Display target information
@@ -53,7 +53,7 @@ public class InfoCommand extends SimpleBotSubcommand {
                 reply(event, "Người dùng với tên " + user.getName() + " không thuộc máy chủ", 10);
                 return;
             }
-            replyEmbeds(event, getDisplayedUserInformation(member), 30);
+            replyEmbed(event, getDisplayedUserInformation(member), 30);
         }
     }
 

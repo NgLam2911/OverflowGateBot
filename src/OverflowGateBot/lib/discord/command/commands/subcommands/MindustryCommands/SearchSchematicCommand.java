@@ -32,7 +32,7 @@ public class SearchSchematicCommand extends SimpleBotSubcommand {
     private final String SEPARATOR = ",";
     private final Integer SEARCH_LIMIT = 100;
 
-    List<String> tags = SCHEMATIC_TAG.getTags();
+    private static List<String> tags = SCHEMATIC_TAG.getTags();
 
     public SearchSchematicCommand() {
         super("searchschematic", "Tìm bản thiết kế dựa theo nhãn", true, false);
@@ -77,7 +77,7 @@ public class SearchSchematicCommand extends SimpleBotSubcommand {
             else
                 reply(event, "Không có dữ liệu về bản thiết kế với nhãn: " + tagOption.getAsString().toLowerCase(), 30);
         } else {
-            new SchematicTable(event, schematicInfo).send();
+            new SchematicTable(event, schematicInfo).sendTable();
         }
     }
 

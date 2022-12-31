@@ -75,7 +75,12 @@ public class UserData extends DataCache {
         update();
     }
 
-    public String getName() { return this.name; }
+    public String getName() {
+        if (this.name.isBlank()) {
+            this.name = _getMember().getEffectiveName();
+        }
+        return this.name;
+    }
 
     public void setPoint(int point) { this.point = point; }
 
@@ -163,13 +168,13 @@ public class UserData extends DataCache {
         }
         point += p;
 
-        update(1);
+        updateTimer(1);
         return levelUp;
     }
 
     public int _addMoney(int m) {
         this.money += m;
-        update(1);
+        updateTimer(1);
         return m;
     }
 

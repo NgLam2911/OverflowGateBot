@@ -25,7 +25,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Role;
 
-public final class UserHandler {
+public final class UserHandler  {
 
     private static UserHandler instance = new UserHandler();
     // Hash map to store user cache
@@ -45,7 +45,6 @@ public final class UserHandler {
                 Log.info("User <" + user.userId + "> offline");
                 user.update();
                 iterator.remove();
-
             }
         }
     }
@@ -64,7 +63,7 @@ public final class UserHandler {
             throw new IllegalStateException(BotException.MEMBER_IS_NULL.name());
         }
         UserData user = getUserAwait(member);
-        user.reset();
+        user.resetTimer();
 
         user._addMoney(1);
         user._addPoint(1);

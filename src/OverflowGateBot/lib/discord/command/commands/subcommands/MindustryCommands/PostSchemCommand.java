@@ -27,7 +27,7 @@ public class PostSchemCommand extends SimpleBotSubcommand {
 
     private final String SEPARATOR = ",";
 
-    List<String> tags = SCHEMATIC_TAG.getTags();
+    private static List<String> tags = SCHEMATIC_TAG.getTags();
 
     public PostSchemCommand() {
         super("postschem", "Chuyển tập tin bản thiết kế thành hình ảnh", false, true);

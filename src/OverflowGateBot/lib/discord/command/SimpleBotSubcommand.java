@@ -7,13 +7,12 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
 
+import OverflowGateBot.main.UpdatableHandler;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-
-import static OverflowGateBot.OverflowGateBot.*;
 
 public class SimpleBotSubcommand extends SubcommandData {
 
@@ -37,7 +36,7 @@ public class SimpleBotSubcommand extends SubcommandData {
         if (updateMessage)
             reply(event, "Đang cập nhật", 60);
         if (this.threaded)
-            run(name, 0, () -> runCommand(event));
+            UpdatableHandler.run(name, 0, () -> runCommand(event));
         else
             runCommand(event);
     }
@@ -88,7 +87,7 @@ public class SimpleBotSubcommand extends SubcommandData {
             event.replyChoice(name, value).queue();
     }
 
-    public void replyEmbeds(SlashCommandInteractionEvent event, EmbedBuilder builder, int sec) { event.getHook().sendMessageEmbeds(builder.build()).queue(_message -> _message.delete().queueAfter(sec, TimeUnit.SECONDS)); }
+    public void replyEmbed(SlashCommandInteractionEvent event, EmbedBuilder builder, int deleteAfter) { event.getHook().sendMessageEmbeds(builder.build()).queue(_message -> _message.delete().queueAfter(deleteAfter, TimeUnit.SECONDS)); }
 
-    public void reply(SlashCommandInteractionEvent event, String content, int sec) { event.getHook().sendMessage("```" + content + "```").queue(_message -> _message.delete().queueAfter(sec, TimeUnit.SECONDS)); }
+    public void reply(SlashCommandInteractionEvent event, String content, int deleteAfter) { event.getHook().sendMessage("```" + content + "```").queue(_message -> _message.delete().queueAfter(deleteAfter, TimeUnit.SECONDS)); }
 }

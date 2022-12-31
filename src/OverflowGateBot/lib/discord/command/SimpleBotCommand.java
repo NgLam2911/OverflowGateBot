@@ -22,22 +22,14 @@ public class SimpleBotCommand {
 
     private final int MAX_OPTIONS = 10;
 
-    public SimpleBotCommand(@Nonnull String name, @Nonnull String description) {
-        command = Commands.slash(name, description);
-    }
+    public SimpleBotCommand(@Nonnull String name, @Nonnull String description) { command = Commands.slash(name, description); }
 
-    public String getName() {
-        return this.command.getName();
-    }
+    public String getName() { return this.command.getName(); }
 
-    public String getDescription() {
-        return this.command.getDescription();
-    }
+    public String getDescription() { return this.command.getDescription(); }
 
     // Override
-    public String getHelpString() {
-        return "";
-    }
+    public String getHelpString() { return ""; }
 
     // Can be overridden
     public String getHelpString(String subCommand) {
@@ -47,9 +39,7 @@ public class SimpleBotCommand {
     }
 
     // Can be overridden
-    public void onCommand(SlashCommandInteractionEvent event) {
-        runCommand(event);
-    }
+    public void onCommand(SlashCommandInteractionEvent event) { runCommand(event); }
 
     protected void runCommand(SlashCommandInteractionEvent event) {
         if (subcommands.containsKey(event.getSubcommandName()))
@@ -93,12 +83,9 @@ public class SimpleBotCommand {
         event.replyChoices(options).queue();
     }
 
-    public void sendAutoComplete(@Nonnull CommandAutoCompleteInteractionEvent event, @Nonnull String value) {
-        sendAutoComplete(event, value, value);
-    }
+    public void sendAutoComplete(@Nonnull CommandAutoCompleteInteractionEvent event, @Nonnull String value) { sendAutoComplete(event, value, value); }
 
-    public void sendAutoComplete(@Nonnull CommandAutoCompleteInteractionEvent event, @Nonnull String name,
-            @Nonnull String value) {
+    public void sendAutoComplete(@Nonnull CommandAutoCompleteInteractionEvent event, @Nonnull String name, @Nonnull String value) {
         if (value.isBlank())
             event.replyChoice("Không tìm thấy kết quả khớp", "Không tìm thấy kết quả khớp").queue();
         else
@@ -112,14 +99,8 @@ public class SimpleBotCommand {
         }
     }
 
-    protected void replyEmbeds(SlashCommandInteractionEvent event, EmbedBuilder builder, int sec) {
-        event.getHook().sendMessageEmbeds(builder.build())
-                .queue(_message -> _message.delete().queueAfter(sec, TimeUnit.SECONDS));
-    }
+    protected void replyEmbed(SlashCommandInteractionEvent event, EmbedBuilder builder, int deleteAfter) { event.getHook().sendMessageEmbeds(builder.build()).queue(_message -> _message.delete().queueAfter(deleteAfter, TimeUnit.SECONDS)); }
 
-    protected void reply(SlashCommandInteractionEvent event, String content, int sec) {
-        event.getHook().sendMessage("```" + content + "```")
-                .queue(_message -> _message.delete().queueAfter(sec, TimeUnit.SECONDS));
-    }
+    protected void reply(SlashCommandInteractionEvent event, String content, int deleteAfter) { event.getHook().sendMessage("```" + content + "```").queue(_message -> _message.delete().queueAfter(deleteAfter, TimeUnit.SECONDS)); }
 
 }

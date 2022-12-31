@@ -57,7 +57,13 @@ public class GuildCommand extends SimpleBotSubcommand {
                 }
             }
             table.addPage(builder);
-            table.send();
+            table.addButtonPrimary("<<<", () -> table.firstPage())//
+                    .addButtonPrimary("<", () -> table.previousPage())//
+                    .addButtonDeny("X", () -> table.delete())//
+                    .addButtonPrimary(">", () -> table.nextPage())//
+                    .addButtonPrimary(">>>", () -> table.lastPage());
+
+            table.sendTable();
 
         } else {
             // Get the guild base on name
@@ -93,7 +99,7 @@ public class GuildCommand extends SimpleBotSubcommand {
             if (!roleString.isEmpty())
                 field.append("\n" + roleString.substring(0, roleString.length() - 2));
             builder.addField("Thông tin cơ bản:", field.toString(), false);
-            replyEmbeds(event, builder, 30);
+            replyEmbed(event, builder, 30);
         }
     }
 

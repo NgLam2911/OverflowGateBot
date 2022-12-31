@@ -25,8 +25,6 @@ import com.mongodb.client.MongoDatabase;
 import OverflowGateBot.BotConfig;
 import arc.util.Log;
 
-import static OverflowGateBot.OverflowGateBot.*;
-
 public final class DatabaseHandler {
 
     public static enum DATABASE {
@@ -83,7 +81,7 @@ public final class DatabaseHandler {
     }
 
     public static void log(LOG_TYPE log, Document content) {
-        run("LOG " + log.name(), 0, () -> {
+       UpdatableHandler.run("LOG " + log.name(), 0, () -> {
             MongoDatabase logDatabase = getDatabase(DATABASE.LOG);
             // Create collection if it doesn't exist
             if (!collectionExists(logDatabase, log.name()))

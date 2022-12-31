@@ -106,7 +106,7 @@ public final class MessageHandler extends ListenerAdapter {
                 guildData._containsChannel(CHANNEL_TYPE.MAP.name(), message.getTextChannel().getId())) {
             if (!message.getContentRaw().isEmpty()) {
                 message.delete().queue();
-                replyTempMessage(message, "Vui lòng không gửi tin nhắn vào kênh này!", 30);
+                replyMessage(message, "Vui lòng không gửi tin nhắn vào kênh này!", 30);
             }
         }
 
@@ -332,7 +332,7 @@ public final class MessageHandler extends ListenerAdapter {
 
             channel.sendFile(schemFile).addFile(previewFile).setEmbeds(builder.build()).queue();
         } catch (Exception e) {
-            e.printStackTrace();
+            replyMessage(channel, "Lỗi: " + e.getMessage(), 30);
         }
     }
 
@@ -395,19 +395,11 @@ public final class MessageHandler extends ListenerAdapter {
     }
 
     // Message send commands
-    public static void sendTempMessage(Message message, String content, int sec) { sendTempMessage(message.getChannel(), content, sec); }
+    public static void replyMessage(SlashCommandInteractionEvent event, String content, int deleteAfter) { replyMessage(event.getChannel(), content, deleteAfter); }
 
-    public static void sendTempMessage(SlashCommandInteractionEvent event, String content, int sec) { sendTempMessage(event.getChannel(), content, sec); }
+    public static void replyMessage(MessageChannel channel, String content, int deleteAfter) { channel.sendMessage("```" + content + "```").queue(m -> m.delete().queueAfter(deleteAfter, TimeUnit.SECONDS)); }
 
-    public static void sendTempMessage(MessageChannel channel, String content, int sec) {
-        channel.sendMessage("```" + content + "```").queue(m -> {
-            m.delete().queueAfter(sec, TimeUnit.SECONDS);
-        });
-    }
+    public static void replyMessage(Message message, String content, int deleteAfter) { message.reply("```" + content + "```").queue(m -> m.delete().queueAfter(deleteAfter, TimeUnit.SECONDS)); }
 
-    public static void replyTempMessage(Message message, String content, int sec) {
-        message.reply("```" + content + "```").queue(m -> {
-            m.delete().queueAfter(sec, TimeUnit.SECONDS);
-        });
-    }
+    public static void replyMessage(Message message, String content) { message.reply("```" + content + "```").queue(); }
 }

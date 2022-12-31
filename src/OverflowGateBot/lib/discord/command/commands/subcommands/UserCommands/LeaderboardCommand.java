@@ -15,15 +15,11 @@ import java.util.HashMap;
 public class LeaderboardCommand extends SimpleBotSubcommand {
 
     public enum ORDER {
-        LEVEL,
-        MONEY,
-        PVP_POINT
+        LEVEL, MONEY, PVP_POINT
     }
 
     public enum LEADERBOARD {
-        GUILD,
-        ONLINE,
-        ALL
+        GUILD, ONLINE, ALL
     }
 
     public LeaderboardCommand() {
@@ -33,9 +29,7 @@ public class LeaderboardCommand extends SimpleBotSubcommand {
     }
 
     @Override
-    public String getHelpString() {
-        return "Hiện thị bản xếp hạng của người dùng:\n\t<orderby>: Xếp theo:\n\t\t- MONEY: Xếp theo tiền\n\t\t- LEVEL: Xếp theo cấp\n\t\t- PVP_POINT: Xếp theo điểm pvp";
-    }
+    public String getHelpString() { return "Hiện thị bản xếp hạng của người dùng:\n\t<orderby>: Xếp theo:\n\t\t- MONEY: Xếp theo tiền\n\t\t- LEVEL: Xếp theo cấp\n\t\t- PVP_POINT: Xếp theo điểm pvp"; }
 
     @Override
     public void runCommand(SlashCommandInteractionEvent event) {
@@ -59,7 +53,7 @@ public class LeaderboardCommand extends SimpleBotSubcommand {
             leaderboard = LEADERBOARD.valueOf(leaderboardOption.getAsString());
 
         LeaderboardTable table = new LeaderboardTable(event, leaderboard, order);
-        table.send();
+        table.sendTable();
     }
 
     @Override

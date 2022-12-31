@@ -9,8 +9,6 @@ import java.net.*;
 import java.nio.*;
 import java.util.function.*;
 
-import static OverflowGateBot.OverflowGateBot.*;
-
 public class NetworkHandler {
 
     private static NetworkHandler instance = new NetworkHandler();
@@ -40,7 +38,7 @@ public class NetworkHandler {
     }
 
     public static void pingServer(String ip, Consumer<Host> listener) {
-        run("PING", 0, () -> {
+        UpdatableHandler.run("PING", 0, () -> {
             try {
                 String resultIP = ip;
                 int port = 6567;

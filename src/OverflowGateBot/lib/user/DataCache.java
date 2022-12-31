@@ -1,5 +1,7 @@
 package OverflowGateBot.lib.user;
 
+import arc.util.Log;
+
 public class DataCache {
 
     private final int ALIVE_LIMIT;
@@ -14,31 +16,26 @@ public class DataCache {
         this.time = ALIVE_LIMIT;
     }
 
-    public boolean isAlive() {
-        return time > 0;
-    }
+    public boolean isAlive() { return time > 0; }
 
     public boolean isAlive(int n) {
         this.time -= n;
         return isAlive();
     }
 
-    public void reset() {
-        time = ALIVE_LIMIT;
-    }
+    public void resetTimer() { time = ALIVE_LIMIT; }
 
-    public void kill() {
-        this.time = 0;
-    }
+    public void killTimer() { this.time = 0; }
 
-    public void update(int n) {
+    public boolean updateTimer(int n) {
         updateTime += n;
         if (updateTime >= UPDATE_LIMIT) {
             updateTime = 0;
             update();
+            return true;
         }
+        return false;
     }
 
-    public void update() {
-    }
+    public void update() { Log.info("Update unhandled"); }
 }

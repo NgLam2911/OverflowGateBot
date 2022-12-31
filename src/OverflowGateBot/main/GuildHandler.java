@@ -62,8 +62,11 @@ public class GuildHandler {
     // Get guild from cache/database
     public static GuildData getGuild(@Nonnull String guildId) {
         // If guild exist in cache then return, else query guild from database
-        if (guildCache.containsKey(guildId))
-            return guildCache.get(guildId);
+        if (guildCache.containsKey(guildId)) {
+            GuildData guildData = guildCache.get(guildId);
+            guildData.resetTimer();
+            return guildData;
+        }
 
         Log.info("Guild <" + guildId + "> online");
         // Create new guild cache to store temporary guild data

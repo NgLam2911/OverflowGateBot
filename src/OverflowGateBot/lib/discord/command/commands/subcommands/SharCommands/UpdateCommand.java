@@ -4,15 +4,11 @@ import OverflowGateBot.lib.discord.command.SimpleBotSubcommand;
 
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
-import static OverflowGateBot.OverflowGateBot.updateCommand;
+import static OverflowGateBot.main.UpdatableHandler.updateCommand;
 
 public class UpdateCommand extends SimpleBotSubcommand {
-    public UpdateCommand() {
-        super("updatecommand", "Shar only", false, true);
-    }
+    public UpdateCommand() { super("updatecommand", "Shar only", false, true); }
 
     @Override
-    public void runCommand(SlashCommandInteractionEvent event) {
-        updateCommand();
-    }
+    public void runCommand(SlashCommandInteractionEvent event) { updateCommand(); }
 }

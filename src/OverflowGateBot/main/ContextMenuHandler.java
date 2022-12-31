@@ -25,18 +25,18 @@ import static OverflowGateBot.OverflowGateBot.*;
 public final class ContextMenuHandler extends ListenerAdapter {
 
     private static ContextMenuHandler instance = new ContextMenuHandler();
-    private static HashMap<String, SimpleBotContextMenu> commands = new HashMap<>();
+    private static HashMap<String, SimpleBotContextMenu> commands;
 
     private ContextMenuHandler() {
-
-        jda.addEventListener(this);
 
         commands = new HashMap<>();
         addCommand(new PostMapContextMenu());
         addCommand(new PostSchematicContextMenu());
         addCommand(new DeleteMessageContextMenu());
 
+        jda.addEventListener(this);
         Log.info("Context menu handler up");
+
     }
 
     public static ContextMenuHandler getInstance() { return instance; }
@@ -100,7 +100,7 @@ public final class ContextMenuHandler extends ListenerAdapter {
         }
     }
 
-    public static void replyEmbeds(MessageContextInteractionEvent event, EmbedBuilder builder, int sec) { event.getHook().sendMessageEmbeds(builder.build()).queue(_message -> _message.delete().queueAfter(sec, TimeUnit.SECONDS)); }
+    public static void replyEmbed(MessageContextInteractionEvent event, EmbedBuilder builder, int deleteAfter) { event.getHook().sendMessageEmbeds(builder.build()).queue(_message -> _message.delete().queueAfter(deleteAfter, TimeUnit.SECONDS)); }
 
-    public static void reply(MessageContextInteractionEvent event, String content, int sec) { event.getHook().sendMessage("```" + content + "```").queue(_message -> _message.delete().queueAfter(sec, TimeUnit.SECONDS)); }
+    public static void reply(MessageContextInteractionEvent event, String content, int deleteAfter) { event.getHook().sendMessage("```" + content + "```").queue(_message -> _message.delete().queueAfter(deleteAfter, TimeUnit.SECONDS)); }
 }

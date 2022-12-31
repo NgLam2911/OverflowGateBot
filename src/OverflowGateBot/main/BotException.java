@@ -14,6 +14,8 @@ public enum BotException {
     TABLE_NOT_SENT("Table is not sent yet"),
     TABLE_NO_CONTENT("Table content is null");
 
+    
+
     private final String message;
 
     BotException(String message) {

@@ -53,6 +53,6 @@ public class InfoCommand extends SimpleBotSubcommand {
         builder.setThumbnail(bot.getEffectiveAvatarUrl());
         builder.setTitle(bot.getName(), jda.getInviteUrl(Permission.ADMINISTRATOR));
 
-        replyEmbeds(event, builder, 30);
+        replyEmbed(event, builder, 30);
     }
 }
