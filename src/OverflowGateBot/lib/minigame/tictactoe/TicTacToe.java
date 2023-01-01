@@ -7,16 +7,6 @@ import OverflowGateBot.lib.discord.table.SimpleEmbed;
 import OverflowGateBot.lib.user.UserData;
 import OverflowGateBot.main.UserHandler;
 
-import java.awt.*;
-import java.awt.image.*;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
-import javax.annotation.Nonnull;
-import javax.imageio.ImageIO;
-
 import static OverflowGateBot.lib.minigame.tictactoe.TicTacToeConfig.*;
 
 public class TicTacToe extends SimpleEmbed {
@@ -24,20 +14,22 @@ public class TicTacToe extends SimpleEmbed {
     private UserData player1;
     private UserData player2;
     private Integer currentPlayer = X;
+    private Integer move = 0;
 
     private int[][] board = new int[3][3];
     private EmbedBuilder builder = new EmbedBuilder();
 
-    private BufferedImage image = new BufferedImage(CANVAS_WIDTH, CANVAS_HEIGHT, BufferedImage.TYPE_INT_ARGB);
-    private Graphics2D canvas = image.createGraphics();
-
     public TicTacToe(SlashCommandInteractionEvent event) { super(event, 10); }
 
     public void init() {
+        player1 = null;
+        player2 = null;
+        resetBoard();
         clearButton();
         builder.clear();
         builder.setTitle("*Cờ ca rô*");
         addButtonPrimary("Chơi", () -> this.addPlayer());
+        addButtonDeny("X", () -> this.delete());
         updateBoard();
     }
 
@@ -45,29 +37,13 @@ public class TicTacToe extends SimpleEmbed {
         resetTimer();
         clearButton();
         currentPlayer = X;
+        move = 0;
 
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 board[i][j] = DEFAULT;
             }
         }
-        canvas.setBackground(Color.BLACK);
-        for (int i = 0; i < CELLS + 1; i++) {
-            drawLine(canvas, CELL_SIZE * i, 0, CELL_SIZE * i, CANVAS_HEIGHT, Color.WHITE);
-            drawLine(canvas, 0, CELL_SIZE * i, CANVAS_WIDTH, CELL_SIZE * i, Color.WHITE);
-        }
-        updateButton();
-    }
-
-    public void drawLine(Graphics2D graphics, int x1, int y1, int x2, int y2, Color color) {
-        graphics.setColor(color);
-        graphics.drawLine(x1, y1, x2, y2);
-    }
-
-    public void drawString(Graphics2D graphics, int x, int y, String str) {
-        graphics.setColor(Color.WHITE);
-        graphics.setFont(FONT);
-        graphics.drawString(str, x, y);
     }
 
     public void addPlayer() {
@@ -87,78 +63,89 @@ public class TicTacToe extends SimpleEmbed {
             player2 = user;
             builder.clear();
             builder.setTitle("*Cờ ca rô*");
-            builder.addField("Lượt đi của", player1.getName(), false);
+            builder.addField("Lượt đi của", "PLayer 1: " + player1.getName(), false);
             resetBoard();
+            updateButton();
             updateBoard();
-        }
+        } else
+            sendMessage("Bạn đa tham gia, hãy mời người chơi khác tham gia", true);
     }
 
     private void onMove() {
-        resetTimer();
-        Member member = getTriggerMember();
-        builder.setTitle("*Cờ ca rô*");
-
-        if (currentPlayer == X) {
-            if (player1 != UserHandler.getUserAwait(member)) {
-                sendMessage("Đây là lượt của người khác, bạn không có quyền tường tác", true);
-                return;
-            }
-        } else {
-            if (player2 != UserHandler.getUserAwait(member)) {
-                sendMessage("Đây là lượt của người khác, bạn không có quyền tường tác", true);
-                return;
-            }
-        }
-
-        String buttonName = getButtonName();
-        String[] buttonId = buttonName.split("|");
-
-        int x = Integer.parseInt(buttonId[0]);
-        int y = Integer.parseInt(buttonId[1]);
-
-        if (!isValidMove(x, y)) {
-            sendMessage("Nước đi không hợp lệ", true);
-            return;
-        }
-
-        canvas = image.createGraphics();
-
-        if (currentPlayer == X)
-            drawString(canvas, x, y, "X");
-        else
-            drawString(canvas, x, y, "Y");
-
-        board[x][y] = currentPlayer;
-
-        if (!isFinished(x, y)) {
+        try {
+            resetTimer();
+            Member member = getTriggerMember();
+            builder.setTitle("*Cờ ca rô*");
 
             if (currentPlayer == X) {
-                builder.clear();
-                builder.setTitle("*Cờ ca rô*");
-                builder.addField("Lượt đi của", player1.getName(), false);
-                currentPlayer = Y;
+                if (player1 != UserHandler.getUserAwait(member)) {
+                    sendMessage("Đây là lượt của người khác, bạn không có quyền tường tác", true);
+                    return;
+                }
             } else {
-                builder.clear();
-                builder.setTitle("*Cờ ca rô*");
-                builder.addField("Lượt đi của", player1.getName(), false);
-                currentPlayer = X;
+                if (player2 != UserHandler.getUserAwait(member)) {
+                    sendMessage("Đây là lượt của người khác, bạn không có quyền tường tác", true);
+                    return;
+                }
             }
 
-            updateButton();
-            updateBoard();
-        } else {
-            finish();
-            updateBoard();
+            String buttonName = getButtonName();
+            String[] buttonId = buttonName.split("-");
+
+            int x = Integer.parseInt(buttonId[1]);
+            int y = Integer.parseInt(buttonId[2]);
+
+            System.out.println(x + ", " + y);
+            System.out.println(board[x][y]);
+
+            if (!isValidMove(x, y)) {
+                sendMessage("Nước đi không hợp lệ", true);
+                return;
+            }
+
+            board[x][y] = currentPlayer;
+            move += 1;
+
+            if (!isFinished(x, y)) {
+
+                if (move >= 9) {
+                    clearButton();
+                    builder.clear();
+                    builder.setTitle("*Cờ ca rô*");
+                    builder.addField("Kết quả", "Hòa", false);
+                    addButtonPrimary("Ván mới", () -> init());
+                    updateBoard();
+                    return;
+
+                }
+                if (currentPlayer == X) {
+                    builder.clear();
+                    builder.setTitle("*Cờ ca rô*");
+                    builder.addField("Lượt đi của", "Player 2: " + player2.getName(), false);
+                    currentPlayer = Y;
+
+                } else {
+                    builder.clear();
+                    builder.setTitle("*Cờ ca rô*");
+                    builder.addField("Lượt đi của", "Player 1: " + player1.getName(), false);
+                    currentPlayer = X;
+                }
+
+                updateButton();
+                updateBoard();
+
+            } else {
+
+                clearButton();
+                builder.clear();
+                builder.setTitle("*Cờ ca rô*");
+                builder.addField("Kết quả", "Người thắng: " + (currentPlayer == X ? player1.getName() : player2.getName()), false);
+                addButtonPrimary("Ván mới", () -> init());
+                updateBoard();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-    }
-
-    private void finish() {
-        clearButton();
-        builder.clear();
-        builder.setTitle("*Cờ ca rô*");
-        builder.addField("Người thắng: ", currentPlayer == X ? player1.getName() : player2.getName(), false);
-        addButtonPrimary("Ván mới", () -> init());
-
     }
 
     private boolean isValidMove(int x, int y) { return board[x][y] == DEFAULT; }
@@ -167,14 +154,14 @@ public class TicTacToe extends SimpleEmbed {
         for (int i = 0; i < 3; i++) {
             if (board[x][i] != currentPlayer)
                 break;
-            if (i == 3 - 1)
+            if (i == 2)
                 return true;
         }
 
         for (int i = 0; i < 3; i++) {
             if (board[i][y] != currentPlayer)
                 break;
-            if (i == 3 - 1)
+            if (i == 2)
                 return true;
         }
 
@@ -182,19 +169,20 @@ public class TicTacToe extends SimpleEmbed {
             for (int i = 0; i < 3; i++) {
                 if (board[i][i] != currentPlayer)
                     break;
-                if (i == 3 - 1)
+                if (i == 2)
                     return true;
             }
         }
 
-        if (x + y == 3 - 1) {
+        if (x + y == 2) {
             for (int i = 0; i < 3; i++) {
-                if (board[i][(3 - 1) - i] != currentPlayer)
+                if (board[i][(2) - i] != currentPlayer)
                     break;
-                if (i == 3 - 1)
+                if (i == 2)
                     return true;
             }
         }
+
         return false;
     }
 
@@ -203,41 +191,16 @@ public class TicTacToe extends SimpleEmbed {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 if (board[i][j] == DEFAULT) {
-                    addButtonSuccess(i + "|" + j, "O", () -> onMove());
-                } else if (board[i][j] == currentPlayer) {
-                    addButtonSuccess(i + "|" + j, getCurrentPlayer(), () -> onMove());
+                    addButtonPrimary("-" + i + "-" + j, "-", () -> onMove());
+                } else if (board[i][j] == Y) {
+                    addButtonSuccess("-" + i + "-" + j, "O", () -> onMove());
                 } else
-                    addButtonDeny(i + "|" + j, getAnotherPlayer(), () -> onMove());
+                    addButtonDeny("-" + i + "-" + j, "X", () -> onMove());
             }
             addRow();
         }
     }
 
-    public void updateBoard() {
-        try {
+    public void updateBoard() { event.getHook().editOriginalEmbeds(builder.build()).setActionRows(getButton()).queue(); }
 
-            canvas.dispose();
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            ImageIO.write(image, "jpeg", os);
-            InputStream is = new ByteArrayInputStream(os.toByteArray());
-            builder.setImage("attachment://img");
-
-            event.getHook().editOriginalEmbeds(builder.build()).setActionRows(getButton()).addFile(is, "img").queue();
-        } catch (IOException e) {
-            reply("Lỗi", 10);
-        }
-
-    }
-
-    private @Nonnull String getCurrentPlayer() {
-        if (currentPlayer == X)
-            return "X";
-        return "Y";
-    }
-
-    private @Nonnull String getAnotherPlayer() {
-        if (currentPlayer == X)
-            return "Y";
-        return "X";
-    }
 }
