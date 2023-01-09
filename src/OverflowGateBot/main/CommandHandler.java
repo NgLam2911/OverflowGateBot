@@ -46,13 +46,26 @@ public class CommandHandler extends ListenerAdapter {
         Log.info("Command handler up");
     }
 
-    public static CommandHandler getInstance() { return instance; }
+    @Override
+    protected void finalize() {
+        Log.info("Command handler down");
+    }
 
-    public static Collection<SimpleBotCommand> getCommands() { return commands.values(); }
+    public static CommandHandler getInstance() {
+        return instance;
+    }
 
-    public static HashMap<String, SimpleBotCommand> getCommandHashMap() { return commands; }
+    public static Collection<SimpleBotCommand> getCommands() {
+        return commands.values();
+    }
 
-    public static void addCommand(SimpleBotCommand command) { commands.put(command.getName(), command); }
+    public static HashMap<String, SimpleBotCommand> getCommandHashMap() {
+        return commands;
+    }
+
+    public static void addCommand(SimpleBotCommand command) {
+        commands.put(command.getName(), command);
+    }
 
     public static void registerCommand(Guild guild) {
         for (SimpleBotCommand command : commands.values()) {
@@ -110,17 +123,25 @@ public class CommandHandler extends ListenerAdapter {
             // Call subcommand
             commands.get(command).onCommand(event);
             // Print to terminal
-            Log.info(MessageHandler.getMessageSender(event) + ": used " + event.getName() + " " + event.getSubcommandName() + " " + event.getOptions().toString());
+            Log.info(MessageHandler.getMessageSender(event) + ": used " + event.getName() + " "
+                    + event.getSubcommandName() + " " + event.getOptions().toString());
             // Send to discord log channel
             if (!command.equals("shar")) {
-                MessageHandler.log(guild, member.getEffectiveName() + " đã sử dụng " + command + " " + event.getSubcommandName());
+                MessageHandler.log(guild,
+                        member.getEffectiveName() + " đã sử dụng " + command + " " + event.getSubcommandName());
             }
         } else
             reply(event, "Lệnh sai rồi kìa baka", 10);
 
     }
 
-    public static void replyEmbed(SlashCommandInteractionEvent event, EmbedBuilder builder, int deleteAfter) { event.getHook().sendMessageEmbeds(builder.build()).queue(_message -> _message.delete().queueAfter(deleteAfter, TimeUnit.SECONDS)); }
+    public static void replyEmbed(SlashCommandInteractionEvent event, EmbedBuilder builder, int deleteAfter) {
+        event.getHook().sendMessageEmbeds(builder.build())
+                .queue(_message -> _message.delete().queueAfter(deleteAfter, TimeUnit.SECONDS));
+    }
 
-    public static void reply(SlashCommandInteractionEvent event, String content, int deleteAfter) { event.getHook().sendMessage("```" + content + "```").queue(_message -> _message.delete().queueAfter(deleteAfter, TimeUnit.SECONDS)); }
+    public static void reply(SlashCommandInteractionEvent event, String content, int deleteAfter) {
+        event.getHook().sendMessage("```" + content + "```")
+                .queue(_message -> _message.delete().queueAfter(deleteAfter, TimeUnit.SECONDS));
+    }
 }

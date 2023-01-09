@@ -39,6 +39,11 @@ public final class ContextMenuHandler extends ListenerAdapter {
 
     }
 
+    @Override
+    protected void finalize() {
+        Log.info("Context menu handler down");
+    }
+
     public static ContextMenuHandler getInstance() { return instance; }
 
     public static Collection<SimpleBotContextMenu> getCommands() { return commands.values(); }

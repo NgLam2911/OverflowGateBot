@@ -67,13 +67,13 @@ public class ContentHandler {
             }
         }
 
-        String assets = "../Mindustry/core/assets/";
+        String assets = "E:/OverflowGateBot/build/Mindustry/core/assets/";
         Vars.state = new GameState();
 
         TextureAtlasData data = new TextureAtlasData(new Fi(assets + "sprites/sprites.aatls"), new Fi(assets + "sprites"), false);
         Core.atlas = new TextureAtlas();
 
-        new Fi("../Mindustry/core/assets-raw/sprites_out").walk(f -> {
+        new Fi("E:/OverflowGateBot/build/Mindustry/core/assets-raw/sprites_out").walk(f -> {
             if (f.extEquals("png")) {
                 imageFiles.put(f.nameWithoutExtension(), f);
             }
@@ -138,7 +138,7 @@ public class ContentHandler {
         }
 
         try {
-            BufferedImage image = ImageIO.read(new File("../Mindustry/core/assets/sprites/block_colors.png"));
+            BufferedImage image = ImageIO.read(new File("E:/OverflowGateBot/build/Mindustry/core/assets/sprites/block_colors.png"));
 
             for (Block block : Vars.content.blocks()) {
                 block.mapColor.argb8888(image.getRGB(block.id, 0));

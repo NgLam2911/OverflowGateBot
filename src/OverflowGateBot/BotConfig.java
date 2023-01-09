@@ -15,6 +15,6 @@ public final class BotConfig {
     public static final String MAP_INFO_COLLECTION = "MAP_INFO";
     public static final String MAP_DATA_COLLECTION = "MAP_DATA";
 
-    public static final Long MAX_LOG_COUNT = 10000l;
+    public static final Long MAX_LOG_COUNT = 8000l;
     public static final String TIME_INSERT_STRING = "_timeInserted";
 }

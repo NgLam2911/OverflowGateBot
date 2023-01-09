@@ -24,6 +24,11 @@ public final class TableHandler extends ListenerAdapter {
         Log.info("Table handler up");
     }
 
+    @Override
+    protected void finalize() {
+        Log.info("Table handler down");
+    }
+
     public static TableHandler getInstance() { return instance; }
 
     public static void add(SimpleEmbed table) { tableCache.put(table.getId(), table); }

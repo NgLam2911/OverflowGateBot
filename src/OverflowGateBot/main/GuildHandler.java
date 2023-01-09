@@ -27,6 +27,11 @@ public class GuildHandler {
         Log.info("Guild handler up");
     }
 
+    @Override
+    protected void finalize() {
+        Log.info("Guild handler down");
+    }
+
     public static GuildHandler getInstance() { return instance; }
 
     public static void update() { updateGuildCache(); }
@@ -68,7 +73,6 @@ public class GuildHandler {
             return guildData;
         }
 
-        Log.info("Guild <" + guildId + "> online");
         // Create new guild cache to store temporary guild data
         if (!DatabaseHandler.collectionExists(DATABASE.GUILD, BotConfig.GUILD_COLLECTION)) {
             DatabaseHandler.createCollection(DATABASE.GUILD, BotConfig.GUILD_COLLECTION);
@@ -76,15 +80,17 @@ public class GuildHandler {
         }
 
         MongoCollection<GuildData> collection = DatabaseHandler.getDatabase(DATABASE.GUILD).getCollection(BotConfig.GUILD_COLLECTION, GuildData.class);
-
+        
         // Get guild from database
         Bson filter = new Document().append("guildId", guildId);
         FindIterable<GuildData> data = collection.find(filter).limit(1);
         GuildData first = data.first();
         if (first != null) {
+            Log.info("Guild <" + guildId + "> online");
             guildCache.put(guildId, first);
             return first;
         } else {
+            Log.info("New guild <" + guildId + "> online");
             return addGuild(guildId);
         }
     }

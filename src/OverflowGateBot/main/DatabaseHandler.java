@@ -11,6 +11,7 @@ import org.bson.Document;
 import org.bson.codecs.configuration.CodecProvider;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
+import org.bson.conversions.Bson;
 
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
@@ -39,18 +40,36 @@ public final class DatabaseHandler {
 
     private static String DATABASE_URL = System.getenv("DATABASE_URL");
     private static ConnectionString connectionString = new ConnectionString(DATABASE_URL);
-    private static MongoClientSettings settings = MongoClientSettings.builder().applyConnectionString(connectionString).serverApi(ServerApi.builder().version(ServerApiVersion.V1).build()).build();
+    private static MongoClientSettings settings = MongoClientSettings.builder().applyConnectionString(connectionString)
+            .serverApi(ServerApi.builder().version(ServerApiVersion.V1).build()).build();
 
     private static MongoClient mongoClient = MongoClients.create(settings);
 
     private static CodecProvider pojoCodecProvider = PojoCodecProvider.builder().automatic(true).build();
-    private static CodecRegistry pojoCodecRegistry = fromRegistries(getDefaultCodecRegistry(), fromProviders(pojoCodecProvider));
+    private static CodecRegistry pojoCodecRegistry = fromRegistries(getDefaultCodecRegistry(),
+            fromProviders(pojoCodecProvider));
 
     private static ConcurrentHashMap<String, MongoDatabase> database = new ConcurrentHashMap<String, MongoDatabase>();
 
-    private DatabaseHandler() { Log.info("Database handler up"); }
+    private DatabaseHandler() {
+        Log.info("Database handler up");
+    }
 
-    public static DatabaseHandler getInstance() { return instance; }
+    @Override
+    protected void finalize() {
+        Log.info("Database handler down");
+    }
+
+    public static DatabaseHandler getInstance() {
+        try{
+
+            Bson ping = new Document("ping", "1");
+            System.out.println(mongoClient.getDatabase("cluster1").runCommand(ping));
+        } catch (Exception exp){
+            Log.err("Database is down", exp);
+        }
+        return instance;
+    }
 
     public static MongoDatabase getDatabase(DATABASE name) {
         if (database.containsKey(name.name()))
@@ -73,7 +92,9 @@ public final class DatabaseHandler {
         return false;
     }
 
-    public static boolean collectionExists(DATABASE databaseName, final String collectionName) { return collectionExists(getDatabase(databaseName), collectionName); }
+    public static boolean collectionExists(DATABASE databaseName, final String collectionName) {
+        return collectionExists(getDatabase(databaseName), collectionName);
+    }
 
     public static void createCollection(DATABASE databaseName, final String collectionName) {
         getDatabase(databaseName).createCollection(collectionName);
@@ -81,20 +102,24 @@ public final class DatabaseHandler {
     }
 
     public static void log(LOG_TYPE log, Document content) {
-       UpdatableHandler.run("LOG " + log.name(), 0, () -> {
-            MongoDatabase logDatabase = getDatabase(DATABASE.LOG);
+        UpdatableHandler.run("LOG " + log.name(), 0, () -> {
             // Create collection if it doesn't exist
+            MongoDatabase logDatabase = getDatabase(DATABASE.LOG);
             if (!collectionExists(logDatabase, log.name()))
                 logDatabase.createCollection(log.name());
 
             MongoCollection<Document> collection = logDatabase.getCollection(log.name(), Document.class);
+            Long count = collection.estimatedDocumentCount();
+            while (count > BotConfig.MAX_LOG_COUNT) {
+                collection.deleteOne(new Document());
+                count--;
+                Log.info("Delete log: " + count);
+            }
             // Insert log message
-            collection.insertOne(content.append(BotConfig.TIME_INSERT_STRING, new BsonDateTime(System.currentTimeMillis())));
+            collection.insertOne(
+                    content.append(BotConfig.TIME_INSERT_STRING, new BsonDateTime(System.currentTimeMillis())));
 
             // Delete old log message if storage is full
-            while (collection.estimatedDocumentCount() > BotConfig.MAX_LOG_COUNT) {
-                collection.deleteOne(new Document());
-            }
         });
     }
 }

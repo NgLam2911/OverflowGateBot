@@ -11,6 +11,7 @@ import javax.annotation.Nonnull;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 
 import OverflowGateBot.BotConfig;
@@ -25,17 +26,28 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Role;
 
-public final class UserHandler  {
+public final class UserHandler {
 
     private static UserHandler instance = new UserHandler();
     // Hash map to store user cache
     private static ConcurrentHashMap<String, UserData> userCache = new ConcurrentHashMap<>();
 
-    private UserHandler() { Log.info("User handler up"); }
+    private UserHandler() {
+        Log.info("User handler up");
+    }
 
-    public static UserHandler getInstance() { return instance; }
+    @Override
+    protected void finalize() {
+        Log.info("User handler down");
+    }
 
-    public static void update() { updateCache(); }
+    public static UserHandler getInstance() {
+        return instance;
+    }
+
+    public static void update() {
+        updateCache();
+    }
 
     public static void updateCache() {
         Iterator<UserData> iterator = userCache.values().iterator();
@@ -49,12 +61,18 @@ public final class UserHandler  {
         }
     }
 
-    public static int getActiveUserCount() { return userCache.size(); }
+    public static int getActiveUserCount() {
+        return userCache.size();
+    }
 
-    public static Collection<UserData> getCachedUser() { return userCache.values(); }
+    public static Collection<UserData> getCachedUser() {
+        return userCache.values();
+    }
 
     // Get date for daily command
-    public static String getDate() { return (Calendar.getInstance().getTime()).toString(); }
+    public static String getDate() {
+        return (Calendar.getInstance().getTime()).toString();
+    }
 
     // Update point, money, level on massage sent
     public static void onMessage(Message message) {
@@ -108,7 +126,9 @@ public final class UserHandler  {
     }
 
     // Add user to cache
-    public static UserData addUser(Member member) { return addUser(member.getGuild().getId(), member.getId()); }
+    public static UserData addUser(Member member) {
+        return addUser(member.getGuild().getId(), member.getId());
+    }
 
     // Get user without adding it to cache
     public static UserData getUserNoCache(@Nonnull Member member) {
@@ -154,14 +174,15 @@ public final class UserHandler  {
             return new UserData(guildId, userId);
 
         }
-        MongoCollection<UserData> collection = DatabaseHandler.getDatabase(DATABASE.USER).getCollection(guildId, UserData.class);
+        MongoCollection<UserData> collection = DatabaseHandler.getDatabase(DATABASE.USER).getCollection(guildId,
+                UserData.class);
 
         // Get user from database
         Bson filter = new Document().append("userId", userId);
-        UserData data = collection.find(filter).limit(1).first();
-        if (data == null)
-            return new UserData(guildId, userId);
-        else
-            return data;
+        FindIterable<UserData> data = collection.find(filter);
+        UserData first = data.first();
+        if (first == null)
+            first = new UserData(guildId, userId);
+        return first;
     }
 }

@@ -19,6 +19,11 @@ public final class UpdatableHandler {
         Log.info("Updatable handler up");
     }
 
+    @Override
+    protected void finalize() {
+        Log.info("Updatable handler down");
+    }
+
     public static UpdatableHandler getInstance() { return instance; }
 
     public static void update() {

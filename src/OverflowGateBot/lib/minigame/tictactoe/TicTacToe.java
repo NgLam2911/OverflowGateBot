@@ -95,9 +95,6 @@ public class TicTacToe extends SimpleEmbed {
             int x = Integer.parseInt(buttonId[1]);
             int y = Integer.parseInt(buttonId[2]);
 
-            System.out.println(x + ", " + y);
-            System.out.println(board[x][y]);
-
             if (!isValidMove(x, y)) {
                 sendMessage("Nước đi không hợp lệ", true);
                 return;
