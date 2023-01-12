@@ -11,7 +11,6 @@ import org.bson.Document;
 import org.bson.codecs.configuration.CodecProvider;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
-import org.bson.conversions.Bson;
 
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
@@ -29,7 +28,7 @@ import arc.util.Log;
 public final class DatabaseHandler {
 
     public static enum DATABASE {
-        USER, GUILD, LOG, DAILY, MINDUSTRY
+        USER, GUILD, LOG, DAILY, MINDUSTRY, STAR, PENGUIN
     }
 
     public static enum LOG_TYPE {
@@ -61,13 +60,6 @@ public final class DatabaseHandler {
     }
 
     public static DatabaseHandler getInstance() {
-        try{
-
-            Bson ping = new Document("ping", "1");
-            System.out.println(mongoClient.getDatabase("cluster1").runCommand(ping));
-        } catch (Exception exp){
-            Log.err("Database is down", exp);
-        }
         return instance;
     }
 
@@ -110,10 +102,12 @@ public final class DatabaseHandler {
 
             MongoCollection<Document> collection = logDatabase.getCollection(log.name(), Document.class);
             Long count = collection.estimatedDocumentCount();
-            while (count > BotConfig.MAX_LOG_COUNT) {
-                collection.deleteOne(new Document());
-                count--;
-                Log.info("Delete log: " + count);
+            if (count > BotConfig.MAX_LOG_COUNT) {
+                while (count > BotConfig.MAX_LOG_COUNT - 1000) {
+                    collection.deleteOne(new Document());
+                    count--;
+                    Log.info("Delete log: " + count);
+                }
             }
             // Insert log message
             collection.insertOne(

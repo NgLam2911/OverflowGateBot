@@ -42,6 +42,11 @@ public class SearchSchematicCommand extends SimpleBotSubcommand {
     }
 
     @Override
+    public String getHelpString() {
+        return "Tìm bản thiết kế theo nhãn, tác giả\n\t<tag>: Nhãn muốn tìm, có thể dùng nhiều nhãn, cách nhau bởi dấu phẩy\n\t<user: Tác giả của bản thiết kế>\nCác nút:\n\t<: Trang trước\n\t>: Trang sau\n\tx: Xóa tin nhắn\n\t📁: Lấy bản thiết kế\n\t⭐: Thích bản thiết kế\n\t🐧: \"Cánh cụt\" bản thiết kế\n\t🚮: Xóa bản thiết kế (admin only)";
+    }
+
+    @Override
     public void runCommand(SlashCommandInteractionEvent event) {
 
         Document filter = new Document();
@@ -62,13 +67,16 @@ public class SearchSchematicCommand extends SimpleBotSubcommand {
         if (!DatabaseHandler.collectionExists(DATABASE.MINDUSTRY, BotConfig.SCHEMATIC_INFO_COLLECTION)) {
             DatabaseHandler.createCollection(DATABASE.MINDUSTRY, BotConfig.SCHEMATIC_INFO_COLLECTION);
         }
-        MongoCollection<SchematicInfo> collection = DatabaseHandler.getDatabase(DATABASE.MINDUSTRY).getCollection(BotConfig.SCHEMATIC_INFO_COLLECTION, SchematicInfo.class);
+        MongoCollection<SchematicInfo> collection = DatabaseHandler.getDatabase(DATABASE.MINDUSTRY)
+                .getCollection(BotConfig.SCHEMATIC_INFO_COLLECTION, SchematicInfo.class);
 
         FindIterable<SchematicInfo> schematicInfo;
         if (tags.length <= 0) {
-            schematicInfo = collection.find(filter, SchematicInfo.class).limit(SEARCH_LIMIT).sort(new Document().append("star", -1));
+            schematicInfo = collection.find(filter, SchematicInfo.class).limit(SEARCH_LIMIT)
+                    .sort(new Document().append("star", -1));
         } else {
-            schematicInfo = collection.find(Filters.and(Filters.all("tag", tags), filter), SchematicInfo.class).limit(SEARCH_LIMIT).sort(new Document().append("star", -1));
+            schematicInfo = collection.find(Filters.and(Filters.all("tag", tags), filter), SchematicInfo.class)
+                    .limit(SEARCH_LIMIT).sort(new Document().append("star", -1));
         }
 
         if (schematicInfo.first() == null) {

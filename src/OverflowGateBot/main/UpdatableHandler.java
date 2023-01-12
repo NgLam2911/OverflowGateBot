@@ -24,7 +24,9 @@ public final class UpdatableHandler {
         Log.info("Updatable handler down");
     }
 
-    public static UpdatableHandler getInstance() { return instance; }
+    public static UpdatableHandler getInstance() {
+        return instance;
+    }
 
     public static void update() {
         UserHandler.update();
@@ -32,10 +34,12 @@ public final class UpdatableHandler {
         TableHandler.update();
         ServerStatusHandler.update();
 
-        jda.getPresence().setActivity(Activity.playing("with " + GuildHandler.getActiveGuildCount() + " servers | " + UserHandler.getActiveUserCount() + " users"));
+        jda.getPresence().setActivity(Activity.playing("with " + GuildHandler.getActiveGuildCount() + " servers | "
+                + UserHandler.getActiveUserCount() + " users"));
     }
 
     public static void updateCommand() {
+        jda.getGuilds().forEach(guild -> guild.updateCommands().complete());
         jda.updateCommands().complete();
         CommandHandler.getCommands().forEach(c -> jda.upsertCommand(c.command).complete());
         ContextMenuHandler.getCommands().forEach(c -> jda.upsertCommand(c.command).complete());
@@ -44,14 +48,18 @@ public final class UpdatableHandler {
     public static void run(String name, long delay, long period, Runnable r) {
         new Timer(name, true).schedule(new TimerTask() {
             @Override
-            public void run() { r.run(); }
+            public void run() {
+                r.run();
+            }
         }, delay, period);
     }
 
     public static void run(String name, long delay, Runnable r) {
         new Timer(name, true).schedule(new TimerTask() {
             @Override
-            public void run() { r.run(); }
+            public void run() {
+                r.run();
+            }
         }, delay);
     }
 }

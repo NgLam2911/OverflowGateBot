@@ -19,6 +19,7 @@ import OverflowGateBot.lib.mindustry.SchematicData;
 import OverflowGateBot.lib.mindustry.SchematicInfo;
 import OverflowGateBot.main.DatabaseHandler;
 import OverflowGateBot.main.MessageHandler;
+import OverflowGateBot.main.UserHandler;
 import OverflowGateBot.main.DatabaseHandler.DATABASE;
 
 import mindustry.game.Schematic;
@@ -39,7 +40,6 @@ public class SchematicTable extends SimpleTable {
     private SchematicInfo currentInfo;
     private SchematicData currentData;
     private Message currentCode;
-    private List<String> voted = new ArrayList<String>();
 
     public SchematicTable(@Nonnull SlashCommandInteractionEvent event, FindIterable<SchematicInfo> schematicInfo) {
         super(event, 10);
@@ -57,8 +57,11 @@ public class SchematicTable extends SimpleTable {
         addButtonPrimary("<", () -> this.previousPage());
         addButtonDeny("X", () -> this.delete());
         addButtonPrimary(">", () -> this.nextPage());
-        addButtonSuccess("data", Emoji.fromMarkdown("📁"), () -> this.sendCode());
-        addButtonSuccess("star", Emoji.fromMarkdown("⭐"), () -> this.star());
+        addRow();
+        addButtonPrimary("data", Emoji.fromMarkdown("📁"), () -> this.sendCode());
+        addButtonPrimary("star", Emoji.fromMarkdown("⭐"), () -> this.star());
+        addButtonPrimary("penguin", Emoji.fromMarkdown("🐧"), () -> this.penguin());
+        addButtonPrimary("delete", Emoji.fromMarkdown("🚮"), () -> this.deleteSchematic());
 
     }
 
@@ -76,20 +79,35 @@ public class SchematicTable extends SimpleTable {
         this.killTimer();
     }
 
-    public void star() {
-
-        if (voted.contains(getTriggerMember().getId()))
-            return;
+    private void star() {
 
         if (this.currentInfo != null) {
-            this.currentInfo.star += 1;
-            this.voted.add(getTriggerMember().getId());
-            this.currentInfo.update();
+            this.currentInfo.addStar(getTriggerMember().getId());
             updateTable();
         }
     }
 
-    public void sendCode() {
+    private void penguin() {
+        if (this.currentInfo != null) {
+            this.currentInfo.addPenguin(getTriggerMember().getId());
+            updateTable();
+        }
+    }
+
+    private void deleteSchematic() {
+        if (UserHandler.isAdmin(getTriggerMember())) {
+            schematicInfoList.remove(currentInfo);
+            currentCode.delete();
+            currentData.delete();
+            currentInfo.delete();
+            sendMessage("Đã xóa bản thiết kế", 10);
+        }
+        else {
+            sendMessage("Bạn không có quyền xóa bản thiết kế", true);
+        }
+    }
+
+    private void sendCode() {
         if (this.currentData == null)
             return;
         String data = this.currentData.data;
@@ -145,7 +163,8 @@ public class SchematicTable extends SimpleTable {
             for (int i = 0; i < this.currentInfo.tag.size() - 1; i++)
                 field.append(this.currentInfo.tag.get(i).toLowerCase() + ", ");
             field.append(this.currentInfo.tag.get(this.currentInfo.tag.size() - 1).toLowerCase() + "\n");
-            field.append("- Sao: " + this.currentInfo.star);
+            field.append("- Sao: " + this.currentInfo.getStar() + "\n");
+            field.append("- Cánh cụt: " + this.currentInfo.getPenguin() + "\n");
 
             builder.addField("*Thông tin*", field.toString(), false);
 
