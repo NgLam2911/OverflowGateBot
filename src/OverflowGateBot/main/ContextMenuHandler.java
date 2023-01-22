@@ -17,7 +17,6 @@ import javax.annotation.Nonnull;
 import OverflowGateBot.lib.discord.context.SimpleBotContextMenu;
 import OverflowGateBot.lib.discord.context.contexts.DeleteMessageContextMenu;
 import OverflowGateBot.lib.discord.context.contexts.PostMapContextMenu;
-import OverflowGateBot.lib.discord.context.contexts.PostSchematicContextMenu;
 import arc.util.Log;
 
 import static OverflowGateBot.OverflowGateBot.*;
@@ -31,7 +30,6 @@ public final class ContextMenuHandler extends ListenerAdapter {
 
         commands = new HashMap<>();
         addCommand(new PostMapContextMenu());
-        addCommand(new PostSchematicContextMenu());
         addCommand(new DeleteMessageContextMenu());
 
         jda.addEventListener(this);

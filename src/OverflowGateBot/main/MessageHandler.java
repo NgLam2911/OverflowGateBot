@@ -100,31 +100,31 @@ public final class MessageHandler extends ListenerAdapter {
         // Schematic preview
         if ((isSchematicText(message) && attachments.isEmpty()) || isSchematicFile(attachments)) {
             Log.info(getMessageSender(message) + ": sent a schematic ");
-            sendSchematicPreview(message, message.getChannel());
+            sendSchematicPreview(message);
         }
 
         else if (isMapFile(attachments)) {
             sendMapPreview(message, message.getChannel());
         }
-        
+
         // Delete in channel that it should not be
         GuildData guildData = GuildHandler.getGuild(message.getGuild());
         if (guildData._containsChannel(CHANNEL_TYPE.SCHEMATIC.name(), message.getTextChannel().getId()) || //
-        guildData._containsChannel(CHANNEL_TYPE.MAP.name(), message.getTextChannel().getId())) {
+                guildData._containsChannel(CHANNEL_TYPE.MAP.name(), message.getTextChannel().getId())) {
             if (!message.getContentRaw().isEmpty()) {
                 message.delete().queue();
                 replyMessage(message, "Vui lòng không gửi tin nhắn vào kênh này!", 30);
             }
         }
-        
+
         // Update exp on message sent
         UserHandler.onMessage(message);
         DatabaseHandler.log(LOG_TYPE.MESSAGE, new Document()//
-        .append("message", getMessageSender(message) + ": " + message.getContentDisplay())//
-        .append("messageId", message.getId())//
-        .append("userId", member == null ? null : member.getId())//
-        .append("guildId", message.getGuild().getId()));
-        
+                .append("message", getMessageSender(message) + ": " + message.getContentDisplay())//
+                .append("messageId", message.getId())//
+                .append("userId", member == null ? null : member.getId())//
+                .append("guildId", message.getGuild().getId()));
+
         // Log member message/file/image url to terminals
         if (!message.getContentRaw().isEmpty())
             Log.info(getMessageSender(message) + ": " + message.getContentDisplay());
@@ -308,7 +308,7 @@ public final class MessageHandler extends ListenerAdapter {
     }
 
     public static void sendSchematicPreview(SlashCommandInteractionEvent event) {
-        OptionMapping fileOption = event.getOption("mapfile");
+        OptionMapping fileOption = event.getOption("schematicfile");
         if (fileOption == null)
             return;
         Attachment attachment = fileOption.getAsAttachment();
@@ -325,17 +325,16 @@ public final class MessageHandler extends ListenerAdapter {
         }
     }
 
-    public static void sendSchematicPreview(Message message, MessageChannel channel) {
+    public static void sendSchematicPreview(Message message) {
         try {
             if (isSchematicText(message)) {
-                sendSchematicPreview(ContentHandler.parseSchematic(message.getContentRaw()), message.getMember(),
-                        channel);
+                sendSchematicPreview(ContentHandler.parseSchematic(message.getContentRaw()), message);
             } else {
                 for (int i = 0; i < message.getAttachments().size(); i++) {
                     Attachment attachment = message.getAttachments().get(i);
+
                     if (isSchematicFile(attachment)) {
-                        sendSchematicPreview(ContentHandler.parseSchematicURL(attachment.getUrl()), message.getMember(),
-                                channel);
+                        sendSchematicPreview(ContentHandler.parseSchematicURL(attachment.getUrl()), message);
                     }
                 }
             }
@@ -343,6 +342,18 @@ public final class MessageHandler extends ListenerAdapter {
             Log.err(e);
         }
         message.delete().queue();
+    }
+
+    public static void sendSchematicPreview(Schematic schem, Message message) {
+        try {
+            File schemFile = getSchematicFile(schem);
+            File previewFile = getSchematicPreviewFile(schem);
+            EmbedBuilder builder = getSchematicEmbedBuilder(schem, previewFile, message.getMember());
+
+            message.reply(schemFile).addFile(previewFile).setEmbeds(builder.build()).queue();
+        } catch (Exception e) {
+            replyMessage(message.getChannel(), "Lỗi: " + e.getMessage(), 30);
+        }
     }
 
     public static void sendSchematicPreview(Schematic schem, Member member, MessageChannel channel) {
@@ -423,7 +434,12 @@ public final class MessageHandler extends ListenerAdapter {
     }
 
     public static void replyMessage(MessageChannel channel, String content, int deleteAfter) {
-        channel.sendMessage("```" + content + "```").queue(m -> m.delete().queueAfter(deleteAfter, TimeUnit.SECONDS));
+        if (channel != null)
+            channel.sendMessage("```" + content + "```")
+                    .queue(m -> m.delete().queueAfter(deleteAfter, TimeUnit.SECONDS));
+        else {
+            Log.info("Message sent in forum channel");
+        }
     }
 
     public static void replyMessage(Message message, String content, int deleteAfter) {

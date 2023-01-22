@@ -11,7 +11,6 @@ import OverflowGateBot.lib.discord.command.commands.SharCommand;
 import OverflowGateBot.lib.discord.command.commands.UserCommand;
 import arc.util.Log;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
@@ -112,12 +111,6 @@ public class CommandHandler extends ListenerAdapter {
         Member member = event.getMember();
         if (member == null)
             throw new IllegalStateException("Member not exists");
-
-        // If bot don't have manager server permission then return
-        if (!botMember.hasPermission(Permission.ADMINISTRATOR)) {
-            reply(event, "Vui lòng cho bot vai trò người quản lí để sử dụng bot", 30);
-            return;
-        }
 
         if (commands.containsKey(command)) {
             // Call subcommand

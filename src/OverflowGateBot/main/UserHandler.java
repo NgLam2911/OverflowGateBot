@@ -55,6 +55,7 @@ public final class UserHandler {
             UserData user = iterator.next();
             if (!user.isAlive(1)) {
                 Log.info("User <" + user.userId + "> offline");
+                UpdatableHandler.updateStatus();
                 user.update();
                 iterator.remove();
             }
@@ -122,6 +123,7 @@ public final class UserHandler {
         // Key is hashId = guildId + userId
         userCache.put(userData._getHashId(), userData);
         Log.info("User <" + userId + "> online");
+        UpdatableHandler.updateStatus();
         return userData;
     }
 

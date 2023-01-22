@@ -32,9 +32,13 @@ public class GuildHandler {
         Log.info("Guild handler down");
     }
 
-    public static GuildHandler getInstance() { return instance; }
+    public static GuildHandler getInstance() {
+        return instance;
+    }
 
-    public static void update() { updateGuildCache(); }
+    public static void update() {
+        updateGuildCache();
+    }
 
     public static void updateGuildCache() {
         Iterator<GuildData> iterator = guildCache.values().iterator();
@@ -42,6 +46,7 @@ public class GuildHandler {
             GuildData guild = iterator.next();
             if (!guild.isAlive(1)) {
                 Log.info("Guild <" + guild.guildId + "> offline");
+                UpdatableHandler.updateStatus();
                 guild.update();
                 iterator.remove();
 
@@ -49,7 +54,9 @@ public class GuildHandler {
         }
     }
 
-    public static int getActiveGuildCount() { return guildCache.size(); }
+    public static int getActiveGuildCount() {
+        return guildCache.size();
+    }
 
     public static GuildData getGuild(Guild guild) {
         if (guild == null)
@@ -79,12 +86,14 @@ public class GuildHandler {
             return addGuild(guildId);
         }
 
-        MongoCollection<GuildData> collection = DatabaseHandler.getDatabase(DATABASE.GUILD).getCollection(BotConfig.GUILD_COLLECTION, GuildData.class);
-        
+        MongoCollection<GuildData> collection = DatabaseHandler.getDatabase(DATABASE.GUILD)
+                .getCollection(BotConfig.GUILD_COLLECTION, GuildData.class);
+
         // Get guild from database
         Bson filter = new Document().append("guildId", guildId);
         FindIterable<GuildData> data = collection.find(filter).limit(1);
         GuildData first = data.first();
+        UpdatableHandler.updateStatus();
         if (first != null) {
             Log.info("Guild <" + guildId + "> online");
             guildCache.put(guildId, first);
