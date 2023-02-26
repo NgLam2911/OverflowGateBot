@@ -17,6 +17,7 @@ import javax.annotation.Nonnull;
 import OverflowGateBot.lib.discord.context.SimpleBotContextMenu;
 import OverflowGateBot.lib.discord.context.contexts.DeleteMessageContextMenu;
 import OverflowGateBot.lib.discord.context.contexts.PostMapContextMenu;
+import OverflowGateBot.lib.discord.context.contexts.PostSchemContextMenu;
 import arc.util.Log;
 
 import static OverflowGateBot.OverflowGateBot.*;
@@ -30,6 +31,7 @@ public final class ContextMenuHandler extends ListenerAdapter {
 
         commands = new HashMap<>();
         addCommand(new PostMapContextMenu());
+        addCommand(new PostSchemContextMenu());
         addCommand(new DeleteMessageContextMenu());
 
         jda.addEventListener(this);
@@ -42,11 +44,17 @@ public final class ContextMenuHandler extends ListenerAdapter {
         Log.info("Context menu handler down");
     }
 
-    public static ContextMenuHandler getInstance() { return instance; }
+    public static ContextMenuHandler getInstance() {
+        return instance;
+    }
 
-    public static Collection<SimpleBotContextMenu> getCommands() { return commands.values(); }
+    public static Collection<SimpleBotContextMenu> getCommands() {
+        return commands.values();
+    }
 
-    public static void addCommand(SimpleBotContextMenu command) { commands.put(command.name, command); }
+    public static void addCommand(SimpleBotContextMenu command) {
+        commands.put(command.name, command);
+    }
 
     public static void registerCommand(Guild guild) {
         for (SimpleBotContextMenu command : commands.values()) {
@@ -103,7 +111,13 @@ public final class ContextMenuHandler extends ListenerAdapter {
         }
     }
 
-    public static void replyEmbed(MessageContextInteractionEvent event, EmbedBuilder builder, int deleteAfter) { event.getHook().sendMessageEmbeds(builder.build()).queue(_message -> _message.delete().queueAfter(deleteAfter, TimeUnit.SECONDS)); }
+    public static void replyEmbed(MessageContextInteractionEvent event, EmbedBuilder builder, int deleteAfter) {
+        event.getHook().sendMessageEmbeds(builder.build())
+                .queue(_message -> _message.delete().queueAfter(deleteAfter, TimeUnit.SECONDS));
+    }
 
-    public static void reply(MessageContextInteractionEvent event, String content, int deleteAfter) { event.getHook().sendMessage("```" + content + "```").queue(_message -> _message.delete().queueAfter(deleteAfter, TimeUnit.SECONDS)); }
+    public static void reply(MessageContextInteractionEvent event, String content, int deleteAfter) {
+        event.getHook().sendMessage("```" + content + "```")
+                .queue(_message -> _message.delete().queueAfter(deleteAfter, TimeUnit.SECONDS));
+    }
 }

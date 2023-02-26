@@ -93,38 +93,43 @@ public class CommandHandler extends ListenerAdapter {
     @Override
     public void onCommandAutoCompleteInteraction(@Nonnull CommandAutoCompleteInteractionEvent event) {
         String command = event.getName();
+
         if (commands.containsKey(command))
             commands.get(command).onAutoComplete(event);
     }
 
     public static void handleCommand(@NotNull SlashCommandInteractionEvent event) {
-        String command = event.getName();
+        try {
+            String command = event.getName();
 
-        Guild guild = event.getGuild();
-        if (guild == null)
-            throw new IllegalStateException("Guild not exists");
+            Guild guild = event.getGuild();
+            if (guild == null)
+                throw new IllegalStateException("Guild not exists");
 
-        Member botMember = guild.getMember(jda.getSelfUser());
-        if (botMember == null)
-            throw new IllegalStateException("Bot not exists");
+            Member botMember = guild.getMember(jda.getSelfUser());
+            if (botMember == null)
+                throw new IllegalStateException("Bot not exists");
 
-        Member member = event.getMember();
-        if (member == null)
-            throw new IllegalStateException("Member not exists");
+            Member member = event.getMember();
+            if (member == null)
+                throw new IllegalStateException("Member not exists");
 
-        if (commands.containsKey(command)) {
-            // Call subcommand
-            commands.get(command).onCommand(event);
-            // Print to terminal
-            Log.info(MessageHandler.getMessageSender(event) + ": used " + event.getName() + " "
-                    + event.getSubcommandName() + " " + event.getOptions().toString());
-            // Send to discord log channel
-            if (!command.equals("shar")) {
-                MessageHandler.log(guild,
-                        member.getEffectiveName() + " đã sử dụng " + command + " " + event.getSubcommandName());
-            }
-        } else
-            reply(event, "Lệnh sai rồi kìa baka", 10);
+            if (commands.containsKey(command)) {
+                // Call subcommand
+                commands.get(command).onCommand(event);
+                // Print to terminal
+                Log.info(MessageHandler.getMessageSender(event) + ": used " + event.getName() + " "
+                        + event.getSubcommandName() + " " + event.getOptions().toString());
+                // Send to discord log channel
+                if (!command.equals("shar")) {
+                    MessageHandler.log(guild,
+                            member.getEffectiveName() + " đã sử dụng " + command + " " + event.getSubcommandName());
+                }
+            } else
+                reply(event, "Lệnh sai rồi kìa baka", 10);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 

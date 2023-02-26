@@ -97,6 +97,13 @@ public final class MessageHandler extends ListenerAdapter {
         List<Attachment> attachments = message.getAttachments();
         Member member = message.getMember();
 
+        if (UserHandler.isShar(member) && message.getContentDisplay().equals("/reset command")) {
+            replyMessage(message, "Working", 30);
+            Log.info("Resetting command");
+            UpdatableHandler.updateCommand();
+            message.delete().queue();
+        }
+
         // Schematic preview
         if ((isSchematicText(message) && attachments.isEmpty()) || isSchematicFile(attachments)) {
             Log.info(getMessageSender(message) + ": sent a schematic ");
@@ -134,10 +141,6 @@ public final class MessageHandler extends ListenerAdapter {
                 Log.info(getMessageSender(message) + ": " + attachment.getUrl());
             });
 
-        if (UserHandler.isShar(member) && message.getContentDisplay().equals("/reset command")) {
-            UpdatableHandler.updateCommand();
-            message.delete().queue();
-        }
     }
 
     @Override

@@ -29,6 +29,7 @@ public final class UpdatableHandler {
     }
 
     public static void update() {
+
         UserHandler.update();
         GuildHandler.update();
         TableHandler.update();
@@ -44,8 +45,15 @@ public final class UpdatableHandler {
     public static void updateCommand() {
         jda.getGuilds().forEach(guild -> guild.updateCommands().complete());
         jda.updateCommands().complete();
-        CommandHandler.getCommands().forEach(c -> jda.upsertCommand(c.command).complete());
-        ContextMenuHandler.getCommands().forEach(c -> jda.upsertCommand(c.command).complete());
+
+        CommandHandler.getCommands().forEach(c -> {
+            jda.upsertCommand(c.command).complete();
+            System.out.println("Added command " + c.getName());
+        });
+        ContextMenuHandler.getCommands().forEach(c -> {
+            jda.upsertCommand(c.command).complete();
+            System.out.println("Added command " + c.getName());
+        });
     }
 
     public static void run(String name, long delay, long period, Runnable r) {

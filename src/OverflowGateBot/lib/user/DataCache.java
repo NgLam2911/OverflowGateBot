@@ -16,16 +16,22 @@ public class DataCache {
         this.time = ALIVE_LIMIT;
     }
 
-    public boolean isAlive() { return time > 0; }
+    public boolean isAlive() {
+        return time > 0;
+    }
 
     public boolean isAlive(int n) {
         this.time -= n;
         return isAlive();
     }
 
-    public void resetTimer() { time = ALIVE_LIMIT; }
+    public void resetTimer() {
+        time = ALIVE_LIMIT;
+    }
 
-    public void killTimer() { this.time = 0; }
+    public void killTimer() {
+        this.time = 0;
+    }
 
     public boolean updateTimer(int n) {
         updateTime += n;
@@ -37,5 +43,7 @@ public class DataCache {
         return false;
     }
 
-    public void update() { Log.info("Update unhandled"); }
+    public void update() {
+        Log.info("Update unhandled");
+    }
 }

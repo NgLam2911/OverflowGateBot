@@ -20,12 +20,25 @@ public class SimpleBotContextMenu {
         command = Commands.message(name);
     }
 
-    public void onCommand(MessageContextInteractionEvent event) { runCommand(event); }
+    public String getName() {
+        return this.name;
+    }
 
-    protected void runCommand(MessageContextInteractionEvent event) {}
+    public void onCommand(MessageContextInteractionEvent event) {
+        runCommand(event);
+    }
 
-    protected void replyEmbed(MessageContextInteractionEvent event, EmbedBuilder builder, int deleteAfter) { event.getHook().sendMessageEmbeds(builder.build()).queue(_message -> _message.delete().queueAfter(deleteAfter, TimeUnit.SECONDS)); }
+    protected void runCommand(MessageContextInteractionEvent event) {
+    }
 
-    protected void reply(MessageContextInteractionEvent event, String content, int deleteAfter) { event.getHook().sendMessage("```" + content + "```").queue(_message -> _message.delete().queueAfter(deleteAfter, TimeUnit.SECONDS)); }
+    protected void replyEmbed(MessageContextInteractionEvent event, EmbedBuilder builder, int deleteAfter) {
+        event.getHook().sendMessageEmbeds(builder.build())
+                .queue(_message -> _message.delete().queueAfter(deleteAfter, TimeUnit.SECONDS));
+    }
+
+    protected void reply(MessageContextInteractionEvent event, String content, int deleteAfter) {
+        event.getHook().sendMessage("```" + content + "```")
+                .queue(_message -> _message.delete().queueAfter(deleteAfter, TimeUnit.SECONDS));
+    }
 
 }

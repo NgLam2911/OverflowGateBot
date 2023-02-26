@@ -51,7 +51,8 @@ public class UserData extends DataCache {
         this.guildId = guildId;
     }
 
-    public UserData modify(@Nonnull String guildId, @Nonnull String userId, String name, Integer point, Integer level, Integer money, Integer pvpPoint) {
+    public UserData modify(@Nonnull String guildId, @Nonnull String userId, String name, Integer point, Integer level,
+            Integer money, Integer pvpPoint) {
         this.userId = userId;
         this.guildId = guildId;
         this.name = name;
@@ -62,13 +63,21 @@ public class UserData extends DataCache {
         return this;
     }
 
-    public void setId(@Nonnull String userId) { this.userId = userId; }
+    public void setId(@Nonnull String userId) {
+        this.userId = userId;
+    }
 
-    public String getId() { return this.userId; }
+    public String getId() {
+        return this.userId;
+    }
 
-    public void setGuildId(@Nonnull String guildId) { this.guildId = guildId; }
+    public void setGuildId(@Nonnull String guildId) {
+        this.guildId = guildId;
+    }
 
-    public String getGuildId() { return this.guildId; }
+    public String getGuildId() {
+        return this.guildId;
+    }
 
     public void setName(String name) {
         this.name = name;
@@ -82,34 +91,56 @@ public class UserData extends DataCache {
         return this.name;
     }
 
-    public void setPoint(int point) { this.point = point; }
+    public void setPoint(int point) {
+        this.point = point;
+    }
 
-    public int getPoint() { return this.point; }
+    public int getPoint() {
+        return this.point;
+    }
 
-    public void setLevel(int level) { this.level = level; }
+    public void setLevel(int level) {
+        this.level = level;
+    }
 
-    public int getLevel() { return this.level; }
+    public int getLevel() {
+        return this.level;
+    }
 
-    public void setShowLevel(String showLevel) { this.showLevel = showLevel; }
+    public void setShowLevel(String showLevel) {
+        this.showLevel = showLevel;
+    }
 
-    public String getShowLevel() { return this.showLevel; }
+    public String getShowLevel() {
+        return this.showLevel;
+    }
 
     @Override
-    public String toString() { return "userId:" + this.userId + "\n" + "guildId:" + this.guildId + "\n" + "point:" + this.point + "\n" + "level:" + this.level + "\n" + "showLevel:" + this.showLevel + "\n"; }
+    public String toString() {
+        return "userId:" + this.userId + "\n" + "guildId:" + this.guildId + "\n" + "point:" + this.point + "\n"
+                + "level:" + this.level + "\n" + "showLevel:" + this.showLevel + "\n";
+    }
 
     public Document toDocument() {
         return new Document().append("userId", this.userId).//
+                append("name", this.name).//
                 append("guildId", this.guildId).//
                 append("point", this.point).//
                 append("level", this.level).//
                 append("showLevel", this.showLevel);
     }
 
-    public String _getHashId() { return this.guildId + this.userId; }
+    public String _getHashId() {
+        return this.guildId + this.userId;
+    }
 
-    public int _getLevelCap() { return level * level; }
+    public int _getLevelCap() {
+        return level * level;
+    }
 
-    public Integer _getTotalPoint() { return ((level - 1) * level * (2 * (level - 1) + 1) / 6) + point; }
+    public Integer _getTotalPoint() {
+        return ((level - 1) * level * (2 * (level - 1) + 1) / 6) + point;
+    }
 
     public Member _getMember() {
         Guild guild = _getGuild();
@@ -130,7 +161,9 @@ public class UserData extends DataCache {
         return guild;
     }
 
-    public String _getName() { return _getMember().getEffectiveName(); }
+    public String _getName() {
+        return _getMember().getEffectiveName();
+    }
 
     public void _displayLevelName() {
         Member bot = _getGuild().getMember(jda.getSelfUser());
@@ -210,7 +243,8 @@ public class UserData extends DataCache {
     public UserData _merge(UserData data) {
         if (data == null)
             return this;
-        modify(guildId, userId, name, point, level, money + data.money, pvpPoint + data.pvpPoint)._addPoint(data._getTotalPoint());
+        modify(guildId, userId, name, point, level, money + data.money, pvpPoint + data.pvpPoint)
+                ._addPoint(data._getTotalPoint());
         if (this.showLevel.equalsIgnoreCase(BOOLEAN_STATE.UNSET.name()))
             this.showLevel = data.showLevel;
 
@@ -227,7 +261,8 @@ public class UserData extends DataCache {
         if (!DatabaseHandler.collectionExists(DATABASE.USER, this.guildId))
             DatabaseHandler.createCollection(DATABASE.USER, this.guildId);
 
-        MongoCollection<UserData> collection = DatabaseHandler.getDatabase(DATABASE.USER).getCollection(this.guildId, UserData.class);
+        MongoCollection<UserData> collection = DatabaseHandler.getDatabase(DATABASE.USER).getCollection(this.guildId,
+                UserData.class);
 
         if (this.showLevel.equalsIgnoreCase(BOOLEAN_STATE.UNSET.name())) {
             this.showLevel = BOOLEAN_STATE.FALSE.name();
@@ -243,7 +278,8 @@ public class UserData extends DataCache {
         if (!DatabaseHandler.collectionExists(DATABASE.USER, this.guildId))
             DatabaseHandler.createCollection(DATABASE.USER, this.guildId);
 
-        MongoCollection<UserData> collection = DatabaseHandler.getDatabase(DATABASE.USER).getCollection(this.guildId, UserData.class);
+        MongoCollection<UserData> collection = DatabaseHandler.getDatabase(DATABASE.USER).getCollection(this.guildId,
+                UserData.class);
 
         // Filter for user id, user id is unique for each collection
         Bson filter = new Document().append("userId", this.userId);
