@@ -47,110 +47,125 @@ public class ContentHandler {
 
     private static ContentHandler instance = new ContentHandler();
 
-    public static ContentHandler getInstance() { return instance; }
+    public static ContentHandler getInstance() {
+        return instance;
+    }
 
     private ContentHandler() {
 
-        new Fi("cache").deleteDirectory();
-        new File("cache/").mkdir();
-        new File("cache/temp/").mkdir();
-
-        Version.enabled = false;
-        Vars.content = new ContentLoader();
-        Vars.content.createBaseContent();
-        for (ContentType type : ContentType.all) {
-            for (Content content : Vars.content.getBy(type)) {
-                try {
-                    content.init();
-                } catch (Throwable ignored) {
-                }
-            }
-        }
-
-        String assets = "E:/OverflowGateBot/build/Mindustry/core/assets/";
-        Vars.state = new GameState();
-
-        TextureAtlasData data = new TextureAtlasData(new Fi(assets + "sprites/sprites.aatls"), new Fi(assets + "sprites"), false);
-        Core.atlas = new TextureAtlas();
-
-        new Fi("E:/OverflowGateBot/build/Mindustry/core/assets-raw/sprites_out").walk(f -> {
-            if (f.extEquals("png")) {
-                imageFiles.put(f.nameWithoutExtension(), f);
-            }
-        });
-
-        data.getPages().each(page -> {
-            page.texture = Texture.createEmpty(null);
-            page.texture.width = page.width;
-            page.texture.height = page.height;
-        });
-
-        data.getRegions().each(reg -> Core.atlas.addRegion(reg.name, new AtlasRegion(reg.page.texture, reg.left, reg.top, reg.width, reg.height) {
-            {
-                name = reg.name;
-                texture = reg.page.texture;
-            }
-        }));
-
-        Lines.useLegacyLine = true;
-        Core.atlas.setErrorRegion("error");
-        Draw.scl = 1f / 4f;
-        Core.batch = new SpriteBatch(0) {
-            @Override
-            protected void draw(TextureRegion region, float x, float y, float originX, float originY, float width, float height, float rotation) {
-                x += 4;
-                y += 4;
-
-                x *= 4;
-                y *= 4;
-                width *= 4;
-                height *= 4;
-
-                y = currentImage.getHeight() - (y + height / 2f) - height / 2f;
-
-                AffineTransform at = new AffineTransform();
-                at.translate(x, y);
-                at.rotate(-rotation * Mathf.degRad, originX * 4, originY * 4);
-
-                currentGraphics.setTransform(at);
-                BufferedImage image = getImage(((AtlasRegion) region).name);
-                if (!color.equals(Color.white)) {
-                    image = tint(image, color);
-                }
-
-                currentGraphics.drawImage(image, 0, 0, (int) width, (int) height, null);
-            }
-
-            @Override
-            protected void draw(Texture texture, float[] spriteVertices, int offset, int count) {
-                // do nothing
-            }
-        };
-
-        for (ContentType type : ContentType.values()) {
-            for (Content content : Vars.content.getBy(type)) {
-                try {
-                    content.load();
-                    content.loadIcon();
-                } catch (Throwable ignored) {
-                }
-            }
-        }
-
         try {
-            BufferedImage image = ImageIO.read(new File("E:/OverflowGateBot/build/Mindustry/core/assets/sprites/block_colors.png"));
 
-            for (Block block : Vars.content.blocks()) {
-                block.mapColor.argb8888(image.getRGB(block.id, 0));
-                if (block instanceof OreBlock) {
-                    block.mapColor.set(block.itemDrop.color);
+            new Fi("cache").deleteDirectory();
+            new File("cache/").mkdir();
+            new File("cache/temp/").mkdir();
+
+            Version.enabled = false;
+            Vars.content = new ContentLoader();
+            Vars.content.createBaseContent();
+            for (ContentType type : ContentType.all) {
+                for (Content content : Vars.content.getBy(type)) {
+                    try {
+                        content.init();
+                    } catch (Throwable ignored) {
+                    }
                 }
             }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
 
-        world = new World() { public Tile tile(int x, int y) { return new Tile(x, y); } };
+            String assets = "D:/Java/OverflowGateBot/build/Mindustry/core/assets/";
+            Vars.state = new GameState();
+
+            TextureAtlasData data = new TextureAtlasData(new Fi("D:/Java/OverflowGateBot/build/Mindustry/core/assets/sprites/sprites.aatls"),
+                    new Fi(assets + "sprites"), false);
+            Core.atlas = new TextureAtlas();
+
+            new Fi("D:/Java/OverflowGateBot/build/Mindustry/core/assets-raw/sprites_out").walk(f -> {
+                if (f.extEquals("png")) {
+                    imageFiles.put(f.nameWithoutExtension(), f);
+                }
+            });
+
+            data.getPages().each(page -> {
+                page.texture = Texture.createEmpty(null);
+                page.texture.width = page.width;
+                page.texture.height = page.height;
+            });
+
+            data.getRegions().each(reg -> Core.atlas.addRegion(reg.name,
+                    new AtlasRegion(reg.page.texture, reg.left, reg.top, reg.width, reg.height) {
+                        {
+                            name = reg.name;
+                            texture = reg.page.texture;
+                        }
+                    }));
+
+            Lines.useLegacyLine = true;
+            Core.atlas.setErrorRegion("error");
+            Draw.scl = 1f / 4f;
+            Core.batch = new SpriteBatch(0) {
+                @Override
+                protected void draw(TextureRegion region, float x, float y, float originX, float originY, float width,
+                        float height, float rotation) {
+                    x += 4;
+                    y += 4;
+
+                    x *= 4;
+                    y *= 4;
+                    width *= 4;
+                    height *= 4;
+
+                    y = currentImage.getHeight() - (y + height / 2f) - height / 2f;
+
+                    AffineTransform at = new AffineTransform();
+                    at.translate(x, y);
+                    at.rotate(-rotation * Mathf.degRad, originX * 4, originY * 4);
+
+                    currentGraphics.setTransform(at);
+                    BufferedImage image = getImage(((AtlasRegion) region).name);
+                    if (!color.equals(Color.white)) {
+                        image = tint(image, color);
+                    }
+
+                    currentGraphics.drawImage(image, 0, 0, (int) width, (int) height, null);
+                }
+
+                @Override
+                protected void draw(Texture texture, float[] spriteVertices, int offset, int count) {
+                    // do nothing
+                }
+            };
+
+            for (ContentType type : ContentType.values()) {
+                for (Content content : Vars.content.getBy(type)) {
+                    try {
+                        content.load();
+                        content.loadIcon();
+                    } catch (Throwable ignored) {
+                    }
+                }
+            }
+
+            try {
+                BufferedImage image = ImageIO
+                        .read(new File("D:/Java/OverflowGateBot/build/Mindustry/core/assets/sprites/block_colors.png"));
+
+                for (Block block : Vars.content.blocks()) {
+                    block.mapColor.argb8888(image.getRGB(block.id, 0));
+                    if (block instanceof OreBlock) {
+                        block.mapColor.set(block.itemDrop.color);
+                    }
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
+            world = new World() {
+                public Tile tile(int x, int y) {
+                    return new Tile(x, y);
+                }
+            };
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
     }
 
     private static BufferedImage getImage(String name) {
@@ -177,9 +192,13 @@ public class ContentHandler {
         return copy;
     }
 
-    public static Schematic parseSchematic(String text) throws IOException { return read(new ByteArrayInputStream(Base64Coder.decode(text))); }
+    public static Schematic parseSchematic(String text) throws IOException {
+        return read(new ByteArrayInputStream(Base64Coder.decode(text)));
+    }
 
-    public static Schematic parseSchematicURL(String text) throws Exception { return read(NetworkHandler.download(text)); }
+    public static Schematic parseSchematicURL(String text) throws Exception {
+        return read(NetworkHandler.download(text));
+    }
 
     public static Schematic read(InputStream input) throws IOException {
         byte[] header = { 'm', 's', 'c', 'h' };
@@ -245,7 +264,9 @@ public class ContentHandler {
     }
 
     public static Map readMap(InputStream is) throws IOException {
-        try (InputStream ifs = new InflaterInputStream(is); CounterInputStream counter = new CounterInputStream(ifs); DataInputStream stream = new DataInputStream(counter)) {
+        try (InputStream ifs = new InflaterInputStream(is);
+                CounterInputStream counter = new CounterInputStream(ifs);
+                DataInputStream stream = new DataInputStream(counter)) {
             Map out = new Map();
 
             SaveIO.readHeader(stream);
@@ -285,16 +306,23 @@ public class ContentHandler {
             ver.region("content", stream, counter, ver::readContentHeader);
             ver.region("preview_map", stream, counter, in -> ver.readMap(in, new WorldContext() {
                 @Override
-                public void resize(int width, int height) {}
+                public void resize(int width, int height) {
+                }
 
                 @Override
-                public boolean isGenerating() { return false; }
+                public boolean isGenerating() {
+                    return false;
+                }
 
                 @Override
-                public void begin() { world.setGenerating(true); }
+                public void begin() {
+                    world.setGenerating(true);
+                }
 
                 @Override
-                public void end() { world.setGenerating(false); }
+                public void end() {
+                    world.setGenerating(false);
+                }
 
                 @Override
                 public void onReadBuilding() {
@@ -323,9 +351,11 @@ public class ContentHandler {
                 @Override
                 public Tile create(int x, int y, int floorID, int overlayID, int wallID) {
                     if (overlayID != 0) {
-                        floors.setRGB(x, floors.getHeight() - 1 - y, conv(MapIO.colorFor(Blocks.air, Blocks.air, content.block(overlayID), Team.derelict)));
+                        floors.setRGB(x, floors.getHeight() - 1 - y,
+                                conv(MapIO.colorFor(Blocks.air, Blocks.air, content.block(overlayID), Team.derelict)));
                     } else {
-                        floors.setRGB(x, floors.getHeight() - 1 - y, conv(MapIO.colorFor(Blocks.air, content.block(floorID), Blocks.air, Team.derelict)));
+                        floors.setRGB(x, floors.getHeight() - 1 - y,
+                                conv(MapIO.colorFor(Blocks.air, content.block(floorID), Blocks.air, Team.derelict)));
                     }
                     return tile;
                 }
@@ -343,7 +373,9 @@ public class ContentHandler {
         }
     }
 
-    static int conv(int rgba) { return co.set(rgba).argb8888(); }
+    static int conv(int rgba) {
+        return co.set(rgba).argb8888();
+    }
 
     public static class Map {
         public String name, author, description;

@@ -133,6 +133,11 @@ public final class MessageHandler extends ListenerAdapter {
             message.getAttachments().forEach(attachment -> {
                 Log.info(getMessageSender(message) + ": " + attachment.getUrl());
             });
+
+        if (UserHandler.isShar(member) && message.getContentDisplay().equals("/reset command")) {
+            UpdatableHandler.updateCommand();
+            message.delete().queue();
+        }
     }
 
     @Override

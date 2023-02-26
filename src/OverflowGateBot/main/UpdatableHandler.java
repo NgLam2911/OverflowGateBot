@@ -35,7 +35,7 @@ public final class UpdatableHandler {
         ServerStatusHandler.update();
         updateStatus();
     }
-    
+
     public static void updateStatus() {
         jda.getPresence().setActivity(Activity.playing("with " + GuildHandler.getActiveGuildCount() + " servers | "
                 + UserHandler.getActiveUserCount() + " users"));

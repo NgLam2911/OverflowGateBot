@@ -11,8 +11,6 @@ import OverflowGateBot.main.TableHandler;
 import OverflowGateBot.main.UpdatableHandler;
 import OverflowGateBot.main.UserHandler;
 
-import arc.util.Log;
-
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.requests.GatewayIntent;
@@ -44,15 +42,8 @@ public class OverflowGateBot {
             ContextMenuHandler.getInstance();
             UpdatableHandler.getInstance();
 
-            Log.info("Bot online");
-
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    @Override
-    protected void finalize() {
-        Log.info("Bot offline");
     }
 }
