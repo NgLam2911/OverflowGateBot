@@ -1,21 +1,20 @@
 package OverflowGateBot;
 
-import OverflowGateBot.main.CommandHandler;
-import OverflowGateBot.main.ContextMenuHandler;
-import OverflowGateBot.main.DatabaseHandler;
-import OverflowGateBot.main.GuildHandler;
-import OverflowGateBot.main.MessageHandler;
-import OverflowGateBot.main.NetworkHandler;
-import OverflowGateBot.main.ServerStatusHandler;
-import OverflowGateBot.main.TableHandler;
-import OverflowGateBot.main.UpdatableHandler;
-import OverflowGateBot.main.UserHandler;
+import OverflowGateBot.main.handler.CommandHandler;
+import OverflowGateBot.main.handler.ContextMenuHandler;
+import OverflowGateBot.main.handler.DatabaseHandler;
+import OverflowGateBot.main.handler.GuildHandler;
+import OverflowGateBot.main.handler.MessageHandler;
+import OverflowGateBot.main.handler.NetworkHandler;
+import OverflowGateBot.main.handler.ServerStatusHandler;
+import OverflowGateBot.main.handler.TableHandler;
+import OverflowGateBot.main.handler.UpdatableHandler;
+import OverflowGateBot.main.handler.UserHandler;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
-import net.dv8tion.jda.api.utils.cache.CacheFlag;
 
 public class OverflowGateBot {
 
@@ -28,7 +27,7 @@ public class OverflowGateBot {
 
             jda = JDABuilder.createDefault(TOKEN, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_EMOJIS,
                     GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_PRESENCES, GatewayIntent.GUILD_MESSAGE_REACTIONS)
-                    .setMemberCachePolicy(MemberCachePolicy.ALL).disableCache(CacheFlag.VOICE_STATE).build();
+                    .setMemberCachePolicy(MemberCachePolicy.ALL).build();
             jda.awaitReady();
 
             GuildHandler.getInstance();

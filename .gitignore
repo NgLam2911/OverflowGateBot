@@ -27,3 +27,5 @@ replay_pid*
 cache
 cache*
 temp*
+build
+build*
