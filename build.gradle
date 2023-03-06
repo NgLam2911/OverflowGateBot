@@ -2,7 +2,7 @@ apply plugin: 'java'
 
 compileJava.options.encoding = 'UTF-8'
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
@@ -29,14 +29,14 @@ ext{
     mindustryVersion = 'v142'
 }
 
-task dist(type: Jar){
+tasks.register('dist', Jar) {
     from files(sourceSets.main.output.classesDirs)
     from files(sourceSets.main.output.resourcesDir)
-    from {configurations.runtimeClasspath.collect{ it.isDirectory() || !it.name.endsWithAny(".zip", ".jar") ? it : zipTree(it) }}
+    from { configurations.runtimeClasspath.collect { it.isDirectory() || !it.name.endsWithAny(".zip", ".jar") ? it : zipTree(it) } }
 
     archiveFileName = "OverflowGateBot.jar"
 
-    manifest{
+    manifest {
         attributes 'Main-Class': project.mainClassName
     }
 
@@ -48,7 +48,7 @@ dependencies{
     implementation "com.github.wendykierp:JTransforms:3.1"
     implementation 'org.mongodb:mongodb-driver-sync:4.3.4'
     implementation ("net.dv8tion:JDA:5.0.0-alpha.10")
-    implementation "org.jsoup:jsoup:1.7.2"
+    implementation 'org.jsoup:jsoup:1.15.3'
     implementation "com.github.Anuken.Mindustry:core:$mindustryVersion"
     implementation "com.github.Anuken.Arc:arc-core:9de902f"
     implementation "org.slf4j:slf4j-nop:1.7.31"
